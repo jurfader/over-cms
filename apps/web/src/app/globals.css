@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+/* ─── Fonts ──────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+
+/* ─── Design tokens ──────────────────────────────────────────────────────── */
+:root {
+  --font-sans:    'Inter', system-ui, sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+
+  /* colours */
+  --color-bg:        #ffffff;
+  --color-surface:   #f8f8f8;
+  --color-border:    #e8e8e8;
+  --color-fg:        #0a0a0a;
+  --color-muted:     #6b7280;
+  --color-primary:   #2563eb;
+  --color-primary-h: #1d4ed8;
+  --color-accent:    #f59e0b;
+
+  /* spacing scale */
+  --section-y: clamp(5rem, 10vw, 9rem);
+
+  /* radius */
+  --radius-sm: 0.5rem;
+  --radius:    1rem;
+  --radius-lg: 1.5rem;
+}
+
+.dark {
+  --color-bg:      #080808;
+  --color-surface: #111111;
+  --color-border:  #222222;
+  --color-fg:      #f5f5f5;
+  --color-muted:   #9ca3af;
+}
+
+/* ─── Base ───────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+  line-height: 1.6;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* ─── Typography helpers ─────────────────────────────────────────────────── */
+.display {
+  font-family: var(--font-display);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+.section-label::before {
+  content: '';
+  display: block;
+  width: 1.5rem;
+  height: 2px;
+  background: var(--color-primary);
+  border-radius: 1px;
+}
+
+/* ─── Container ──────────────────────────────────────────────────────────── */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 5vw, 3rem);
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 4px 24px color-mix(in oklch, var(--color-primary) 40%, transparent);
+}
+.btn-primary:hover {
+  background: var(--color-primary-h);
+  box-shadow: 0 8px 32px color-mix(in oklch, var(--color-primary) 50%, transparent);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-fg);
+  border: 1.5px solid var(--color-border);
+}
+.btn-outline:hover {
+  border-color: var(--color-fg);
+}
+
+/* ─── Glass card ─────────────────────────────────────────────────────────── */
+.glass {
+  background: color-mix(in oklch, var(--color-bg) 70%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
+}
+
+/* ─── GSAP initial states (hidden before animation) ─────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+}
+
+/* ─── Page transition ────────────────────────────────────────────────────── */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+main {
+  animation: page-enter 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ─── Prose (block HTML content) ─────────────────────────────────────────── */
+.prose h1, .prose h2, .prose h3, .prose h4 { font-weight: 700; line-height: 1.2; margin-bottom: 0.5em; }
+.prose h1 { font-size: 2rem; }
+.prose h2 { font-size: 1.5rem; }
+.prose h3 { font-size: 1.25rem; }
+.prose p  { margin-bottom: 1em; }
+.prose ul { list-style: disc; padding-left: 1.5em; margin-bottom: 1em; }
+.prose ol { list-style: decimal; padding-left: 1.5em; margin-bottom: 1em; }
+.prose a  { color: var(--color-primary); text-decoration: underline; }
+.prose blockquote { border-left: 3px solid var(--color-primary); padding-left: 1em; opacity: 0.8; }
+.prose img { max-width: 100%; border-radius: var(--radius-sm); }
+.prose code { font-family: monospace; background: var(--color-surface); padding: 0.1em 0.4em; border-radius: 0.25em; }

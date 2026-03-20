@@ -40,3 +40,10 @@ coverage/
 # Misc
 *.tsbuildinfo
 .cache/
+
+# Cloudflare credentials
+*.json
+!package.json
+!tsconfig*.json
+!drizzle.config.json
+.cloudflared/

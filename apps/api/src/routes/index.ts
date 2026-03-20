@@ -7,7 +7,8 @@ import mediaRouter from './media'
 import settingsRouter from './settings'
 import seoRouter from './seo'
 import redirectsRouter from './redirects'
-import usersRouter from './users'
+import usersRouter   from './users'
+import modulesRouter from './modules'
 import type { AppEnv } from '../types'
 
 export function registerRoutes(app: Hono<AppEnv>) {
@@ -20,4 +21,5 @@ export function registerRoutes(app: Hono<AppEnv>) {
   app.route('/api/seo', seoRouter)
   app.route('/api/redirects', redirectsRouter)
   app.route('/api/users', usersRouter)
+  app.route('/api/modules', modulesRouter)
 }

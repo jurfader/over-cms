@@ -4,7 +4,7 @@
 
 ---
 
-## FAZA 1 — Środowisko & Fundament
+## FAZA 1 — Środowisko & Fundament ✅
 
 ### 1.1 Monorepo Setup ✅
 - [x] Inicjalizacja projektu: `pnpm init` + konfiguracja workspace
@@ -13,7 +13,6 @@
 - [x] Bazowa konfiguracja TypeScript (`tsconfig.base.json`)
 - [x] ESLint + Prettier (wspólna konfiguracja dla całego monorepo)
 - [x] `.gitignore`, `.env.example`
-- [ ] Git init + pierwszy commit
 
 ### 1.2 Infrastruktura lokalna (dev) ✅
 - [x] `docker-compose.yml` — PostgreSQL + Redis + MinIO (S3-local)
@@ -22,386 +21,323 @@
 
 ### 1.3 Pakiet `packages/core` ✅
 - [x] Schema bazy danych (Drizzle ORM):
-  - Tabela `user` + `session` + `account` + `verification` (Better Auth compatible)
-  - Tabela `content_types` (slug, name, icon, fields_schema, is_singleton)
-  - Tabela `content_items` (type_id, slug, title, data, status, seo, author_id)
-  - Tabela `media` (filename, url, size, mime_type, width, height, alt, folder)
-  - Tabela `settings` (key, value)
-  - Tabela `modules` (id/slug, version, active, config)
-  - Tabela `redirects` (from_path, to_path, status_code)
-- [x] Migracje bazy danych (`drizzle-kit push`) — 10 tabel w PostgreSQL
-- [x] Typy TypeScript: FieldDefinition, SeoData
+  - Tabela `user` + `session` + `account` + `verification` (Better Auth)
+  - Tabela `content_types`, `content_items`, `content_versions`
+  - Tabela `media`, `settings`, `modules`, `redirects`
+  - Tabela `form_definitions`, `form_submissions`
+- [x] Typy TypeScript: `FieldDefinition`, `SeoData`, `BlockStyle`, `FormFieldDef`
 - [x] Seed danych testowych (`pnpm db:seed`)
 
 ---
 
-## FAZA 2 — API (Hono.js)
+## FAZA 2 — API (Hono.js) ✅
 
 ### 2.1 Aplikacja `apps/api` ✅
 - [x] Setup Hono.js + TypeScript
 - [x] Middleware: CORS, logger, error handler, rate limiter (Redis)
+- [x] Middleware licencji (`licenseMiddleware`) — tryb read-only przy wygasłej licencji, 7-dniowy grace period
 - [x] Połączenie z PostgreSQL (przez `@overcms/core`)
 - [x] Połączenie z Redis (cache layer)
 - [x] Health check endpoint `GET /health`
-- [x] Struktura routerów
 
 ### 2.2 Autentykacja (Better Auth) ✅
-- [x] Setup Better Auth w API (bcrypt password hashing)
+- [x] Setup Better Auth (bcrypt password hashing)
 - [x] Endpointy: login, logout, session — `/api/auth/*`
 - [x] Role: `super_admin`, `admin`, `editor`, `viewer`
 - [x] Middleware autoryzacji: `requireAuth`, `requireRole`
-- [x] Testy: login ✅, cookie session ✅, /me ✅, unauthorized ✅
 
 ### 2.3 Endpointy Content ✅
-- [x] `GET /api/content-types` — lista typów treści
-- [x] `POST /api/content-types` — tworzenie (admin+)
-- [x] `GET /api/content/:type` — lista z paginacją, filtrowaniem, sortowaniem
-- [x] `GET /api/content/:type/:slug` — pojedynczy element z autorem
-- [x] `POST /api/content/:type` — tworzenie (auth)
-- [x] `PUT /api/content/:type/:id` — edycja (auth)
-- [x] `DELETE /api/content/:type/:id` — usuwanie (auth)
-- [x] `POST /api/content/:type/:id/publish` — toggle publish (auth)
+- [x] CRUD typów treści (`/api/content-types`)
+- [x] CRUD elementów treści (`/api/content/:type`) — lista, pojedynczy, tworzenie, edycja, usuwanie
+- [x] `POST /api/content/:type/:id/publish` — toggle publish
+- [x] `GET /api/content/:type/:id/versions` — historia wersji
+- [x] `POST /api/content/:type/:id/versions/:versionId/restore` — przywracanie wersji
+- [x] Auto-snapshot przy każdym PUT (tabela `content_versions`)
 - [x] Walidacja danych (Zod v4)
 
-### 2.4 Endpointy Media
-- [ ] `POST /api/media/upload` — upload pliku
-- [ ] `GET /api/media` — lista plików
-- [ ] `DELETE /api/media/:id` — usuwanie
-- [ ] Optymalizacja obrazów (Sharp) — WebP/AVIF konwersja
-- [ ] Integracja z MinIO/R2 (S3-compatible)
-> ⏭ Faza 5 — Media Manager
+### 2.4 Endpointy Media ✅
+- [x] `POST /api/media/upload` — upload pliku (multipart)
+- [x] `GET /api/media` — lista z paginacją i filtrowaniem
+- [x] `DELETE /api/media/:id` — usuwanie
+- [x] Optymalizacja obrazów (Sharp) — WebP konwersja
+- [x] Integracja z MinIO/R2 (S3-compatible) + lokalny fallback `/uploads`
 
 ### 2.5 Endpointy SEO ✅
-- [x] `GET /api/seo/:type/:slug` — dane SEO dla strony
-- [x] `GET /api/seo/sitemap.xml` — generowanie sitemap.xml
+- [x] `GET /api/seo/:type/:slug`, `PUT /api/seo/:type/:id`
+- [x] `GET /api/seo/sitemap.xml` — generowanie sitemap
 - [x] `GET /api/seo/robots.txt` — generowanie robots.txt
-- [x] `PUT /api/seo/:type/:id` — aktualizacja danych SEO
 
 ### 2.6 Endpointy Ustawień ✅
-- [x] `GET /api/settings` — wszystkie ustawienia CMS
-- [x] `PUT /api/settings` — aktualizacja ustawień (admin+)
-- [x] `GET /api/settings/navigation/:name` — menu nawigacyjne
-- [x] `PUT /api/settings/navigation/:name` — edycja menu (admin+)
+- [x] `GET/PUT /api/settings`
+- [x] `GET/PUT /api/settings/navigation/:name`
 
 ---
 
-## FAZA 3 — Panel Admina (Next.js 15)
+## FAZA 3 — Panel Admina (Next.js 15) ✅
 
-### 3.1 Setup `apps/admin` ✅
+### 3.1 Setup & Design System ✅
 - [x] Next.js 15 (App Router) + TypeScript
-- [x] Tailwind CSS v4 + globals.css z design tokenami (@theme)
-- [x] Framer Motion (animacje sidebar, fade-in, stagger)
-- [x] TanStack Query (data fetching + cache)
-- [x] Zustand (auth state z persist)
-- [x] React Hook Form + Zod
-- [x] Lucide React (ikony SVG)
-- [x] Design System: kolory primary #E91E8C + secondary #9333EA + dark bg #0A0B14
-- [x] Glassmorphism: .glass, .glass-card, .gradient-text utilities
+- [x] Tailwind CSS v4 + design tokeny (@theme): primary #E91E8C, secondary #9333EA, dark bg #0A0B14
+- [x] Framer Motion, TanStack Query, Zustand, React Hook Form + Zod
+- [x] Glassmorphism: `.glass`, `.glass-card`, `.gradient-text`
+- [x] Komponenty UI: Button, Input, Label, Badge, Card, Separator, Avatar, Tooltip, DropdownMenu, Switch, Select, Tabs, Textarea
 
-### 3.2 Design System ✅
-- [x] CSS variables (@theme) — kolory, radius, shadows, sidebar dimensions
-- [x] Button (warianty: default gradient, outline, ghost, destructive, link)
-- [x] Input, Label, Badge, Card, Separator, Avatar, Tooltip, DropdownMenu
-- [x] lib/utils.ts (cn, formatBytes, formatDate, slugify)
-- [x] lib/api.ts (typesafe fetch wrapper z credentials:include)
-- [x] store/auth.ts (Zustand z persist)
-- [x] providers/query-provider.tsx
+### 3.2 Layout Panelu ✅
+- [x] Sidebar (collapsible, Framer Motion, dynamic modules section)
+- [x] Topbar (search, notifications, user menu)
+- [x] Dashboard (stat cards, ostatnie treści, quick actions, status systemu)
 
-### 3.3 Layout Panelu ✅
-- [x] Sidebar (collapsible z Framer Motion, pink active states, Lucide icons)
-- [x] Topbar (search, notifications, user menu z dropdown)
-- [x] Dashboard layout (dynamic padding based on sidebar state)
-- [x] hooks/use-auth.ts (TanStack Query + Zustand sync, auto redirect)
-
-### 3.4 Auth Pages ✅
-- [x] `/auth/login` — formularz logowania (email + hasło, walidacja Zod)
-- [x] Animacje Framer Motion (fade-in card, error shake)
-- [x] Password toggle (eye/eye-off)
-- [ ] `/forgot-password` — reset hasła (przyszła faza)
-- [ ] Middleware Next.js (redirect niezalogowanych)
-
-### 3.5 Dashboard ✅
-- [x] Statystyki: liczba typów treści, wpisów, mediów, użytkowników (stat cards)
-- [x] Ostatnio edytowane treści (lista z badge statusu)
-- [x] Quick actions (linki do głównych sekcji)
-- [x] Status systemu (API, DB, Storage, Cache — z kolorowymi wskaźnikami)
-- [x] Animacje Framer Motion (stagger container/item)
-- [x] Build: ✅ (`next build` czyste, 0 TypeScript errors)
+### 3.3 Auth ✅
+- [x] `/auth/login` — formularz logowania (email + hasło)
 
 ---
 
-## FAZA 4 — Edytor Treści
+## FAZA 4 — Edytor Treści ✅
 
-### 4.1 System Typów Treści
-- [ ] Strona "Content Types" — lista typów z ikonami
-- [ ] Kreator nowego typu treści (drag & drop pól):
-  - Pola: Text, Textarea, Rich Text, Number, Boolean
-  - Pola: Date, Image, File, Relation, Repeater, Select
-  - Pola: Slug (auto-generate), Color, JSON
-- [ ] Walidacja pól w kreatorze
-- [ ] Edycja istniejącego typu
+### 4.1 System Typów Treści ✅
+- [x] Lista typów treści z ikonami
+- [x] Kreator nowego typu treści — drag & drop pól (@dnd-kit)
+  - Pola: text, textarea, richtext, blocks, number, boolean, date, image, file, relation, repeater, select, slug, color, json
+- [x] Edycja istniejącego typu treści
 
-### 4.2 Block-Based Editor
-- [ ] Architektura bloków (każdy blok = React component + schema)
-- [ ] Bloki bazowe:
-  - Heading (H1-H6)
-  - Paragraph (Rich Text)
-  - Image (z alt, caption, lazy load)
-  - Gallery
-  - Button / CTA
-  - Video (embed + upload)
-  - Code Block
-  - Quote
-  - Divider
-  - HTML (raw)
-  - Columns (2/3 kolumny)
-  - Card
-  - Accordion / FAQ
-  - Testimonial
-  - Call-to-Action Section
-- [ ] Drag & drop bloków
-- [ ] Duplikowanie, usuwanie, przesuwanie bloków
-- [ ] Podgląd na żywo (preview URL)
+### 4.2 Block-Based Editor ✅
+- [x] 15 typów bloków: Heading, Paragraph, Image, Gallery, Button/CTA, Video, Code, Quote, Divider, HTML, Columns (zagnieżdżone), Card, Accordion/FAQ, Testimonial, CTA Section
+- [x] Zagnieżdżone bloki w kolumnach (rozwiązanie przez `InnerBlockEditorCtx`)
+- [x] Drag & drop bloków (@dnd-kit), duplikowanie, usuwanie
+- [x] Podgląd na żywo z device switcher (mobile/tablet/desktop)
+- [x] Block Style Editor (tło, padding, border radius, shadow)
 
-### 4.3 Lista Treści
-- [ ] Tabela z sortowaniem, filtrowaniem, paginacją
-- [ ] Bulk actions (publish, delete, archive)
-- [ ] Status badges (draft, published, scheduled, archived)
-- [ ] Szybki podgląd bez wychodzenia z listy
+### 4.3 Lista Treści ✅
+- [x] Tabela z sortowaniem, filtrowaniem, paginacją
+- [x] Status badges (draft, published, archived)
+- [x] Szybki podgląd (QuickPreview)
 
-### 4.4 Formularz Edycji
-- [ ] Dynamiczne pola z content type schema
-- [ ] Sidebar: SEO, status, daty, autor
-- [ ] Auto-save (draft co 30s)
-- [ ] Historia wersji (ostatnie 10)
-- [ ] Scheduled publish
+### 4.4 Formularz Edycji ✅
+- [x] Dynamiczne pola z content type schema
+- [x] Sidebar: SEO, status, daty, autor
+- [x] Historia wersji (ostatnie 50) z przywracaniem
+- [x] `form.reset()` po przywróceniu wersji
 
 ---
 
-## FAZA 5 — Media Manager
+## FAZA 5 — Media Manager ✅
 
-- [ ] Grid view / list view
-- [ ] Upload (drag & drop, multi-file)
-- [ ] Automatyczna konwersja do WebP/AVIF
-- [ ] Automatyczne generowanie thumbnails (S, M, L, XL)
-- [ ] Tagi i foldery
-- [ ] Wyszukiwanie po nazwie / alt
-- [ ] Edycja alt text, caption
-- [ ] Kopiowanie URL do schowka
-
----
-
-## FAZA 6 — SEO Manager
-
-- [ ] SEO panel per strona/post (title, description, canonical, robots)
-- [ ] Open Graph (title, description, image)
-- [ ] Twitter/X Cards
-- [ ] Schema.org JSON-LD (Article, WebPage, Organization, BreadcrumbList, FAQ)
-- [ ] Globalne ustawienia SEO (site name, default og:image)
-- [ ] Sitemap: automatyczny, configurowalny (include/exclude per typ)
-- [ ] Robots.txt: edytor w panelu
-- [ ] Redirect manager (301, 302)
-- [ ] SEO score preview (jak Yoast, ale własny)
+- [x] Grid view z drag & drop upload (multi-file, max 50MB)
+- [x] Upload obrazów z konwersją WebP (Sharp)
+- [x] Integracja S3/MinIO + lokalny fallback
+- [x] Filtrowanie (obrazy / pliki), wyszukiwanie po nazwie
+- [x] Panel szczegółów (wymiary, rozmiar, URL, kopiowanie)
+- [x] Usuwanie z potwierdzeniem
+- [x] Paginacja
 
 ---
 
-## FAZA 7 — Nawigacja & Ustawienia
+## FAZA 6 — SEO Manager ✅
 
-### 7.1 Menu Builder
-- [ ] Drag & drop budowanie menu (do 3 poziomów zagnieżdżenia)
-- [ ] Linki do content items, URL zewnętrzne, anchory
-- [ ] Wiele menu (main, footer, mobile)
-
-### 7.2 Ustawienia Ogólne
-- [ ] Dane firmy/serwisu (nazwa, logo, favicon, opis)
-- [ ] Ustawienia mail (SMTP lub Resend API)
-- [ ] Ustawienia API keys (zewnętrzne serwisy)
-- [ ] Zarządzanie użytkownikami + role
-- [ ] Logi aktywności
+- [x] SEO panel per strona/post (title, description, OG, canonical)
+- [x] Sitemap.xml — automatyczny, wszystkie opublikowane treści
+- [x] Robots.txt — generowany dynamicznie
+- [x] Redirect manager (301/302) w panelu admina
 
 ---
 
-## FAZA 8 — SDK Klienta (`packages/sdk`)
+## FAZA 7 — Nawigacja & Ustawienia ✅
 
-### 8.1 Pakiet `@overcms/sdk`
-- [ ] `createClient(config)` — inicjalizacja z URL i API key
-- [ ] `client.content.getAll(type, options)` — lista treści
-- [ ] `client.content.getOne(type, slug)` — pojedynczy element
-- [ ] `client.media.getUrl(id, options)` — URL obrazu z transformacjami
-- [ ] `client.navigation.get(name)` — pobranie menu
-- [ ] `client.settings.get()` — ustawienia serwisu
-- [ ] `client.seo.get(type, slug)` — dane SEO
-- [ ] TypeScript typy dla wszystkich responses
-- [ ] Cache layer (SWR/TanStack Query compatible)
+### 7.1 Menu Builder ✅
+- [x] Drag & drop budowanie menu (@dnd-kit), do 3 poziomów
+- [x] Linki wewnętrzne, zewnętrzne, anchory
+- [x] Wiele menu (main, footer)
 
-### 8.2 Next.js Helpers
-- [ ] `generateStaticParams` helpers
-- [ ] `generateMetadata` helper (auto z SEO fields)
-- [ ] ISR revalidation handler (webhook trigger)
-- [ ] Image component wrapper (z next/image + R2 CDN)
+### 7.2 Ustawienia Ogólne ✅
+- [x] Dane firmy/serwisu (nazwa, logo, favicon, opis, kontakt)
+- [x] Zarządzanie użytkownikami + role
 
 ---
 
-## FAZA 9 — Pierwszy Szablon: Corporate (`templates/corporate`)
+## FAZA 8 — SDK Klienta (`packages/sdk`) ✅
 
-### 9.1 Setup
-- [ ] Next.js 15 + TypeScript
-- [ ] Tailwind CSS v4
-- [ ] GSAP + ScrollTrigger
-- [ ] Framer Motion (dla komponentów React)
-- [ ] `@overcms/sdk` integracja
-- [ ] Konfiguracja ISR
+### 8.1 Pakiet `@overcms/sdk` ✅
+- [x] `createClient(config)` — inicjalizacja z URL i API key
+- [x] `client.content.list(type, options)` — lista treści z paginacją
+- [x] `client.content.get(type, slug)` — pojedynczy element
+- [x] `client.content.slugs(type)` — lista slugów (dla SSG)
+- [x] `client.navigation.get(name)` — pobranie menu
+- [x] `client.settings.get(key)` — ustawienia serwisu
+- [x] TypeScript typy dla wszystkich responses (`ContentItem<T>`, `ContentList<T>`)
+- [x] ISR-compatible (`revalidate` option, Next.js `fetch` cache)
 
-### 9.2 Sekcje (bloki widoku)
-- [ ] Hero Section (video bg / image bg, animacja reveal)
-- [ ] About Section (liczniki animowane, tekst + image)
-- [ ] Services Section (karty z hover animacjami)
-- [ ] Portfolio/Realizacje Section (grid + filtr + lightbox)
-- [ ] Testimonials Section (slider/karuzela)
-- [ ] Team Section
-- [ ] FAQ Section (accordion)
-- [ ] Contact Section (formularz + mapa)
-- [ ] Blog Preview Section
-- [ ] CTA Section
-- [ ] Footer (mega footer)
-
-### 9.3 Animacje GSAP
-- [ ] ScrollTrigger: reveal tekstu linia po linii
-- [ ] ScrollTrigger: fade-in + slide-up elementów
-- [ ] ScrollTrigger: parallax na hero
-- [ ] Animowane liczniki (countUp)
-- [ ] Smooth scroll (Lenis)
-- [ ] Cursor custom (opcjonalny)
-- [ ] Page transitions
-
-### 9.4 Performance
-- [ ] Lighthouse score ≥ 95 na wszystkich kategoriach
-- [ ] GSAP ładowany lazy (tylko gdy sekcja widoczna)
-- [ ] Czcionki: variable fonts, `font-display: swap`
-- [ ] Krytyczny CSS inline
-- [ ] Preload kluczowych zasobów
+### 8.2 Next.js Helpers ✅
+- [x] `makeStaticParams(fn)` — helper dla `generateStaticParams`
+- [x] `contentMetadata(res)` — helper dla `generateMetadata`
 
 ---
 
-## FAZA 10 — System Modułów
+## FAZA 9 — Szablon Corporate (`apps/web`) ✅
 
-### 10.1 Module API
-- [ ] Specyfikacja interfejsu `OverCMSModule`
-- [ ] System rejestracji modułów (registry)
-- [ ] Moduły instalowane przez panel admina
-- [ ] Hook system (eventy CMS)
-- [ ] Dokumentacja tworzenia własnych modułów
+### 9.1 Setup ✅
+- [x] Next.js 15 + TypeScript + Tailwind CSS v4
+- [x] GSAP + ScrollTrigger (`Reveal` component)
+- [x] Lenis smooth scroll (`LenisProvider`)
+- [x] `@overcms/sdk` integracja, ISR revalidate: 60s
+- [x] Page transitions (CSS `@keyframes page-enter`)
 
-### 10.2 Moduł Blog (`modules/@overcms/blog`)
-- [ ] Content types: Post, Category, Tag, Author
-- [ ] Bloki edytora: PostList, FeaturedPost, RelatedPosts
-- [ ] API: feed RSS, paginacja, filtrowanie
-- [ ] Widoki szablonu: lista postów, single post, archiwum, kategorie
-- [ ] Komentarze (opcjonalne)
+### 9.2 Sekcje ✅
+- [x] Hero Section (video/image bg, animacja reveal)
+- [x] About Section
+- [x] Services Section
+- [x] Portfolio Section (grid + filtr kategoriami, hover)
+- [x] Testimonials Section (star rating, avatar fallback)
+- [x] FAQ Section (accordion, CSS max-height transition)
+- [x] Contact Section (formularz podłączony do `/api/m/forms/submit`)
+- [x] Blog Preview (PostCard)
+- [x] CTA Section
+- [x] Header + Footer (z dynamicznym menu z CMS)
 
-### 10.3 Moduł Forms (`modules/@overcms/forms`)
-- [ ] Kreator formularzy (drag & drop pól)
-- [ ] Typy pól: text, email, phone, select, checkbox, file, textarea
-- [ ] Walidacja (wymagane, regex, min/max)
-- [ ] Akcje: zapis do DB, wysyłka email, webhook
-- [ ] Antyspam (honeypot + rate limit)
-- [ ] Panel z przesłanymi formularzami
-- [ ] Eksport do CSV
-
-### 10.4 Moduł Portfolio (`modules/@overcms/portfolio`)
-- [ ] Content types: Project, Category, Tag
-- [ ] Galeria projektów z filtrowaniem
-- [ ] Single project: opis, galeria, technologie, link
-- [ ] Bloki: ProjectGrid, ProjectFeatured, ProjectCarousel
+### 9.3 Block Renderer ✅
+- [x] Server-side renderer dla wszystkich 15 typów bloków
+- [x] `styleToCSS()` — konwersja BlockStyle → CSSProperties
+- [x] Zagnieżdżone kolumny z głębokością MAX_DEPTH=4
+- [x] Strony: `/blog`, `/blog/[slug]`, `/portfolio`, `/portfolio/[slug]`
 
 ---
 
-## FAZA 11 — System Licencji
+## FAZA 10 — System Modułów ✅
 
-### 11.1 License Server (`apps/license-server`)
-- [ ] Setup Hono.js na własnym serwerze
-- [ ] Baza danych licencji:
-  - Tabela `licenses` (key, plan, buyer_email, max_installations, expires_at)
-  - Tabela `activations` (license_id, domain, installation_id, activated_at)
-- [ ] Endpoint `POST /activate` — aktywacja na domenie
-- [ ] Endpoint `POST /validate` — sprawdzenie ważności (pingowany co 24h)
-- [ ] Endpoint `POST /deactivate` — zwolnienie instalacji
-- [ ] Grace period 7 dni przy braku internetu (timestamp w local DB)
-- [ ] Tryb read-only przy nieważnej licencji (API działa, panel admina zablokowany)
+### 10.1 Module API ✅
+- [x] Interfejs `OverCMSModule` (`packages/module-kit`)
+- [x] `defineModule()` factory function
+- [x] System rejestracji modułów (registry + loader)
+- [x] Moduły montowane pod `/api/m/{id}/`
+- [x] Włączanie/wyłączanie modułów przez panel admina
+- [x] `adminNav` — dynamiczne linki w sidebarze
 
-### 11.2 Plany Licencyjne
-- [ ] **Solo** — 1 instalacja, wszystkie core moduły
-- [ ] **Agency** — nielimitowane instalacje, wszystkie core moduły
-- [ ] **Module Add-ons** — premium moduły sprzedawane osobno
-- [ ] Trial 14 dni bez limitu funkcji
+### 10.2 Moduł Blog (`modules/blog`) ✅
+- [x] RSS feed: `GET /api/m/blog/rss`
+- [x] `adminNav` → `/content/post`
+- [x] Strony web: lista postów + single post
 
-### 11.3 Stripe Integration
-- [ ] Produkty i ceny w Stripe Dashboard
-- [ ] Checkout flow: wybór planu → Stripe → generowanie klucza → email
-- [ ] Webhooks: payment_succeeded, subscription_cancelled, refund
-- [ ] Automatyczne wysyłanie klucza emailem (Resend)
-- [ ] Odnowienie rocznej subskrypcji
+### 10.3 Moduł Forms (`modules/forms`) ✅
+- [x] Kreator formularzy GUI — drag & drop pól (@dnd-kit)
+- [x] 11 typów pól: text, email, phone, number, textarea, select, radio, checkbox, heading, paragraph, divider
+- [x] Walidacja pól (min/max znaków, zakres liczb)
+- [x] Szerokość pól (full / half / third)
+- [x] CRUD definicji formularzy: `GET/POST/PUT/DELETE /api/m/forms/definitions`
+- [x] Submit: `POST /api/m/forms/submit` — zapis do DB + email powiadomienie (Resend)
+- [x] Panel zgłoszeń z filtrowaniem po formularzu
+- [x] Eksport zgłoszeń do CSV: `GET /api/m/forms/submissions/export`
+- [ ] Antyspam (honeypot + rate limit per IP)
+- [ ] Webhook po każdym zgłoszeniu
 
-### 11.4 Portal Klienta
-- [ ] Strona zakupu licencji (landing)
-- [ ] Panel klienta: licencje, instalacje, faktury
-- [ ] Deaktywacja instalacji przez klienta
-- [ ] Historia płatności
-
----
-
-## FAZA 12 — Deployment & DevOps
-
-### 12.1 Docker
-- [ ] `Dockerfile` dla API (Hono.js)
-- [ ] `Dockerfile` dla Admin (Next.js)
-- [ ] `Dockerfile` dla License Server
-- [ ] `docker-compose.prod.yml`
-- [ ] `.env` management (production)
-
-### 12.2 CloudPanel Setup
-- [ ] Konfiguracja domen (api.overcms.pl, admin.overcms.pl, license.overcms.pl)
-- [ ] SSL (Let's Encrypt)
-- [ ] Nginx reverse proxy → Docker containers
-- [ ] PostgreSQL setup na serwerze
-- [ ] Redis setup na serwerze
-- [ ] Automatyczne backupy DB
-
-### 12.3 CI/CD
-- [ ] GitHub Actions: testy + build + deploy przy push do main
-- [ ] Staging environment
-- [ ] Health checks po deploymencie
-
-### 12.4 Monitoring
-- [ ] Uptime monitoring (UptimeRobot lub własny)
-- [ ] Error tracking (Sentry — self-hosted lub cloud)
-- [ ] Logi (strukturalne, rotacja)
+### 10.4 Moduł Portfolio (`modules/portfolio`) ✅
+- [x] `adminNav` → `/content/project`
+- [x] Strony web: `/portfolio` (grid z tagami) + `/portfolio/[slug]` (detail z Block Renderer)
 
 ---
 
-## FAZA 13 — Premium Moduły (V2)
+## FAZA 11 — System Licencji ✅
 
-### 13.1 E-commerce (`modules/@overcms/ecommerce`)
+### 11.1 License Server (`apps/license-server`) ✅
+- [x] Hono.js app na porcie 3002
+- [x] Schema DB: `lic_licenses`, `lic_activations`, `lic_audit`
+- [x] `POST /activate` — aktywacja klucza na domenie (normalizacja URL)
+- [x] `POST /validate` — walidacja (pingowana co 24h przez CMS API)
+- [x] `POST /deactivate` — zwolnienie domeny
+- [x] `GET /status` — aktualny status licencji dla domeny
+- [x] Admin API (Bearer token `LICENSE_ADMIN_SECRET`):
+  - `GET/POST /admin/licenses`, `GET /admin/licenses/:key`, `PATCH`, `DELETE`
+  - `POST /admin/licenses/:key/resend-email`
+  - `GET /admin/stats`
+- [x] Generowanie kluczy: format `XXXX-XXXX-XXXX-XXXX` (hex, crypto-random)
+- [x] Audit log wszystkich zdarzeń
+
+### 11.2 Plany Licencyjne ✅
+- [x] **Trial** — 1 domena, 14 dni
+- [x] **Solo** — 1 domena, bezterminowo
+- [x] **Agency** — nielimitowane domeny, bezterminowo
+- [x] Automatyczne ustawienie `expiresAt` przy tworzeniu licencji
+
+### 11.3 Integracja z CMS API ✅
+- [x] `licenseMiddleware` — sprawdza licencję co 24h
+- [x] 7-dniowy grace period przy braku połączenia z license server
+- [x] Tryb read-only (blokowanie POST/PUT/PATCH/DELETE) po wygaśnięciu grace period
+- [x] Env vars: `OVERCMS_LICENSE_KEY`, `OVERCMS_INSTALL_ID`, `LICENSE_SERVER_URL`
+
+### 11.4 Stripe dla zakupu licencji ✅
+- [x] Webhook `POST /webhooks/stripe`:
+  - `checkout.session.completed` → auto-tworzy licencję + wysyła email z kluczem (Resend)
+  - `customer.subscription.deleted` → zawiesza licencję
+- [x] `POST /checkout/session` — tworzy Stripe Checkout Session → zwraca `{url}`
+
+### 11.5 Portal Klienta (`apps/portal`) ✅
+- [x] `apps/portal` — Next.js 15 app na porcie :3004
+- [x] Strona główna `/` — landing z cennikiem (Trial / Solo / Agency)
+- [x] Checkout flow: redirect → Stripe → `/checkout/success`
+- [x] `GET /customer/:key` — pobiera licencję + aktywacje (autentykacja kluczem)
+- [x] `/portal` — formularz wyszukiwania po kluczu licencji
+- [x] `/portal/[key]` — panel: plan, status, aktywacje, deaktywacja per instalacja
+- [x] `POST /customer/:key/deactivate` — self-service deaktywacja instalacji
+
+---
+
+## FAZA 12 — Moduły Płatności _(zaplanowane na później)_
+
+> Każdy operator płatności jako osobny moduł — taka sama architektura jak `modules/forms`, `modules/blog` itd.
+> **Decyzja: implementujemy po stabilizacji core — wymagają dopracowania UX i integracji z e-commerce.**
+
+### 12.1 Moduł Stripe (`modules/payments-stripe`) ⏳
+### 12.2 Moduł Autopay (`modules/payments-autopay`) ⏳
+### 12.3 Moduł Przelewy24 (`modules/payments-p24`) ⏳
+
+---
+
+## FAZA 13 — Deployment & DevOps
+
+### 13.1 Docker ✅
+- [x] `apps/api/Dockerfile` — multi-stage build (deps → builder → runner)
+- [x] `apps/admin/Dockerfile` — Next.js standalone output
+- [x] `apps/license-server/Dockerfile` — multi-stage build
+- [x] `docker-compose.prod.yml` — Traefik + Let's Encrypt + wszystkie serwisy
+- [x] `.dockerignore` — wykluczone node_modules, .env, .next, dist
+- [x] `.env.example` uzupełniony o zmienne produkcyjne (domeny, ACME, hasła)
+- [x] `next.config.ts` admin: `output: 'standalone'`
+
+### 13.2 CloudPanel Setup
+- [ ] Konfiguracja domen: `api.overcms.pl`, `admin.overcms.pl`, `license.overcms.pl`
+- [ ] SSL — Let's Encrypt przez Traefik (ACME TLS Challenge, automatyczne odnawianie)
+- [ ] Serwer docelowy: Ubuntu 22.04 + Docker (skrypt `scripts/server-setup.sh`)
+- [ ] Automatyczne backupy DB: `scripts/backup-db.sh` (cron 2:00 AM, retencja 14 dni)
+
+### 13.3 CI/CD ✅
+- [x] `.github/workflows/ci.yml` — typecheck + lint + build przy PR i push
+- [x] `.github/workflows/deploy.yml` — build obrazów → GHCR → SSH deploy → health check
+- [x] Rolling restart (zero-downtime per serwis)
+- [x] Docker layer caching (GitHub Actions cache)
+
+### 13.4 Monitoring
+- [ ] Uptime monitoring (UptimeRobot / Better Uptime)
+- [ ] Logi strukturalne + rotacja (skonfigurowana w daemon.json — max 10MB × 5 plików)
+
+---
+
+## FAZA 14 — Premium Moduły (V2)
+
+### 14.1 E-commerce (`modules/ecommerce`) ⏳ _(zaplanowane na później — wymaga modułów płatności)_
 - [ ] Content types: Product, Category, Order, Customer
 - [ ] Koszyk (localStorage + backend sync)
-- [ ] Checkout + Stripe Payments
-- [ ] Panel zamówień w adminie
-- [ ] Stany zamówień, emaile transakcyjne
-- [ ] Warianty produktów (rozmiar, kolor)
-- [ ] Stany magazynowe
+- [ ] Checkout z modułami płatności (Stripe / Autopay / P24)
+- [ ] Panel zamówień w adminie, stany, emaile transakcyjne
+- [ ] Warianty produktów, stany magazynowe
 - [ ] Faktury PDF
 
-### 13.2 Multilingual (`modules/@overcms/multilang`)
+### 14.2 Multilingual (`modules/multilang`)
 - [ ] Wiele języków per instalacja
-- [ ] Tłumaczenia treści w panelu (obok siebie)
-- [ ] URL struktura: `/pl/`, `/en/`, lub domeny
-- [ ] hreflang w SEO
-- [ ] Fallback do domyślnego języka
+- [ ] Tłumaczenia treści w panelu
+- [ ] URL: `/pl/`, `/en/` lub subdomeny
+- [ ] hreflang w SEO, fallback do domyślnego języka
 
-### 13.3 Analytics (`modules/@overcms/analytics`)
+### 14.3 Analytics (`modules/analytics`)
 - [ ] Self-hosted (Plausible lub własny)
 - [ ] Dashboard w panelu admina
-- [ ] Top strony, źródła ruchu, urządzenia
 - [ ] Bez cookies (GDPR compliant)
 
 ---
@@ -417,4 +353,4 @@
 
 ---
 
-*Ostatnia aktualizacja: 2026-03-19*
+*Ostatnia aktualizacja: 2026-03-20 — Fazy 12 + 14.1 odłożone na V2; Faza 13 Docker + CI/CD done; Faza 11.5 Portal Klienta done; audyt kodu done*

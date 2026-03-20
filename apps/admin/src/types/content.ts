@@ -1,7 +1,7 @@
 export type ContentStatus = 'draft' | 'published' | 'scheduled' | 'archived'
 
 export type FieldType =
-  | 'text' | 'textarea' | 'richtext' | 'number' | 'boolean'
+  | 'text' | 'textarea' | 'richtext' | 'blocks' | 'number' | 'boolean'
   | 'date' | 'image' | 'file' | 'relation' | 'repeater'
   | 'select' | 'slug' | 'color' | 'json'
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -16,6 +16,8 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CodeEditor, type CodeLanguage } from './code-editor'
 import { EditorSidebar } from './editor-sidebar'
+import { BlockEditor } from '@/components/editor/block-editor'
+import type { Block } from '@/components/editor/types'
 import { api } from '@/lib/api'
 import { slugify } from '@/lib/utils'
 import type { ContentType, ContentItem } from '@/types/content'
@@ -67,10 +69,16 @@ export function ContentEditor({ contentType, item, typeSlug }: ContentEditorProp
   )
   const bodyFieldName = bodyField?.name ?? 'content'
 
-  // Pola boczne (wszystko poza body/richtext i slug)
+  // Pole bloków — pierwszy field type='blocks' lub fallback na klucz 'blocks'
+  const blocksField = contentType.fieldsSchema?.find((f) => f.type === 'blocks')
+  const blocksFieldName = blocksField?.name ?? 'blocks'
+
+  // Pola boczne (wszystko poza body/richtext, slug i blocks)
   const sidebarFields = contentType.fieldsSchema?.filter(
-    (f) => f.name !== bodyFieldName && f.type !== 'slug',
+    (f) => f.name !== bodyFieldName && f.type !== 'slug' && f.type !== 'blocks',
   ) ?? []
+
+  // Zawsze pozwól używać blokowego editora — dane lądują w data[blocksFieldName]
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -155,6 +163,21 @@ export function ContentEditor({ contentType, item, typeSlug }: ContentEditorProp
   }
 
   const isBusy = saveMutation.isPending || publishMutation.isPending
+
+  // ── Auto-save every 30s (only for existing items in draft/scheduled) ─────
+  const autoSaveRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  useEffect(() => {
+    if (!item) return  // don't auto-save new items
+    autoSaveRef.current = setInterval(() => {
+      const values = form.getValues()
+      if (values.status === 'published') return  // skip published items
+      saveMutation.mutate(values)
+    }, 30_000)
+    return () => {
+      if (autoSaveRef.current) clearInterval(autoSaveRef.current)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item?.id])
 
   return (
     <div className="flex flex-col h-[calc(100vh-var(--topbar-height))] -mt-6 -mx-6">
@@ -279,13 +302,18 @@ export function ContentEditor({ contentType, item, typeSlug }: ContentEditorProp
                 height="100%"
               />
             ) : (
-              <div className="h-full flex items-center justify-center text-[var(--color-subtle)]">
-                <div className="text-center">
-                  <Blocks className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                  <p className="text-sm">Edytor bloków — wkrótce</p>
-                  <p className="text-xs mt-1 opacity-60">Użyj trybu Kod do edycji treści</p>
-                </div>
-              </div>
+              <Controller
+                control={control}
+                name={`data.${blocksFieldName}`}
+                render={({ field }) => (
+                  <div className="h-full overflow-y-auto p-4 scrollbar-thin">
+                    <BlockEditor
+                      value={(field.value as Block[]) ?? []}
+                      onChange={field.onChange}
+                    />
+                  </div>
+                )}
+              />
             )}
           </div>
         </div>
@@ -300,6 +328,16 @@ export function ContentEditor({ contentType, item, typeSlug }: ContentEditorProp
           slugManual={slugManual}
           onSlugEdit={() => setSlugManual(true)}
           typeSlug={typeSlug}
+          itemId={item?.id}
+          onRestore={(restored) => {
+            form.reset({
+              title:  restored.title,
+              slug:   restored.slug,
+              status: restored.status as FormValues['status'],
+              data:   restored.data as FormValues['data'],
+              seo:    (restored.seo ?? {}) as FormValues['seo'],
+            })
+          }}
         />
       </div>
     </div>

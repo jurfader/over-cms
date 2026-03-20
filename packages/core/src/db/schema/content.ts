@@ -1,6 +1,7 @@
 import {
   boolean,
   index,
+  integer,
   jsonb,
   pgEnum,
   pgTable,
@@ -12,8 +13,8 @@ import {
 } from 'drizzle-orm/pg-core'
 
 import type { FieldDefinition } from '../../types/fields'
-import type { SeoData } from '../../types/seo'
-import { user } from './auth'
+import type { SeoData }          from '../../types/seo'
+import { user }                  from './auth'
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
@@ -68,5 +69,27 @@ export const contentItems = pgTable(
     index('content_items_status_idx').on(table.status),
     index('content_items_author_idx').on(table.authorId),
     index('content_items_published_at_idx').on(table.publishedAt),
+  ]
+)
+
+// ─── Content Versions ─────────────────────────────────────────────────────────
+// Snapshoty stanu elementu po każdym zapisie (historia wersji)
+
+export const contentVersions = pgTable(
+  'content_versions',
+  {
+    id:        uuid('id').primaryKey().defaultRandom(),
+    itemId:    uuid('item_id').notNull().references(() => contentItems.id, { onDelete: 'cascade' }),
+    version:   integer('version').notNull(),
+    title:     varchar('title', { length: 500 }).notNull(),
+    data:      jsonb('data').notNull().$type<Record<string, unknown>>(),
+    status:    contentStatusEnum('status').notNull(),
+    seo:       jsonb('seo').$type<SeoData>(),
+    authorId:  text('author_id').references(() => user.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('cv_item_idx').on(t.itemId),
+    uniqueIndex('cv_unique_version').on(t.itemId, t.version),
   ]
 )

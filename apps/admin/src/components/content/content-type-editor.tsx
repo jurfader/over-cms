@@ -30,13 +30,14 @@ const FIELD_TYPES: { value: FieldType; label: string }[] = [
   { value: 'color',     label: 'Kolor'         },
   { value: 'json',      label: 'JSON'          },
   { value: 'slug',      label: 'Slug'          },
+  { value: 'blocks',    label: 'Bloki (editor)' },
 ]
 
 const fieldSchema = z.object({
   id:       z.string(),
   name:     z.string().min(1, 'Wymagane'),
   label:    z.string().min(1, 'Wymagane'),
-  type:     z.enum(['text', 'textarea', 'richtext', 'number', 'boolean', 'date', 'image', 'file', 'relation', 'repeater', 'select', 'slug', 'color', 'json']),
+  type:     z.enum(['text', 'textarea', 'richtext', 'blocks', 'number', 'boolean', 'date', 'image', 'file', 'relation', 'repeater', 'select', 'slug', 'color', 'json']),
   required: z.boolean(),
 })
 

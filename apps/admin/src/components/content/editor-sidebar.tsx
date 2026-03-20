@@ -9,8 +9,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FieldRenderer } from './field-renderer'
+import { VersionHistory } from './version-history'
 import { slugify } from '@/lib/utils'
-import type { FieldDefinition, ContentStatus } from '@/types/content'
+import type { FieldDefinition, ContentStatus, ContentItem } from '@/types/content'
 import { cn } from '@/lib/utils'
 
 type FormValues = {
@@ -30,6 +31,8 @@ interface EditorSidebarProps {
   slugManual: boolean
   onSlugEdit: () => void
   typeSlug: string
+  itemId?: string
+  onRestore?: (item: ContentItem) => void
 }
 
 function SidebarSection({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
@@ -58,6 +61,7 @@ const STATUS_OPTIONS: { value: ContentStatus; label: string }[] = [
 export function EditorSidebar({
   control, watch, setValue, errors,
   sidebarFields, slugManual, onSlugEdit,
+  typeSlug, itemId, onRestore,
 }: EditorSidebarProps) {
   return (
     <aside className="w-72 shrink-0 border-l border-[var(--color-border)] overflow-y-auto bg-[var(--glass-card-bg)] backdrop-filter backdrop-blur-sm">
@@ -145,6 +149,17 @@ export function EditorSidebar({
               setValue={setValue as unknown as UseFormSetValue<FieldValues>}
             />
           ))}
+        </SidebarSection>
+      )}
+
+      {/* ── Historia wersji ── */}
+      {itemId && onRestore && (
+        <SidebarSection title="Historia wersji" defaultOpen={false}>
+          <VersionHistory
+            itemId={itemId}
+            typeSlug={typeSlug}
+            onRestore={onRestore}
+          />
         </SidebarSection>
       )}
 

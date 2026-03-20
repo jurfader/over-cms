@@ -1,5 +1,6 @@
 export * from './auth'
 export * from './content'
+export * from './forms'
 export * from './media'
 export * from './modules'
 export * from './redirects'

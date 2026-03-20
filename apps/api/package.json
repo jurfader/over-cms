@@ -14,7 +14,11 @@
   "dependencies": {
     "@hono/node-server": "^1.19.11",
     "@hono/zod-validator": "^0.7.6",
-    "@overcms/core": "workspace:^",
+    "@overcms/core":         "workspace:^",
+    "@overcms/module-blog":      "workspace:^",
+    "@overcms/module-forms":     "workspace:^",
+    "@overcms/module-portfolio": "workspace:^",
+    "@overcms/module-kit":   "workspace:^",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.5.5",
     "busboy": "^1.6.0",

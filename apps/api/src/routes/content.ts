@@ -1,8 +1,8 @@
 import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
-import { and, asc, count, desc, eq, or } from '@overcms/core'
-import { db, contentTypes, contentItems, user } from '@overcms/core'
+import { and, asc, count, desc, eq, or, sql } from '@overcms/core'
+import { db, contentTypes, contentItems, contentVersions, user } from '@overcms/core'
 import { requireAuth } from '../middleware/auth'
 import { ApiError } from '../middleware/error'
 import type { AppEnv } from '../types'
@@ -46,6 +46,29 @@ async function findContentType(typeSlug: string) {
 
   if (!type) throw ApiError.notFound(`Content type "${typeSlug}" not found`)
   return type
+}
+
+// ─── Helper: utwórz snapshot wersji ──────────────────────────────────────────
+
+type ItemRow = typeof contentItems.$inferSelect
+
+async function createVersionSnapshot(item: ItemRow) {
+  const [maxRes] = await db
+    .select({ v: sql<number>`COALESCE(MAX(${contentVersions.version}), 0)` })
+    .from(contentVersions)
+    .where(eq(contentVersions.itemId, item.id))
+
+  const nextVersion = (maxRes?.v ?? 0) + 1
+
+  await db.insert(contentVersions).values({
+    itemId:   item.id,
+    version:  nextVersion,
+    title:    item.title,
+    data:     item.data as Record<string, unknown>,
+    status:   item.status,
+    seo:      item.seo ?? undefined,
+    authorId: item.authorId,
+  })
 }
 
 // ─── GET /:typeSlug — lista elementów ─────────────────────────────────────────
@@ -200,6 +223,11 @@ router.put('/:typeSlug/:id', requireAuth,
       .where(eq(contentItems.id, id))
       .returning()
 
+    if (!updated) throw ApiError.notFound('Item not found after update')
+
+    // Auto-snapshot po każdym zapisie
+    await createVersionSnapshot(updated)
+
     return c.json({ data: updated })
   }
 )
@@ -234,6 +262,81 @@ router.post('/:typeSlug/:id/publish', requireAuth, async (c) => {
     .returning()
 
   return c.json({ data: updated })
+})
+
+// ─── GET /:typeSlug/:id/versions — lista wersji ──────────────────────────────
+
+router.get('/:typeSlug/:id/versions', requireAuth, async (c) => {
+  const typeSlug = c.req.param('typeSlug')!
+  const id       = c.req.param('id')!
+
+  const type = await findContentType(typeSlug)
+
+  const [existing] = await db
+    .select({ id: contentItems.id })
+    .from(contentItems)
+    .where(and(eq(contentItems.typeId, type.id), eq(contentItems.id, id)))
+    .limit(1)
+
+  if (!existing) throw ApiError.notFound('Item not found')
+
+  const versions = await db
+    .select({
+      version:   contentVersions,
+      author:    { id: user.id, name: user.name, email: user.email },
+    })
+    .from(contentVersions)
+    .leftJoin(user, eq(contentVersions.authorId, user.id))
+    .where(eq(contentVersions.itemId, id))
+    .orderBy(desc(contentVersions.version))
+    .limit(50)
+
+  return c.json({ data: versions })
+})
+
+// ─── POST /:typeSlug/:id/versions/:versionId/restore — przywróć wersję ────────
+
+router.post('/:typeSlug/:id/versions/:versionId/restore', requireAuth, async (c) => {
+  const typeSlug  = c.req.param('typeSlug')!
+  const id        = c.req.param('id')!
+  const versionId = c.req.param('versionId')!
+
+  const type = await findContentType(typeSlug)
+
+  const [existing] = await db
+    .select()
+    .from(contentItems)
+    .where(and(eq(contentItems.typeId, type.id), eq(contentItems.id, id)))
+    .limit(1)
+
+  if (!existing) throw ApiError.notFound('Item not found')
+
+  const [ver] = await db
+    .select()
+    .from(contentVersions)
+    .where(and(eq(contentVersions.id, versionId), eq(contentVersions.itemId, id)))
+    .limit(1)
+
+  if (!ver) throw ApiError.notFound('Version not found')
+
+  const [restored] = await db
+    .update(contentItems)
+    .set({
+      title:     ver.title,
+      data:      ver.data,
+      seo:       ver.seo,
+      status:    ver.status,
+      updatedAt: new Date(),
+    })
+    .where(eq(contentItems.id, id))
+    .returning()
+
+  if (!restored) throw ApiError.notFound('Item not found after restore')
+
+  // Snapshot przywróconego stanu
+  await createVersionSnapshot(restored)
+
+  return c.json({ data: restored })
 })
 
 // ─── DELETE /:typeSlug/:id ────────────────────────────────────────────────────

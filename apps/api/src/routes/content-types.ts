@@ -16,7 +16,7 @@ const fieldSchema = z.object({
   name: z.string(),
   label: z.string(),
   type: z.enum([
-    'text', 'textarea', 'richtext', 'number', 'boolean',
+    'text', 'textarea', 'richtext', 'blocks', 'number', 'boolean',
     'date', 'image', 'file', 'relation', 'repeater',
     'select', 'slug', 'color', 'json',
   ]),

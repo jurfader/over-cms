@@ -1,0 +1,25 @@
+# Cloudflare Tunnel — OverCMS
+# Plik: /etc/cloudflared/config.yml
+#
+# Tunnel przez CloudPanel Nginx (rekomendowane):
+# - Cloudflared → Nginx (port 80) → Node.js apps
+# - CloudPanel zarządza SSL i vhostami
+
+tunnel: TWOJ_TUNNEL_ID
+credentials-file: /root/.cloudflared/TWOJ_TUNNEL_ID.json
+
+ingress:
+  # Strona główna OVERMEDIA
+  - hostname: overmedia.pl
+    service: http://localhost:80
+
+  # Panel administracyjny CMS
+  - hostname: admin.overmedia.pl
+    service: http://localhost:80
+
+  # API
+  - hostname: api.overmedia.pl
+    service: http://localhost:80
+
+  # Wymagane — catch-all
+  - service: http_status:404

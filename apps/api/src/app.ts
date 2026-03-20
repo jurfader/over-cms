@@ -3,8 +3,9 @@ import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { secureHeaders } from 'hono/secure-headers'
 import { serveStatic } from '@hono/node-server/serve-static'
-import { errorHandler } from './middleware/error'
-import { rateLimiter } from './middleware/rate-limit'
+import { errorHandler }      from './middleware/error'
+import { rateLimiter }       from './middleware/rate-limit'
+import { licenseMiddleware } from './middleware/license'
 import { registerRoutes } from './routes'
 import type { AppEnv } from './types'
 
@@ -27,6 +28,7 @@ app.use('*', cors({
 }))
 
 app.use('/api/*', rateLimiter)
+app.use('/api/*', licenseMiddleware)
 
 // ─── Error Handler ────────────────────────────────────────────────────────────
 

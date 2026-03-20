@@ -1,0 +1,31 @@
+{
+  "name": "@overcms/web",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3003",
+    "build": "next build",
+    "start": "next start --port 3003",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf .next"
+  },
+  "dependencies": {
+    "@overcms/core": "workspace:*",
+    "@overcms/sdk": "workspace:*",
+    "@tailwindcss/postcss": "^4.2.2",
+    "gsap": "^3.14.2",
+    "lenis": "^1.3.19",
+    "lucide-react": "^0.577.0",
+    "next": "15",
+    "postcss": "^8.5.8",
+    "react": "19",
+    "react-dom": "19",
+    "tailwindcss": "^4.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.7",
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3"
+  }
+}

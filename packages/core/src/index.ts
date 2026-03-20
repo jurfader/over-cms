@@ -4,6 +4,11 @@ export * from './db'
 // Types
 export * from './types/fields'
 export * from './types/seo'
+export * from './types/block-style'
+export * from './types/form-field'
+
+// Utils
+export * from './utils/block-style'
 
 // Drizzle re-exports — użyj tych zamiast importować bezpośrednio z 'drizzle-orm'
 // Gwarantuje pojedynczą instancję drizzle-orm w całym projekcie

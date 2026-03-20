@@ -8,7 +8,9 @@ import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CodeEditor } from './code-editor'
 import { MediaPicker } from '@/components/media/media-picker'
+import { BlockEditor } from '@/components/editor/block-editor'
 import type { FieldDefinition } from '@/types/content'
+import type { Block } from '@/components/editor/types'
 
 interface FieldRendererProps {
   field: FieldDefinition
@@ -167,6 +169,14 @@ export function FieldRenderer({ field, control }: FieldRendererProps) {
                   value={(value as string) ?? ''}
                   onChange={formField.onChange}
                   accept="file"
+                />
+              )
+
+            case 'blocks':
+              return (
+                <BlockEditor
+                  value={(formField.value as Block[]) ?? []}
+                  onChange={formField.onChange}
                 />
               )
 
