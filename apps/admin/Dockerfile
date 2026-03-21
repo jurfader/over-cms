@@ -14,6 +14,10 @@ RUN pnpm install --frozen-lockfile
 FROM deps AS builder
 WORKDIR /app
 
+# Build-time env vars for Next.js (NEXT_PUBLIC_* must be available at build time)
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
 COPY tsconfig.base.json ./
 COPY packages/core/src ./packages/core/src
 COPY packages/core/tsconfig.json ./packages/core/
