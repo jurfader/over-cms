@@ -78,8 +78,11 @@ RUN node -e " \
   }); \
 "
 
+# tsx handles ESM extensionless imports that tsc+Bundler moduleResolution emits
+RUN npm i -g tsx
+
 # Public uploads dir (mounted as volume in prod)
 RUN mkdir -p /app/apps/api/public/uploads
 
 EXPOSE 3000
-CMD ["node", "apps/api/dist/index.js"]
+CMD ["tsx", "apps/api/dist/index.js"]
