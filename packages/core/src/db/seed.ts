@@ -39,30 +39,24 @@ async function seed() {
   // ── Users ────────────────────────────────────────────────────────────────────
 
   const adminId = randomUUID()
-  const editorId = randomUUID()
+
+  const adminEmail = process.env['ADMIN_EMAIL'] || 'admin@overcms.local'
+  const adminPassword = process.env['ADMIN_PASSWORD'] || 'Admin123!'
 
   await db.insert(schema.user).values([
     {
       id: adminId,
       name: 'Super Admin',
-      email: 'admin@overcms.local',
+      email: adminEmail,
       emailVerified: true,
       role: 'super_admin',
     },
-    {
-      id: editorId,
-      name: 'Jan Edytor',
-      email: 'editor@overcms.local',
-      emailVerified: true,
-      role: 'editor',
-    },
   ])
-  log('✓ Użytkownicy utworzeni')
+  log(`✓ Admin: ${adminEmail}`)
 
   // ── Accounts (credentials) ───────────────────────────────────────────────────
 
-  const adminHash = await bcrypt.hash('Admin123!', 10)
-  const editorHash = await bcrypt.hash('Editor123!', 10)
+  const adminHash = await bcrypt.hash(adminPassword, 10)
 
   await db.insert(schema.account).values([
     {
@@ -72,15 +66,8 @@ async function seed() {
       userId: adminId,
       password: adminHash,
     },
-    {
-      id: randomUUID(),
-      accountId: editorId,
-      providerId: 'credential',
-      userId: editorId,
-      password: editorHash,
-    },
   ])
-  log('✓ Konta (hasła) utworzone')
+  log('✓ Konto admina utworzone')
 
   // ── Content Types ─────────────────────────────────────────────────────────────
 
@@ -298,7 +285,7 @@ async function seed() {
       slug: 'jak-dziala-system-modulow',
       title: 'Jak działa system modułów w OverCMS',
       status: 'draft',
-      authorId: editorId,
+      authorId: adminId,
       data: {
         content:
           '<p>System modułów OverCMS pozwala rozszerzać funkcjonalność CMS bez modyfikacji core.</p>',
@@ -389,11 +376,7 @@ async function seed() {
   // ─────────────────────────────────────────────────────────────────────────────
 
   console.log('\n✅ Seed zakończony pomyślnie!\n')
-  console.log('  Dane logowania:')
-  console.log('  ┌─────────────────────────────────────────────────┐')
-  console.log('  │  Super Admin:  admin@overcms.local / Admin123!  │')
-  console.log('  │  Editor:       editor@overcms.local / Editor123!│')
-  console.log('  └─────────────────────────────────────────────────┘\n')
+  console.log(`  Admin: ${adminEmail}\n`)
 
   await client.end()
 }
