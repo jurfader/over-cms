@@ -6,7 +6,7 @@ export interface OverCMSConfig {
   /** Optional API key sent as X-API-Key header */
   apiKey?: string
   /** Default fetch cache strategy (default: 'force-cache' for ISR) */
-  cache?: RequestCache
+  cache?: 'default' | 'no-store' | 'reload' | 'no-cache' | 'force-cache' | 'only-if-cached'
   /** Default ISR revalidation in seconds. 0 = no-store. */
   revalidate?: number
 }
