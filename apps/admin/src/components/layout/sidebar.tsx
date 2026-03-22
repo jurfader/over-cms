@@ -14,6 +14,8 @@ import { api }        from '@/lib/api'
 import { cn }         from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
+const APP_VERSION = process.env['APP_VERSION'] ?? '0.0.0'
+
 // ─── Module icon map ──────────────────────────────────────────────────────────
 
 const MODULE_ICONS: Record<string, React.ElementType> = {
@@ -361,7 +363,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           ))}
         </nav>
 
-        {/* Collapse toggle */}
+        {/* Collapse toggle + version */}
         <div className="shrink-0 p-2 border-t border-[var(--color-border)]">
           <button
             onClick={onToggle}
@@ -389,6 +391,18 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               </>
             )}
           </button>
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.4 }}
+                exit={{ opacity: 0 }}
+                className="text-[10px] text-center text-[var(--color-subtle)] mt-1 select-none"
+              >
+                OverCMS v{APP_VERSION}
+              </motion.p>
+            )}
+          </AnimatePresence>
         </div>
       </motion.aside>
     </TooltipProvider>

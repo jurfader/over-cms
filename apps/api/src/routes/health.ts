@@ -2,6 +2,17 @@ import { Hono } from 'hono'
 import { db } from '@overcms/core'
 import { sql } from '@overcms/core'
 import { redis } from '../lib/redis'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+
+function readVersion(): string {
+  try {
+    const pkg = JSON.parse(readFileSync(resolve(import.meta.dirname ?? '.', '../../..', 'package.json'), 'utf-8'))
+    return pkg.version ?? '0.0.0'
+  } catch { return '0.0.0' }
+}
+
+const APP_VERSION = readVersion()
 
 const health = new Hono()
 
@@ -33,7 +44,7 @@ health.get('/', async (c) => {
   return c.json(
     {
       status: allOk ? 'ok' : 'degraded',
-      version: '0.0.1',
+      version: APP_VERSION,
       timestamp: new Date().toISOString(),
       checks,
     },
