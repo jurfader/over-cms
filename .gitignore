@@ -41,9 +41,16 @@ coverage/
 *.tsbuildinfo
 .cache/
 
+# Private — not for public repo
+apps/license-server/
+
 # Cloudflare credentials
 *.json
 !package.json
 !tsconfig*.json
 !drizzle.config.json
 .cloudflared/
+
+# License keys — never commit
+license-private.pem
+.env.license
