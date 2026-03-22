@@ -12,6 +12,8 @@ RUN pnpm install --frozen-lockfile
 FROM deps AS builder
 WORKDIR /app
 
+COPY tsconfig.base.json ./
+COPY packages ./packages
 COPY apps/portal ./apps/portal
 
 RUN pnpm --filter @overcms/portal build
