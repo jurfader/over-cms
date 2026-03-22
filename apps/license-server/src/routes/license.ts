@@ -79,13 +79,14 @@ licenseRouter.post('/activate', zValidator('json', activateSchema), async (c) =>
       .set({ active: true, installationId, lastSeenAt: new Date() })
       .where(eq(activations.id, existing.id))
     await audit(license.id, 'reactivate', domain)
-    const response = {
+    const data = {
       success:   true,
       plan:      license.plan,
       expiresAt: license.expiresAt,
     }
-    const signature = signPayload(response)
-    if (signature) response.signature = signature as never
+    const signature = signPayload(data)
+    const response: Record<string, unknown> = data
+    if (signature) response.signature = signature
     return c.json(response)
   }
 
@@ -114,13 +115,14 @@ licenseRouter.post('/activate', zValidator('json', activateSchema), async (c) =>
 
   await audit(license.id, 'activate', domain)
 
-  const response = {
+  const data = {
     success:   true,
     plan:      license.plan,
     expiresAt: license.expiresAt,
   }
-  const signature = signPayload(response)
-  if (signature) response.signature = signature as never
+  const signature = signPayload(data)
+  const response: Record<string, unknown> = data
+  if (signature) response.signature = signature
   return c.json(response)
 })
 
@@ -164,13 +166,14 @@ licenseRouter.post('/validate', zValidator('json', validateSchema), async (c) =>
     .set({ lastSeenAt: new Date(), installationId })
     .where(eq(activations.id, activation.id))
 
-  const response = {
+  const data = {
     valid:     true,
     plan:      license.plan,
     expiresAt: license.expiresAt,
   }
-  const signature = signPayload(response)
-  if (signature) response.signature = signature as never
+  const signature = signPayload(data)
+  const response: Record<string, unknown> = data
+  if (signature) response.signature = signature
   return c.json(response)
 })
 
