@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import {
   Settings2, Users, Mail, Save, Loader2, CheckCircle2,
-  Trash2, ShieldCheck,
+  Trash2, ShieldCheck, Download, Upload, AlertCircle,
 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
@@ -44,9 +44,10 @@ const ROLE_LABELS: Record<Role, string> = {
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
 const TABS = [
-  { id: 'general', label: 'Ogólne',      icon: Settings2 },
-  { id: 'users',   label: 'Użytkownicy', icon: Users     },
-  { id: 'mail',    label: 'Mail',        icon: Mail      },
+  { id: 'general',  label: 'Ogólne',      icon: Settings2 },
+  { id: 'users',    label: 'Użytkownicy', icon: Users     },
+  { id: 'mail',     label: 'Mail',        icon: Mail      },
+  { id: 'transfer', label: 'Transfer',    icon: Download  },
 ] as const
 
 type TabId = typeof TABS[number]['id']
@@ -320,6 +321,118 @@ function MailTab() {
   )
 }
 
+// ─── Transfer ─────────────────────────────────────────────────────────────────
+
+function TransferTab() {
+  const [importing, setImporting] = useState(false)
+  const [result, setResult]       = useState<{ ok: boolean; msg: string } | null>(null)
+
+  async function handleExport() {
+    const apiUrl = process.env['NEXT_PUBLIC_API_URL'] ?? ''
+    const token  = typeof document !== 'undefined'
+      ? document.cookie.split('; ').find((c) => c.startsWith('better-auth.session_token='))?.split('=')[1]
+      : undefined
+
+    const res = await fetch(`${apiUrl}/api/transfer/export`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      credentials: 'include',
+    })
+    if (!res.ok) { setResult({ ok: false, msg: 'Export nieudany' }); return }
+
+    const blob = await res.blob()
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    const cd   = res.headers.get('Content-Disposition') ?? ''
+    const name = cd.match(/filename="([^"]+)"/)?.[1] ?? 'overcms-export.json'
+    a.href = url; a.download = name; a.click()
+    URL.revokeObjectURL(url)
+    setResult({ ok: true, msg: 'Export pobrany' })
+  }
+
+  async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImporting(true)
+    setResult(null)
+    try {
+      const text = await file.text()
+      const json = JSON.parse(text)
+      const res  = await fetch(`${process.env['NEXT_PUBLIC_API_URL'] ?? ''}/api/transfer/import`, {
+        method:      'POST',
+        headers:     { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body:        JSON.stringify(json),
+      })
+      const data = await res.json() as { success?: boolean; imported?: { types: number; items: number; settings: number }; error?: string }
+      if (res.ok && data.success) {
+        setResult({ ok: true, msg: `Zaimportowano: ${data.imported?.types ?? 0} typów, ${data.imported?.items ?? 0} elementów, ${data.imported?.settings ?? 0} ustawień` })
+      } else {
+        setResult({ ok: false, msg: data.error ?? 'Import nieudany' })
+      }
+    } catch {
+      setResult({ ok: false, msg: 'Nieprawidłowy plik JSON' })
+    } finally {
+      setImporting(false)
+      e.target.value = ''
+    }
+  }
+
+  return (
+    <div className="space-y-6 max-w-2xl">
+      {/* Export */}
+      <div className="glass-card rounded-[var(--radius-lg)] p-6 space-y-4">
+        <div>
+          <h2 className="text-sm font-semibold text-[var(--color-foreground)]">Eksport</h2>
+          <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
+            Pobierz plik JSON ze wszystkimi typami treści, elementami i ustawieniami.
+          </p>
+        </div>
+        <Button type="button" onClick={handleExport}>
+          <Download className="w-4 h-4" />
+          Pobierz eksport
+        </Button>
+      </div>
+
+      {/* Import */}
+      <div className="glass-card rounded-[var(--radius-lg)] p-6 space-y-4">
+        <div>
+          <h2 className="text-sm font-semibold text-[var(--color-foreground)]">Import</h2>
+          <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
+            Wgraj plik JSON z innej instancji OverCMS. Istniejące elementy zostaną nadpisane.
+          </p>
+        </div>
+        <label className="inline-flex items-center gap-2 cursor-pointer">
+          <span className={cn(
+            'inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-[var(--radius)] transition-colors',
+            importing
+              ? 'opacity-50 pointer-events-none bg-[var(--color-surface-elevated)] text-[var(--color-subtle)]'
+              : 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary)]/90',
+          )}>
+            {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+            {importing ? 'Importuję…' : 'Wgraj plik JSON'}
+          </span>
+          <input type="file" accept=".json" className="sr-only" disabled={importing} onChange={handleImport} />
+        </label>
+      </div>
+
+      {/* Result */}
+      {result && (
+        <div className={cn(
+          'flex items-center gap-2.5 px-4 py-3 rounded-[var(--radius)] text-sm',
+          result.ok
+            ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
+            : 'bg-[var(--color-destructive)]/10 text-[var(--color-destructive)]',
+        )}>
+          {result.ok
+            ? <CheckCircle2 className="w-4 h-4 shrink-0" />
+            : <AlertCircle  className="w-4 h-4 shrink-0" />}
+          {result.msg}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
@@ -356,9 +469,10 @@ export default function SettingsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.2 }}
       >
-        {tab === 'general' && <GeneralTab />}
-        {tab === 'users'   && <UsersTab />}
-        {tab === 'mail'    && <MailTab />}
+        {tab === 'general'  && <GeneralTab />}
+        {tab === 'users'    && <UsersTab />}
+        {tab === 'mail'     && <MailTab />}
+        {tab === 'transfer' && <TransferTab />}
       </motion.div>
     </div>
   )
