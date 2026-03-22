@@ -323,30 +323,27 @@ function MailTab() {
 
 // ─── Transfer ─────────────────────────────────────────────────────────────────
 
+type ImportStats = { types: number; items: number; settings: number; media: number; files: number }
+
 function TransferTab() {
+  const [exporting, setExporting] = useState(false)
   const [importing, setImporting] = useState(false)
-  const [result, setResult]       = useState<{ ok: boolean; msg: string } | null>(null)
+  const [result, setResult]       = useState<{ ok: boolean; msg: string; stats?: ImportStats } | null>(null)
+
+  const apiUrl = process.env['NEXT_PUBLIC_API_URL'] ?? ''
 
   async function handleExport() {
-    const apiUrl = process.env['NEXT_PUBLIC_API_URL'] ?? ''
-    const token  = typeof document !== 'undefined'
-      ? document.cookie.split('; ').find((c) => c.startsWith('better-auth.session_token='))?.split('=')[1]
-      : undefined
-
-    const res = await fetch(`${apiUrl}/api/transfer/export`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      credentials: 'include',
-    })
-    if (!res.ok) { setResult({ ok: false, msg: 'Export nieudany' }); return }
-
-    const blob = await res.blob()
-    const url  = URL.createObjectURL(blob)
-    const a    = document.createElement('a')
-    const cd   = res.headers.get('Content-Disposition') ?? ''
-    const name = cd.match(/filename="([^"]+)"/)?.[1] ?? 'overcms-export.json'
-    a.href = url; a.download = name; a.click()
-    URL.revokeObjectURL(url)
-    setResult({ ok: true, msg: 'Export pobrany' })
+    setExporting(true)
+    setResult(null)
+    try {
+      // Use anchor navigation — browser streams the download without loading into memory
+      const a = document.createElement('a')
+      a.href = `${apiUrl}/api/transfer/export`
+      a.click()
+      setResult({ ok: true, msg: 'Pobieranie eksportu rozpoczęte. Może potrwać chwilę (grafiki są dołączone).' })
+    } finally {
+      setExporting(false)
+    }
   }
 
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -356,21 +353,21 @@ function TransferTab() {
     setResult(null)
     try {
       const text = await file.text()
-      const json = JSON.parse(text)
-      const res  = await fetch(`${process.env['NEXT_PUBLIC_API_URL'] ?? ''}/api/transfer/import`, {
+      const json = JSON.parse(text) as unknown
+      const res  = await fetch(`${apiUrl}/api/transfer/import`, {
         method:      'POST',
         headers:     { 'Content-Type': 'application/json' },
         credentials: 'include',
         body:        JSON.stringify(json),
       })
-      const data = await res.json() as { success?: boolean; imported?: { types: number; items: number; settings: number }; error?: string }
+      const data = await res.json() as { success?: boolean; imported?: ImportStats; error?: string }
       if (res.ok && data.success) {
-        setResult({ ok: true, msg: `Zaimportowano: ${data.imported?.types ?? 0} typów, ${data.imported?.items ?? 0} elementów, ${data.imported?.settings ?? 0} ustawień` })
+        setResult({ ok: true, msg: 'Import zakończony pomyślnie', stats: data.imported })
       } else {
         setResult({ ok: false, msg: data.error ?? 'Import nieudany' })
       }
-    } catch {
-      setResult({ ok: false, msg: 'Nieprawidłowy plik JSON' })
+    } catch (err) {
+      setResult({ ok: false, msg: err instanceof SyntaxError ? 'Nieprawidłowy plik JSON' : 'Błąd importu' })
     } finally {
       setImporting(false)
       e.target.value = ''
@@ -379,16 +376,25 @@ function TransferTab() {
 
   return (
     <div className="space-y-6 max-w-2xl">
+      {/* What's included */}
+      <div className="flex items-start gap-3 p-4 rounded-[var(--radius)] bg-[var(--color-surface-elevated)] border border-[var(--color-border)]">
+        <ShieldCheck className="w-4 h-4 text-[var(--color-primary)] mt-0.5 shrink-0" />
+        <p className="text-xs text-[var(--color-muted-foreground)]">
+          Eksport zawiera <strong>typy treści, elementy, ustawienia, rekordy mediów i pliki graficzne</strong> (base64).
+          Import automatycznie remapuje URL-e mediów i relacje między elementami.
+        </p>
+      </div>
+
       {/* Export */}
       <div className="glass-card rounded-[var(--radius-lg)] p-6 space-y-4">
         <div>
           <h2 className="text-sm font-semibold text-[var(--color-foreground)]">Eksport</h2>
           <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
-            Pobierz plik JSON ze wszystkimi typami treści, elementami i ustawieniami.
+            Pobierz pełny backup jako JSON. Plik może być duży jeśli masz dużo grafik.
           </p>
         </div>
-        <Button type="button" onClick={handleExport}>
-          <Download className="w-4 h-4" />
+        <Button type="button" disabled={exporting} onClick={handleExport}>
+          {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
           Pobierz eksport
         </Button>
       </div>
@@ -398,7 +404,7 @@ function TransferTab() {
         <div>
           <h2 className="text-sm font-semibold text-[var(--color-foreground)]">Import</h2>
           <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
-            Wgraj plik JSON z innej instancji OverCMS. Istniejące elementy zostaną nadpisane.
+            Wgraj plik JSON z innej instancji OverCMS. Istniejące elementy zostaną nadpisane, nowe dodane.
           </p>
         </div>
         <label className="inline-flex items-center gap-2 cursor-pointer">
@@ -418,15 +424,33 @@ function TransferTab() {
       {/* Result */}
       {result && (
         <div className={cn(
-          'flex items-center gap-2.5 px-4 py-3 rounded-[var(--radius)] text-sm',
+          'rounded-[var(--radius)] text-sm overflow-hidden',
           result.ok
             ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
             : 'bg-[var(--color-destructive)]/10 text-[var(--color-destructive)]',
         )}>
-          {result.ok
-            ? <CheckCircle2 className="w-4 h-4 shrink-0" />
-            : <AlertCircle  className="w-4 h-4 shrink-0" />}
-          {result.msg}
+          <div className="flex items-center gap-2.5 px-4 py-3">
+            {result.ok
+              ? <CheckCircle2 className="w-4 h-4 shrink-0" />
+              : <AlertCircle  className="w-4 h-4 shrink-0" />}
+            {result.msg}
+          </div>
+          {result.stats && (
+            <div className="grid grid-cols-5 divide-x divide-[var(--color-success)]/20 border-t border-[var(--color-success)]/20 text-center text-xs">
+              {([
+                ['Typy',     result.stats.types],
+                ['Elementy', result.stats.items],
+                ['Pliki',    result.stats.files],
+                ['Media',    result.stats.media],
+                ['Ustawienia', result.stats.settings],
+              ] as [string, number][]).map(([label, count]) => (
+                <div key={label} className="py-2 px-1">
+                  <div className="font-bold text-base leading-none">{count}</div>
+                  <div className="opacity-70 mt-0.5">{label}</div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
