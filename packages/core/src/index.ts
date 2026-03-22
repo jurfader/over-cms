@@ -6,6 +6,7 @@ export * from './types/fields'
 export * from './types/seo'
 export * from './types/block-style'
 export * from './types/form-field'
+export * from './license/public-key'
 
 // Utils
 export * from './utils/block-style'
