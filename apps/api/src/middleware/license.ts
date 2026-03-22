@@ -1,6 +1,6 @@
 import type { Context, Next } from 'hono'
 import { readFileSync, writeFileSync } from 'node:fs'
-import type { LicenseVerification } from '@overcms/core'
+import type { LicenseVerification, LicensePlan } from '@overcms/core'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -64,7 +64,7 @@ async function validateLicenseWithServer(): Promise<LicenseVerification | null> 
       return {
         valid: true,
         lastCheck: new Date().toISOString(),
-        plan: body.plan,
+        plan: (body.plan ?? undefined) as LicensePlan | undefined,
       }
     }
 
@@ -73,7 +73,7 @@ async function validateLicenseWithServer(): Promise<LicenseVerification | null> 
     return {
       valid: false,
       lastCheck: new Date().toISOString(),
-      plan: body.plan,
+      plan: (body.plan ?? undefined) as LicensePlan | undefined,
     }
   } catch (err) {
     console.warn('[License] Validation error:', err instanceof Error ? err.message : err)
