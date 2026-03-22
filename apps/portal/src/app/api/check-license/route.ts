@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifySigned, type VerifiedResponse, type LicenseData } from '@overcms/core'
+
+interface CustomerResponse {
+  key: string
+  plan: string
+  status: string
+  maxInstallations: number
+  activeCount: number
+  activations: Array<{ domain: string; installationId: string; activatedAt: string }>
+  expiresAt?: string | null
+}
 
 /**
  * Server-side license check endpoint
  * POST /api/check-license
  * Body: { key: string }
- * Returns: { valid: boolean, plan?: string, status?: string }
+ * Returns: { valid: boolean, plan?: string, status?: string, ... }
  */
 export async function POST(req: NextRequest) {
   const { key } = await req.json() as { key?: string }
@@ -38,36 +47,15 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const body = await res.json() as VerifiedResponse<LicenseData> | LicenseData
+    const data = await res.json() as CustomerResponse
 
-    // If response has signature, verify it
-    if ('signature' in body && 'data' in body) {
-      const verified = verifySigned(body as VerifiedResponse<LicenseData>)
-      if (!verified) {
-        console.error('[Portal] License signature verification failed')
-        return NextResponse.json(
-          { valid: false, error: 'Invalid signature' },
-          { status: 400 }
-        )
-      }
-      const data = verified
-      return NextResponse.json({
-        valid: data.status === 'active',
-        plan: data.plan,
-        status: data.status,
-        maxInstallations: data.maxInstallations,
-        activeCount: data.activeCount,
-      })
-    }
-
-    // Fallback: unsigned response (legacy)
-    const data = body as LicenseData
     return NextResponse.json({
       valid: data.status === 'active',
       plan: data.plan,
       status: data.status,
       maxInstallations: data.maxInstallations,
       activeCount: data.activeCount,
+      expiresAt: data.expiresAt,
     })
   } catch (err) {
     console.error('[Portal] License check failed:', err instanceof Error ? err.message : err)

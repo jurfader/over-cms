@@ -1,7 +1,6 @@
 import type { Context, Next } from 'hono'
-import { verifySigned, type VerifiedResponse } from '@overcms/core'
 import { readFileSync, writeFileSync } from 'node:fs'
-import type { LicenseData, LicenseVerification } from '@overcms/core'
+import type { LicenseVerification } from '@overcms/core'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -36,58 +35,48 @@ function writeLicenseStatus(status: LicenseVerification) {
   }
 }
 
-// ─── Helper: check license with server ───────────────────────────────────────
+// ─── Helper: validate license with server ────────────────────────────────────
 
-async function checkLicenseWithServer(): Promise<LicenseVerification | null> {
+async function validateLicenseWithServer(): Promise<LicenseVerification | null> {
   const licenseKey = process.env['OVERCMS_LICENSE_KEY']
   if (!licenseKey) return null  // No license key configured
 
   const serverUrl = process.env['LICENSE_SERVER_URL']
+  const installId = process.env['OVERCMS_INSTALL_ID']
+  const domain    = process.env['API_DOMAIN'] ?? process.env['SITE_URL'] ?? 'localhost'
+
   if (!serverUrl) {
     console.warn('[License] LICENSE_SERVER_URL not set')
     return null
   }
 
   try {
-    const res = await fetch(`${serverUrl}/customer/${licenseKey}`, {
-      signal: AbortSignal.timeout(5000),
+    const res = await fetch(`${serverUrl}/validate`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ licenseKey, domain, installationId: installId }),
+      signal:  AbortSignal.timeout(5000),
     })
 
-    if (!res.ok) {
-      console.warn(`[License] Server returned ${res.status}`)
-      return null
-    }
+    const body = await res.json() as { valid: boolean; error?: string; plan?: string; expiresAt?: string | null }
 
-    const body = await res.json() as VerifiedResponse<LicenseData> | LicenseData
-
-    // If response has signature, verify it
-    if ('signature' in body && 'data' in body) {
-      const verified = verifySigned(body as VerifiedResponse<LicenseData>)
-      if (!verified) {
-        console.error('[License] Signature verification failed')
-        return null
-      }
-      const data = verified
-      const isValid = data.status === 'active'
+    if (res.ok && body.valid) {
       return {
-        valid: isValid,
+        valid: true,
         lastCheck: new Date().toISOString(),
-        plan: data.plan,
-        status: data.status,
+        plan: body.plan,
       }
     }
 
-    // Fallback: treat as unsigned response (legacy)
-    const data = body as LicenseData
-    const isValid = data.status === 'active'
+    // Validation failed
+    console.warn(`[License] Validation failed: ${body.error ?? 'Unknown error'}`)
     return {
-      valid: isValid,
+      valid: false,
       lastCheck: new Date().toISOString(),
-      plan: data.plan,
-      status: data.status,
+      plan: body.plan,
     }
   } catch (err) {
-    console.error('[License] Check failed:', err instanceof Error ? err.message : err)
+    console.warn('[License] Validation error:', err instanceof Error ? err.message : err)
     return null
   }
 }
@@ -103,7 +92,7 @@ async function isLicenseValid(): Promise<boolean> {
   // Check if interval elapsed
   if (now - lastCheckTime > CHECK_INTERVAL_MS) {
     lastCheckTime = now
-    const freshStatus = await checkLicenseWithServer()
+    const freshStatus = await validateLicenseWithServer()
 
     if (freshStatus) {
       // Server reachable and returned valid data
