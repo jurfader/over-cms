@@ -4,6 +4,7 @@ import { z }          from 'zod'
 import { eq, and, count } from 'drizzle-orm'
 import { db, licenses, activations, licAudit } from '../db/index.js'
 import { normalizeDomain } from '../utils/license-key.js'
+import { signPayload } from '../utils/sign.js'
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 
@@ -78,11 +79,14 @@ licenseRouter.post('/activate', zValidator('json', activateSchema), async (c) =>
       .set({ active: true, installationId, lastSeenAt: new Date() })
       .where(eq(activations.id, existing.id))
     await audit(license.id, 'reactivate', domain)
-    return c.json({
+    const response = {
       success:   true,
       plan:      license.plan,
       expiresAt: license.expiresAt,
-    })
+    }
+    const signature = signPayload(response)
+    if (signature) response.signature = signature as never
+    return c.json(response)
   }
 
   // Count active installations
@@ -110,11 +114,14 @@ licenseRouter.post('/activate', zValidator('json', activateSchema), async (c) =>
 
   await audit(license.id, 'activate', domain)
 
-  return c.json({
+  const response = {
     success:   true,
     plan:      license.plan,
     expiresAt: license.expiresAt,
-  })
+  }
+  const signature = signPayload(response)
+  if (signature) response.signature = signature as never
+  return c.json(response)
 })
 
 // ── POST /validate ────────────────────────────────────────────────────────────
@@ -157,11 +164,14 @@ licenseRouter.post('/validate', zValidator('json', validateSchema), async (c) =>
     .set({ lastSeenAt: new Date(), installationId })
     .where(eq(activations.id, activation.id))
 
-  return c.json({
+  const response = {
     valid:     true,
     plan:      license.plan,
     expiresAt: license.expiresAt,
-  })
+  }
+  const signature = signPayload(response)
+  if (signature) response.signature = signature as never
+  return c.json(response)
 })
 
 // ── POST /deactivate ──────────────────────────────────────────────────────────

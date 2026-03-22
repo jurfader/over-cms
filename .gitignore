@@ -41,8 +41,8 @@ coverage/
 *.tsbuildinfo
 .cache/
 
-# Private — not for public repo
-apps/license-server/
+# Private — license server DB only
+apps/license-server/src/db/
 
 # Cloudflare credentials
 *.json

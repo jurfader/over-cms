@@ -3,6 +3,7 @@ import { zValidator } from '@hono/zod-validator'
 import { z }          from 'zod'
 import { eq, and }    from 'drizzle-orm'
 import { db, licenses, activations } from '../db/index.js'
+import { signPayload } from '../utils/sign.js'
 
 export const customerRouter = new Hono()
 
@@ -35,20 +36,24 @@ customerRouter.get('/:key', async (c) => {
 
   const activeCount = acts.filter((a) => a.active).length
 
-  return c.json({
-    data: {
-      key:              license.key,
-      plan:             license.plan,
-      status:           license.status,
-      buyerName:        license.buyerName,
-      buyerEmail:       license.buyerEmail,
-      maxInstallations: license.maxInstallations,
-      expiresAt:        license.expiresAt,
-      createdAt:        license.createdAt,
-      activeCount,
-      activations:      acts,
-    },
-  })
+  const data = {
+    key:              license.key,
+    plan:             license.plan,
+    status:           license.status,
+    buyerName:        license.buyerName,
+    buyerEmail:       license.buyerEmail,
+    maxInstallations: license.maxInstallations,
+    expiresAt:        license.expiresAt,
+    createdAt:        license.createdAt,
+    activeCount,
+    activations:      acts,
+  }
+
+  const signature = signPayload(data)
+  const response: Record<string, unknown> = { data }
+  if (signature) response.signature = signature
+
+  return c.json(response)
 })
 
 // ─── POST /customer/:key/deactivate — self-service deaktywacja instalacji ────
