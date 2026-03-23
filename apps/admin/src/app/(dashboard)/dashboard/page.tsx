@@ -49,12 +49,12 @@ const statCards = [
     href: '/content',
   },
   {
-    label: 'Wpisy',
+    label: 'Strony',
     key: 'contentItems' as const,
     icon: FileText,
     color: 'text-[var(--color-primary)]',
     bg: 'bg-[var(--color-primary-muted)]',
-    href: '/content',
+    href: '/pages',
   },
   {
     label: 'Pliki media',
@@ -93,20 +93,29 @@ export default function DashboardPage() {
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['stats'],
-    queryFn: () =>
-      api.get<StatsResponse>('/api/content-types').then(async (types) => {
-        const count = Array.isArray(types) ? types.length : 0
-        return { contentTypes: count, contentItems: 0, mediaFiles: 0, users: 0 }
-      }),
+    queryFn: async () => {
+      const [types, pages, media, users] = await Promise.all([
+        api.get<{ data: unknown[] }>('/api/content-types').catch(() => ({ data: [] })),
+        api.get<{ meta: { total: number } }>('/api/content/page?limit=1').catch(() => ({ meta: { total: 0 } })),
+        api.get<{ data: unknown[]; meta: { total: number } }>('/api/media?limit=1').catch(() => ({ data: [], meta: { total: 0 } })),
+        api.get<unknown[]>('/api/users').catch(() => []),
+      ])
+      return {
+        contentTypes: Array.isArray(types?.data) ? types.data.length : 0,
+        contentItems: pages?.meta?.total ?? 0,
+        mediaFiles: media?.meta?.total ?? media?.data?.length ?? 0,
+        users: Array.isArray(users) ? users.length : 0,
+      } as StatsResponse
+    },
     staleTime: 60_000,
   })
 
-  const { data: recentContent } = useQuery({
-    queryKey: ['content', 'recent'],
-    queryFn: () =>
-      api
-        .get<{ items: ContentItem[] }>('/api/content/page?limit=5&sort=updatedAt&order=desc')
-        .catch(() => ({ items: [] as ContentItem[] })),
+  const { data: recentPages } = useQuery({
+    queryKey: ['pages', 'recent'],
+    queryFn: async () => {
+      const res = await api.get<{ data: Array<{ item: ContentItem }> }>('/api/content/page?limit=5&sort=updatedAt&order=desc')
+      return (res?.data ?? []).map((e) => e.item)
+    },
     staleTime: 30_000,
   })
 
@@ -132,9 +141,9 @@ export default function DashboardPage() {
           </p>
         </div>
         <Button asChild>
-          <Link href="/content">
+          <Link href="/pages">
             <FileText className="w-4 h-4" />
-            Nowy wpis
+            Nowa strona
           </Link>
         </Button>
       </motion.div>
@@ -176,10 +185,10 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-[var(--color-primary)]" />
-                <h2 className="text-sm font-semibold">Ostatnie wpisy</h2>
+                <h2 className="text-sm font-semibold">Ostatnie strony</h2>
               </div>
               <Button variant="ghost" size="sm" asChild>
-                <Link href="/content">
+                <Link href="/pages">
                   Wszystkie
                   <ArrowUpRight className="w-3 h-3" />
                 </Link>
@@ -187,10 +196,11 @@ export default function DashboardPage() {
             </div>
 
             <div className="space-y-2">
-              {recentContent?.items && recentContent.items.length > 0 ? (
-                recentContent.items.map((c) => (
-                  <div
+              {recentPages && recentPages.length > 0 ? (
+                recentPages.map((c) => (
+                  <Link
                     key={c.id}
+                    href={`/pages/${c.id}`}
                     className="flex items-center gap-3 p-3 rounded-[var(--radius)] hover:bg-[var(--color-surface-elevated)] transition-colors"
                   >
                     <div className="w-8 h-8 rounded-[var(--radius-sm)] gradient-bg flex items-center justify-center shrink-0">
@@ -205,14 +215,14 @@ export default function DashboardPage() {
                     <Badge variant={statusVariant[c.status] ?? 'outline'}>
                       {statusLabel[c.status] ?? c.status}
                     </Badge>
-                  </div>
+                  </Link>
                 ))
               ) : (
                 <div className="text-center py-10 text-[var(--color-subtle)]">
                   <FileText className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                  <p className="text-sm">Brak wpisów</p>
+                  <p className="text-sm">Brak stron</p>
                   <Button variant="outline" size="sm" className="mt-3" asChild>
-                    <Link href="/content">Dodaj pierwszy wpis</Link>
+                    <Link href="/pages">Dodaj pierwszą stronę</Link>
                   </Button>
                 </div>
               )}
@@ -230,7 +240,7 @@ export default function DashboardPage() {
             </div>
             <div className="space-y-2">
               {[
-                { label: 'Dodaj stronę', href: '/content?type=page', icon: Globe },
+                { label: 'Dodaj stronę', href: '/pages', icon: Globe },
                 { label: 'Wgraj media', href: '/media', icon: Image },
                 { label: 'Edytuj SEO', href: '/seo', icon: Eye },
                 { label: 'Ustawienia', href: '/settings', icon: Users },
