@@ -2,16 +2,21 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import {
-  Plus, Search, ChevronLeft, ChevronRight, Globe, FileText,
+  Plus, Search, ChevronLeft, ChevronRight, Globe, FileText, Loader2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription,
+} from '@/components/ui/dialog'
 import { api } from '@/lib/api'
-import { formatDate } from '@/lib/utils'
+import { formatDate, slugify } from '@/lib/utils'
 import type { ContentItemWithAuthor, ContentStatus } from '@/types/content'
 
 // ─── Config ──────────────────────────────────────────────────────────────────
@@ -39,10 +44,58 @@ interface ItemsResponse {
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function PagesListPage() {
+  const router = useRouter()
   const [page,            setPage]            = useState(1)
   const [search,          setSearch]          = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [statusFilter,    setStatusFilter]    = useState<ContentStatus | ''>('')
+
+  // ── Add-page dialog ───────────────────────────────────────────────────
+
+  const [dialogOpen,   setDialogOpen]   = useState(false)
+  const [newTitle,     setNewTitle]     = useState('')
+  const [newSlug,      setNewSlug]      = useState('')
+  const [slugTouched,  setSlugTouched]  = useState(false)
+  const [isCreating,   setIsCreating]   = useState(false)
+  const [createError,  setCreateError]  = useState('')
+
+  function handleTitleChange(value: string) {
+    setNewTitle(value)
+    if (!slugTouched) setNewSlug(slugify(value))
+  }
+
+  function handleSlugChange(value: string) {
+    setSlugTouched(true)
+    setNewSlug(value)
+  }
+
+  function resetDialog() {
+    setNewTitle('')
+    setNewSlug('')
+    setSlugTouched(false)
+    setIsCreating(false)
+    setCreateError('')
+  }
+
+  async function handleCreate() {
+    if (!newTitle.trim()) return
+    setIsCreating(true)
+    setCreateError('')
+    try {
+      const res = await api.post<{ data?: { id: string }; id?: string }>(
+        '/api/content/page',
+        { title: newTitle.trim(), slug: newSlug || slugify(newTitle), data: {}, status: 'draft' },
+      )
+      const id = res.data?.id ?? res.id
+      if (!id) throw new Error('Brak ID nowej strony')
+      setDialogOpen(false)
+      resetDialog()
+      router.push(`/pages/${id}`)
+    } catch (err: unknown) {
+      setCreateError(err instanceof Error ? err.message : 'Nie udało się utworzyć strony')
+      setIsCreating(false)
+    }
+  }
 
   // ── Debounced search ────────────────────────────────────────────────────
 
@@ -89,11 +142,9 @@ export default function PagesListPage() {
             <p className="text-xs text-[var(--color-subtle)]">Zarządzaj stronami witryny</p>
           </div>
         </div>
-        <Button asChild>
-          <Link href="/pages/new">
-            <Plus className="w-4 h-4" />
-            Nowa strona
-          </Link>
+        <Button onClick={() => { resetDialog(); setDialogOpen(true) }}>
+          <Plus className="w-4 h-4" />
+          Nowa strona
         </Button>
       </motion.div>
 
@@ -154,11 +205,9 @@ export default function PagesListPage() {
               {debouncedSearch || statusFilter ? 'Nie znaleziono stron' : 'Brak stron'}
             </p>
             {!debouncedSearch && !statusFilter && (
-              <Button className="mt-4" size="sm" asChild>
-                <Link href="/pages/new">
-                  <Plus className="w-4 h-4" />
-                  Dodaj pierwszą stronę
-                </Link>
+              <Button className="mt-4" size="sm" onClick={() => { resetDialog(); setDialogOpen(true) }}>
+                <Plus className="w-4 h-4" />
+                Dodaj pierwszą stronę
               </Button>
             )}
           </div>
@@ -253,6 +302,68 @@ export default function PagesListPage() {
           </>
         )}
       </motion.div>
+
+      {/* ── Add-page dialog ──────────────────────────────────────────────── */}
+
+      <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetDialog() }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Dodaj nową stronę</DialogTitle>
+            <DialogDescription>
+              Podaj tytuł i slug, aby utworzyć nową stronę jako szkic.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form
+            onSubmit={(e) => { e.preventDefault(); handleCreate() }}
+            className="space-y-4"
+          >
+            <div className="space-y-2">
+              <Label htmlFor="new-page-title">Tytuł strony</Label>
+              <Input
+                id="new-page-title"
+                placeholder="np. O nas"
+                value={newTitle}
+                onChange={(e) => handleTitleChange(e.target.value)}
+                autoFocus
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="new-page-slug">Slug</Label>
+              <Input
+                id="new-page-slug"
+                placeholder="np. o-nas"
+                value={newSlug}
+                onChange={(e) => handleSlugChange(e.target.value)}
+              />
+              <p className="text-xs text-[var(--color-subtle)]">
+                Adres URL strony &mdash; generowany automatycznie z tytułu.
+              </p>
+            </div>
+
+            {createError && (
+              <p className="text-sm text-[var(--color-destructive)]">{createError}</p>
+            )}
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setDialogOpen(false)}
+                disabled={isCreating}
+              >
+                Anuluj
+              </Button>
+              <Button type="submit" disabled={isCreating || !newTitle.trim()}>
+                {isCreating && <Loader2 className="w-4 h-4 animate-spin" />}
+                Utwórz
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -51,12 +51,25 @@ type RawSingle<T> = { data: { item: { id: string; slug: string; title: string; d
 
 /** Fetch a single published page by slug. Returns null if not found or API unreachable. */
 export async function getPageBySlug(slug: string): Promise<CmsPage | null> {
+  // Try direct slug lookup first
   try {
     const raw = await cms.fetch<RawSingle<Record<string, unknown>>>(
       `/api/content/page/${slug}`,
     )
-    const item = raw.data.item
-    if (item.status !== 'published') return null
+    const item = raw?.data?.item
+    if (item && item.status === 'published') {
+      return { id: item.id, slug: item.slug, title: item.title, data: item.data, seo: item.seo }
+    }
+  } catch { /* fallback below */ }
+
+  // Fallback: fetch all published pages and find by slug
+  try {
+    const raw = await cms.fetch<RawList<Record<string, unknown>>>(
+      `/api/content/page?status=published&limit=100`,
+    )
+    const match = raw.data.find((e) => e.item.slug === slug)
+    if (!match) return null
+    const item = match.item as { id: string; slug: string; title: string; data: Record<string, unknown>; seo: CmsPage['seo'] }
     return { id: item.id, slug: item.slug, title: item.title, data: item.data, seo: item.seo }
   } catch {
     return null
