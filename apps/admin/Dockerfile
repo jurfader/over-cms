@@ -48,4 +48,5 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/admin/public ./apps/admin/pu
 USER nextjs
 EXPOSE 3001
 
+ENV HOSTNAME=0.0.0.0
 CMD ["node", "apps/admin/server.js"]

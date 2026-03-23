@@ -34,4 +34,5 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/portal/.next/static ./apps/p
 USER nextjs
 EXPOSE 3004
 
+ENV HOSTNAME=0.0.0.0
 CMD ["node", "apps/portal/server.js"]
