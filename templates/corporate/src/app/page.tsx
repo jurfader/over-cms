@@ -1,47 +1,46 @@
 import type { Metadata } from 'next'
-import { Hero }         from '@/components/home/hero'
-import { Services }     from '@/components/home/services'
-import { Portfolio }    from '@/components/home/portfolio'
-import { AboutPreview } from '@/components/home/about-preview'
-import { Pricing }      from '@/components/home/pricing'
-import { Testimonials } from '@/components/home/testimonials'
-import { Cta }          from '@/components/home/cta'
-import { getSingleton, getCollection } from '@/lib/cms'
-import type {
-  HeroCms,
-  ServiceItemCms,
-  PortfolioItemCms,
-  AboutCms,
-  PricingPlanCms,
-  TestimonialCms,
-  ContactInfoCms,
-} from '@/lib/cms-types'
+import { getPageBySlug } from '@/lib/cms'
+import { PageRenderer }  from '@/components/page-renderer'
 
-export const metadata: Metadata = {
-  title:       'OVERMEDIA — Profesjonalne Strony WWW i Marketing Cyfrowy | Polska',
-  description: 'Kompleksowe usługi digital: tworzenie stron internetowych, sklepy e-commerce WooCommerce, aplikacje mobilne iOS i Android, montaż wideo oraz kampanie Google Ads, Meta Ads i TikTok Ads.',
+export const revalidate = 60
+
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getPageBySlug('home')
+  if (!page) return {}
+
+  return {
+    title:       page.seo?.title       ?? page.title,
+    description: page.seo?.description ?? undefined,
+    openGraph: {
+      title:       page.seo?.ogTitle       ?? page.seo?.title ?? page.title,
+      description: page.seo?.ogDescription ?? page.seo?.description ?? undefined,
+      images:      page.seo?.ogImage ? [page.seo.ogImage] : undefined,
+    },
+  }
 }
 
 export default async function HomePage() {
-  const [hero, services, portfolio, about, plans, testimonials, contact] = await Promise.all([
-    getSingleton<HeroCms>('hero'),
-    getCollection<ServiceItemCms>('service_item'),
-    getCollection<PortfolioItemCms>('portfolio_item'),
-    getSingleton<AboutCms>('about'),
-    getCollection<PricingPlanCms>('pricing_plan'),
-    getCollection<TestimonialCms>('testimonial'),
-    getSingleton<ContactInfoCms>('contact_info'),
-  ])
+  const page = await getPageBySlug('home')
 
-  return (
-    <>
-      {hero && <Hero cms={hero} />}
-      {services.length > 0 && <Services cms={services} />}
-      {portfolio.length > 0 && <Portfolio cms={portfolio} />}
-      {about && <AboutPreview cms={about} />}
-      {plans.length > 0 && <Pricing cms={plans} />}
-      {testimonials.length > 0 && <Testimonials cms={testimonials} />}
-      {contact && <Cta cms={contact} />}
-    </>
-  )
+  if (!page) {
+    return (
+      <section style={{ paddingTop: '9rem', paddingBottom: 'var(--section-y)' }}>
+        <div className="container" style={{ maxWidth: '800px', textAlign: 'center' }}>
+          <h1
+            className="display"
+            style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', marginBottom: '1.5rem' }}
+          >
+            Brak strony
+          </h1>
+          <p style={{ color: 'var(--color-muted)', fontSize: '1.0625rem' }}>
+            Strona o slugu &quot;home&quot; nie istnieje w CMS. Dodaj stron&#281; typu
+            &quot;page&quot; ze slugiem &quot;home&quot;, aby wy&#347;wietli&#263;
+            stron&#281; g&#322;&#243;wn&#261;.
+          </p>
+        </div>
+      </section>
+    )
+  }
+
+  return <PageRenderer page={page} hideTitle />
 }

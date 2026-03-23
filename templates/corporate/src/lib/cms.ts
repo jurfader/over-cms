@@ -36,3 +36,41 @@ export async function getCollection<T>(typeSlug: string): Promise<(T & { _id: st
     return []
   }
 }
+
+// ─── Page helpers ────────────────────────────────────────────────────────────
+
+export interface CmsPage {
+  id:    string
+  slug:  string
+  title: string
+  data:  Record<string, unknown>
+  seo:   { title?: string; description?: string; ogTitle?: string; ogDescription?: string; ogImage?: string } | null
+}
+
+type RawSingle<T> = { data: { item: { id: string; slug: string; title: string; data: T; seo: CmsPage['seo']; status: string } } }
+
+/** Fetch a single published page by slug. Returns null if not found or API unreachable. */
+export async function getPageBySlug(slug: string): Promise<CmsPage | null> {
+  try {
+    const raw = await cms.fetch<RawSingle<Record<string, unknown>>>(
+      `/api/content/page/${slug}`,
+    )
+    const item = raw.data.item
+    if (item.status !== 'published') return null
+    return { id: item.id, slug: item.slug, title: item.title, data: item.data, seo: item.seo }
+  } catch {
+    return null
+  }
+}
+
+/** Fetch all published page slugs — for generateStaticParams. */
+export async function getAllPageSlugs(): Promise<string[]> {
+  try {
+    const raw = await cms.fetch<RawList<unknown>>(
+      `/api/content/page?status=published&limit=500`,
+    )
+    return raw.data.map((e) => e.item.slug).filter((s) => s !== 'home')
+  } catch {
+    return []
+  }
+}
