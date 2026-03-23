@@ -10,6 +10,26 @@ interface PageRendererProps {
 export function PageRenderer({ page, hideTitle }: PageRendererProps) {
   const blocks  = Array.isArray(page.data.blocks) ? page.data.blocks : null
   const content = typeof page.data.content === 'string' ? page.data.content : null
+  const styles  = typeof page.data.styles === 'string' ? page.data.styles : null
+
+  // Visual builder page (GrapesJS output) — HTML + scoped CSS, zero JS
+  if (content && page.data.editorMode === 'visual') {
+    return (
+      <>
+        {styles && <style dangerouslySetInnerHTML={{ __html: styles }} />}
+        {!hideTitle && (
+          <section style={{ paddingTop: '9rem', paddingBottom: 'var(--section-y)' }}>
+            <div className="container" style={{ maxWidth: '800px' }}>
+              <h1 className="display" style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)' }}>
+                {page.title}
+              </h1>
+            </div>
+          </section>
+        )}
+        <div dangerouslySetInnerHTML={{ __html: content }} />
+      </>
+    )
+  }
 
   // Block-based page
   if (blocks && blocks.length > 0) {

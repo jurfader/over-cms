@@ -28,7 +28,16 @@
       "Bash(unzip -l /Volumes/Nowy/OVERMEDIA/Strony/Projekty/OVERCMS/Divi_5.zip)",
       "Bash(mkdir -p /tmp/divi-analysis)",
       "Bash(unzip -q -o /Volumes/Nowy/OVERMEDIA/Strony/Projekty/OVERCMS/Divi_5.zip -d /tmp/divi-analysis)",
-      "Bash(find /tmp/divi-analysis/Divi/includes/builder-5/visual-builder/packages/module-library/src/ -type f -name *.ts -o -name *.tsx -o -name *.js)"
+      "Bash(find /tmp/divi-analysis/Divi/includes/builder-5/visual-builder/packages/module-library/src/ -type f -name *.ts -o -name *.tsx -o -name *.js)",
+      "Bash(ls /Volumes/Nowy/OVERMEDIA/Strony/Projekty/OVERCMS/apps/admin/src/app/\\\\\\(dashboard\\\\\\)/pages/)",
+      "Bash(ls /Volumes/Nowy/OVERMEDIA/Strony/Projekty/OVERCMS/apps/admin/src/app/\\\\\\(dashboard\\\\\\)/pages/new/)",
+      "WebSearch",
+      "WebFetch(domain:grapesjs.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:gjs.market)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:bundlephobia.com)",
+      "Bash(npm info:*)"
     ]
   }
 }
