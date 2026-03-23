@@ -5,12 +5,6 @@ import { ArrowRight, ChevronDown, Monitor, Smartphone, Video, Target } from 'luc
 import Image from 'next/image'
 import type { HeroCms } from '@/lib/cms-types'
 
-const DEFAULT_STATS = [
-  { value: '150+', label: 'Zrealizowanych projektów' },
-  { value: '98%',  label: 'Zadowolonych klientów'    },
-  { value: '5',    label: 'Lat na rynku'              },
-]
-
 // Floating service badges around the logo
 const BADGES = [
   { icon: Monitor,    label: 'Strony WWW', top: '14%',  left: '-8%',  right: 'auto' },
@@ -19,14 +13,12 @@ const BADGES = [
   { icon: Target,     label: 'Marketing',  top: 'auto', left: 'auto', right: '-10%', bottom: '16%' },
 ]
 
-export function Hero({ cms }: { cms?: HeroCms }) {
-  const stats = cms
-    ? [
-        { value: cms.stat1_value, label: cms.stat1_label },
-        { value: cms.stat2_value, label: cms.stat2_label },
-        { value: cms.stat3_value, label: cms.stat3_label },
-      ]
-    : DEFAULT_STATS
+export function Hero({ cms }: { cms: HeroCms }) {
+  const stats = [
+    { value: cms.stat1_value, label: cms.stat1_label },
+    { value: cms.stat2_value, label: cms.stat2_label },
+    { value: cms.stat3_value, label: cms.stat3_label },
+  ]
 
   const ref = useRef<HTMLElement>(null)
 
@@ -134,7 +126,7 @@ export function Hero({ cms }: { cms?: HeroCms }) {
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
               </svg>
-              {cms?.badge_text ?? 'AGENCJA INTERAKTYWNA | POLSKA'}
+              {cms.badge_text}
             </span>
           </div>
 
@@ -150,9 +142,9 @@ export function Hero({ cms }: { cms?: HeroCms }) {
               marginBottom:  '1.5rem',
             }}
           >
-            {cms?.title_before ?? 'Profesjonalne'}<br />
-            <span className="gradient-text">{cms?.title_gradient ?? 'Strony WWW'}</span><br />
-            {cms?.title_after ?? 'i Marketing Cyfrowy'}
+            {cms.title_before}<br />
+            <span className="gradient-text">{cms.title_gradient}</span><br />
+            {cms.title_after}
           </h1>
 
           {/* Subtitle */}
@@ -167,17 +159,17 @@ export function Hero({ cms }: { cms?: HeroCms }) {
               lineHeight:   1.75,
             }}
           >
-            {cms?.subtitle ?? 'Kompleksowe usługi digital dla Twojej firmy: tworzenie stron internetowych, sklepy e-commerce WooCommerce, aplikacje mobilne iOS i Android, montaż wideo oraz kampanie Google Ads, Meta Ads i TikTok Ads.'}
+            {cms.subtitle}
           </p>
 
           {/* CTAs */}
           <div data-h-actions style={{ opacity: 0, display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '3.5rem' }}>
             <a href="#kontakt" className="btn btn-primary" style={{ fontSize: '1rem', padding: '0.875rem 2rem' }}>
-              {cms?.cta_primary_text ?? 'Bezpłatna wycena projektu'}
+              {cms.cta_primary_text}
               <ArrowRight size={18} aria-hidden />
             </a>
             <a href="#portfolio" className="btn btn-outline" style={{ fontSize: '1rem', padding: '0.875rem 2rem' }}>
-              {cms?.cta_secondary_text ?? 'Nasze realizacje'}
+              {cms.cta_secondary_text}
             </a>
           </div>
 

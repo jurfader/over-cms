@@ -3,22 +3,7 @@ import { ArrowRight } from 'lucide-react'
 import { Reveal } from '@/components/gsap/reveal'
 import type { AboutCms } from '@/lib/cms-types'
 
-const VALUES = [
-  {
-    title:       'Innowacyjność',
-    description: 'Śledzimy trendy i wdrażamy nowoczesne rozwiązania',
-  },
-  {
-    title:       'Skuteczność',
-    description: 'Nasze projekty przynoszą realne rezultaty',
-  },
-  {
-    title:       'Partnerstwo',
-    description: 'Budujemy długotrwałe relacje z klientami',
-  },
-]
-
-export function AboutPreview({ cms }: { cms?: AboutCms }) {
+export function AboutPreview({ cms }: { cms: AboutCms }) {
   return (
     <section id="o-nas" style={{ padding: 'var(--section-y) 0' }}>
       <div className="container">
@@ -44,7 +29,7 @@ export function AboutPreview({ cms }: { cms?: AboutCms }) {
                 background:    '#161616',
               }}>
                 <Image
-                  src={cms?.photo ?? '/images/pawel.webp'}
+                  src={cms.photo}
                   alt="Paweł — OVERMEDIA"
                   fill
                   style={{ objectFit: 'cover', objectPosition: 'top center' }}
@@ -63,7 +48,7 @@ export function AboutPreview({ cms }: { cms?: AboutCms }) {
                 borderRadius:  'var(--radius)',
                 padding:       '1rem 1.5rem',
               }}>
-                <p style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--color-primary)', lineHeight: 1 }}>{cms?.years_on_market ?? 5}</p>
+                <p style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--color-primary)', lineHeight: 1 }}>{cms.years_on_market}</p>
                 <p style={{ fontSize: '0.8125rem', color: 'rgba(255,255,255,0.6)', marginTop: '0.25rem' }}>Lat na rynku</p>
               </div>
 
@@ -78,7 +63,7 @@ export function AboutPreview({ cms }: { cms?: AboutCms }) {
                 borderRadius:  'var(--radius)',
                 padding:       '1rem 1.5rem',
               }}>
-                <p style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--color-primary)', lineHeight: 1 }}>{cms?.projects_count ?? '150+'}</p>
+                <p style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--color-primary)', lineHeight: 1 }}>{cms.projects_count}</p>
                 <p style={{ fontSize: '0.8125rem', color: 'rgba(255,255,255,0.6)', marginTop: '0.25rem' }}>Projektów</p>
               </div>
 
@@ -113,15 +98,15 @@ export function AboutPreview({ cms }: { cms?: AboutCms }) {
               <span className="gradient-text">Wieloletnim Doświadczeniem</span>
             </h2>
             <p style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, marginBottom: '0.875rem' }}>
-              {cms?.description1 ?? 'OVERMEDIA to polska agencja digital specjalizująca się w tworzeniu stron internetowych, sklepów e-commerce i kompleksowym marketingu cyfrowym dla firm.'}
+              {cms.description1}
             </p>
             <p style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, marginBottom: '2rem' }}>
-              {cms?.description2 ?? 'Oferujemy profesjonalne usługi web developmentu na WordPress, produkcję materiałów wideo, prowadzenie social media oraz kampanie reklamowe Google Ads i Meta Ads. Specjalizujemy się w obsłudze małych firm, startupów i przedsiębiorców w całej Polsce.'}
+              {cms.description2}
             </p>
 
             {/* Values */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '2rem' }}>
-              {VALUES.map(({ title, description }) => (
+            {cms.values && cms.values.length > 0 && <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '2rem' }}>
+              {cms.values.map(({ title, description }) => (
                 <div key={title} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
                   <div style={{
                     width:          '8px',
@@ -138,7 +123,7 @@ export function AboutPreview({ cms }: { cms?: AboutCms }) {
                   </div>
                 </div>
               ))}
-            </div>
+            </div>}
 
             <a href="#kontakt" className="btn btn-primary">
               Porozmawiajmy

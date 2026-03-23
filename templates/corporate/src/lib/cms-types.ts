@@ -58,6 +58,7 @@ export interface AboutCms {
   description2:     string
   years_on_market:  number
   projects_count:   string  // e.g. "150+"
+  values?:          { title: string; description: string }[]
 }
 
 /** Collection: slug = "pricing_plan" */

@@ -1,32 +1,6 @@
 import { Reveal } from '@/components/gsap/reveal'
 import type { TestimonialCms } from '@/lib/cms-types'
 
-const DEFAULT_TESTIMONIALS = [
-  {
-    id:      't1',
-    name:    'Piotr Wiśniewski',
-    role:    'Właściciel',
-    company: 'Chicken King',
-    rating:  5,
-    text:    'OVERMEDIA wykonała dla nas zarówno stronę internetową, sklep WooCommerce jak i aplikację mobilną. Efekty przeszły nasze oczekiwania — sprzedaż online wzrosła o 40% w ciągu pierwszego kwartału.',
-  },
-  {
-    id:      't2',
-    name:    'Anna Kowalczyk',
-    role:    'Dyrektor',
-    company: 'Szkoła Językowa',
-    rating:  5,
-    text:    'Profesjonalne podejście, terminowość i świetny kontakt przez cały projekt. Strona wygląda doskonale na każdym urządzeniu, a liczba zapisów na kursy wzrosła dwukrotnie.',
-  },
-  {
-    id:      't3',
-    name:    'Marek Nowak',
-    role:    'CEO',
-    company: 'RAPTOR Sp. z o.o.',
-    rating:  5,
-    text:    'Polecam OVERMEDIA każdemu, kto szuka solidnej agencji digital. Realizacja szybka, cena uczciwa, a strona wizytówkowa wygląda super profesjonalnie. Kampanie Google Ads przyniosły wymierny efekt.',
-  },
-]
 
 function Stars({ n }: { n: number }) {
   return (
@@ -47,8 +21,8 @@ function Stars({ n }: { n: number }) {
   )
 }
 
-export function Testimonials({ cms }: { cms?: TestimonialCms[] }) {
-  const testimonials = cms ?? DEFAULT_TESTIMONIALS
+export function Testimonials({ cms }: { cms: TestimonialCms[] }) {
+  const testimonials = cms
   return (
     <section id="opinie" style={{ padding: 'var(--section-y) 0' }}>
       <div className="container">

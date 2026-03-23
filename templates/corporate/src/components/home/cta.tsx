@@ -31,7 +31,7 @@ const inputStyle: React.CSSProperties = {
   fontFamily:   'inherit',
 }
 
-export function Cta({ cms }: { cms?: ContactInfoCms }) {
+export function Cta({ cms }: { cms: ContactInfoCms }) {
   const [sent,    setSent]    = useState(false)
   const [loading, setLoading] = useState(false)
   const [form,    setForm]    = useState({
@@ -77,9 +77,9 @@ export function Cta({ cms }: { cms?: ContactInfoCms }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
               {[
-                { icon: <Mail size={18} aria-hidden />,      label: 'Email',   value: cms?.email ?? 'kontakt@overmedia.pl',  href: `mailto:${cms?.email ?? 'kontakt@overmedia.pl'}`  },
-                { icon: <Phone size={18} aria-hidden />,     label: 'Telefon', value: cms?.phone ?? '+48 571 501 896',        href: `tel:${(cms?.phone ?? '+48 571 501 896').replace(/\s/g, '')}`             },
-                { icon: <Building2 size={18} aria-hidden />, label: 'NIP',     value: cms?.nip ?? '875-156-53-27',          href: undefined                      },
+                { icon: <Mail size={18} aria-hidden />,      label: 'Email',   value: cms.email,  href: `mailto:${cms.email}`  },
+                { icon: <Phone size={18} aria-hidden />,     label: 'Telefon', value: cms.phone,  href: `tel:${cms.phone.replace(/\s/g, '')}`             },
+                { icon: <Building2 size={18} aria-hidden />, label: 'NIP',     value: cms.nip,    href: undefined                      },
               ].map(({ icon, label, value, href }) => (
                 <div
                   key={label}
@@ -115,7 +115,7 @@ export function Cta({ cms }: { cms?: ContactInfoCms }) {
                     Godziny pracy
                   </p>
                   <p style={{ fontSize: '0.9375rem', color: 'rgba(255,255,255,0.65)', lineHeight: 1.75 }}>
-                    {cms?.hours_text ?? 'Pon – Pt: 9:00 – 17:00'}<br />
+                    {cms.hours_text}<br />
                     <span style={{ color: 'rgba(255,255,255,0.35)' }}>Sob – Nd: Zamknięte</span>
                   </p>
                 </div>
@@ -134,10 +134,10 @@ export function Cta({ cms }: { cms?: ContactInfoCms }) {
                 </p>
                 <div style={{ display: 'flex', gap: '0.875rem' }}>
                   {[
-                    { label: 'Facebook', href: cms?.facebook_url || 'https://facebook.com', path: 'M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z' },
-                    { label: 'Instagram', href: cms?.instagram_url || 'https://instagram.com', path: 'M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z M17.5 6.5h.01 M7.5 2h9a5.5 5.5 0 0 1 5.5 5.5v9a5.5 5.5 0 0 1-5.5 5.5h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2z' },
-                    { label: 'TikTok', href: cms?.tiktok_url || 'https://tiktok.com', path: 'M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.79 1.53V6.77a4.85 4.85 0 0 1-1.02-.08z' },
-                    { label: 'YouTube', href: cms?.youtube_url || 'https://youtube.com', path: 'M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42C1 8.14 1 11.61 1 11.61s0 3.47.46 5.19a2.78 2.78 0 0 0 1.95 1.95C5.12 19.22 12 19.22 12 19.22s6.88 0 8.59-.47a2.78 2.78 0 0 0 1.95-1.95C23 15.08 23 11.61 23 11.61s0-3.47-.46-5.19z M9.75 15.02 15.5 11.61 9.75 8.2 9.75 15.02' },
+                    { label: 'Facebook', href: cms.facebook_url, path: 'M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z' },
+                    { label: 'Instagram', href: cms.instagram_url, path: 'M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z M17.5 6.5h.01 M7.5 2h9a5.5 5.5 0 0 1 5.5 5.5v9a5.5 5.5 0 0 1-5.5 5.5h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2z' },
+                    { label: 'TikTok', href: cms.tiktok_url, path: 'M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.79 1.53V6.77a4.85 4.85 0 0 1-1.02-.08z' },
+                    { label: 'YouTube', href: cms.youtube_url, path: 'M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42C1 8.14 1 11.61 1 11.61s0 3.47.46 5.19a2.78 2.78 0 0 0 1.95 1.95C5.12 19.22 12 19.22 12 19.22s6.88 0 8.59-.47a2.78 2.78 0 0 0 1.95-1.95C23 15.08 23 11.61 23 11.61s0-3.47-.46-5.19z M9.75 15.02 15.5 11.61 9.75 8.2 9.75 15.02' },
                   ].map(({ label, href, path }) => (
                     <a
                       key={label}

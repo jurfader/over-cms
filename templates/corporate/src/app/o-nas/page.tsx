@@ -1,7 +1,8 @@
 import type { Metadata }  from 'next'
 import { Reveal }         from '@/components/gsap/reveal'
 import { Cta }            from '@/components/home/cta'
-import { cms }            from '@/lib/cms'
+import { cms, getSingleton } from '@/lib/cms'
+import type { ContactInfoCms } from '@/lib/cms-types'
 
 export const revalidate = 60
 
@@ -11,9 +12,10 @@ export const metadata: Metadata = {
 }
 
 export default async function AboutPage() {
-  const page = await cms.content
-    .singleton<Record<string, string>>('about')
-    .catch(() => null)
+  const [page, contact] = await Promise.all([
+    cms.content.singleton<Record<string, string>>('about').catch(() => null),
+    getSingleton<ContactInfoCms>('contact_info'),
+  ])
 
   const d = page?.data ?? {}
 
@@ -82,7 +84,7 @@ export default async function AboutPage() {
         </section>
       )}
 
-      <Cta />
+      {contact && <Cta cms={contact} />}
     </>
   )
 }

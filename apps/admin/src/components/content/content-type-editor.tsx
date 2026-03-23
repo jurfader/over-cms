@@ -6,6 +6,14 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  DndContext, closestCenter, PointerSensor, useSensor, useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext, verticalListSortingStrategy, useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { ChevronLeft, Plus, Trash2, GripVertical, Save, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -51,6 +59,91 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>
 
+// ─── Sortable Field Row ──────────────────────────────────────────────────────
+
+interface SortableFieldRowProps {
+  fieldId:  string
+  index:    number
+  control:  ReturnType<typeof useForm<FormValues>>['control']
+  register: ReturnType<typeof useForm<FormValues>>['register']
+  onRemove: () => void
+}
+
+function SortableFieldRow({ fieldId, index, control, register, onRemove }: SortableFieldRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: fieldId })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    position: 'relative' as const,
+    zIndex: isDragging ? 10 : undefined,
+  }
+
+  return (
+    <div ref={setNodeRef} style={style} className="grid grid-cols-[20px_1fr_1fr_148px_60px_32px] items-center gap-3 px-4 py-2.5">
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing text-[var(--color-subtle)] hover:text-[var(--color-muted-foreground)] touch-none"
+      >
+        <GripVertical className="w-4 h-4" />
+      </button>
+
+      <Input
+        {...register(`fieldsSchema.${index}.label`)}
+        placeholder="np. Tytuł"
+        className="h-8 text-sm"
+      />
+
+      <Input
+        {...register(`fieldsSchema.${index}.name`)}
+        placeholder="np. title"
+        className="h-8 text-sm font-mono"
+      />
+
+      <Controller
+        control={control}
+        name={`fieldsSchema.${index}.type`}
+        render={({ field: f }) => (
+          <Select value={f.value} onValueChange={f.onChange}>
+            <SelectTrigger className="h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {FIELD_TYPES.map((t) => (
+                <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      />
+
+      <div className="flex justify-center">
+        <Controller
+          control={control}
+          name={`fieldsSchema.${index}.required`}
+          render={({ field: f }) => (
+            <Switch checked={f.value} onCheckedChange={f.onChange} />
+          )}
+        />
+      </div>
+
+      <button
+        type="button"
+        onClick={onRemove}
+        className="text-[var(--color-subtle)] hover:text-[var(--color-destructive)] transition-colors"
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
+    </div>
+  )
+}
+
+// ─── Content Type Editor ─────────────────────────────────────────────────────
+
 interface ContentTypeEditorProps {
   type?: ContentType
 }
@@ -73,7 +166,19 @@ export function ContentTypeEditor({ type }: ContentTypeEditorProps) {
     },
   })
 
-  const { fields, append, remove } = useFieldArray({ control, name: 'fieldsSchema' })
+  const { fields, append, remove, move } = useFieldArray({ control, name: 'fieldsSchema' })
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+  )
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIndex = fields.findIndex((f) => f.id === active.id)
+    const newIndex = fields.findIndex((f) => f.id === over.id)
+    move(oldIndex, newIndex)
+  }
   const name = watch('name')
 
   useEffect(() => {
@@ -186,59 +291,22 @@ export function ContentTypeEditor({ type }: ContentTypeEditorProps) {
               <span />
             </div>
 
-            <div className="divide-y divide-[var(--color-border)]">
-              {fields.map((field, index) => (
-                <div key={field.id} className="grid grid-cols-[20px_1fr_1fr_148px_60px_32px] items-center gap-3 px-4 py-2.5">
-                  <GripVertical className="w-4 h-4 text-[var(--color-subtle)] cursor-grab" />
-
-                  <Input
-                    {...register(`fieldsSchema.${index}.label`)}
-                    placeholder="np. Tytuł"
-                    className="h-8 text-sm"
-                  />
-
-                  <Input
-                    {...register(`fieldsSchema.${index}.name`)}
-                    placeholder="np. title"
-                    className="h-8 text-sm font-mono"
-                  />
-
-                  <Controller
-                    control={control}
-                    name={`fieldsSchema.${index}.type`}
-                    render={({ field: f }) => (
-                      <Select value={f.value} onValueChange={f.onChange}>
-                        <SelectTrigger className="h-8 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {FIELD_TYPES.map((t) => (
-                            <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-
-                  <div className="flex justify-center">
-                    <Controller
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
+                <div className="divide-y divide-[var(--color-border)]">
+                  {fields.map((field, index) => (
+                    <SortableFieldRow
+                      key={field.id}
+                      fieldId={field.id}
+                      index={index}
                       control={control}
-                      name={`fieldsSchema.${index}.required`}
-                      render={({ field: f }) => (
-                        <Switch checked={f.value} onCheckedChange={f.onChange} />
-                      )}
+                      register={register}
+                      onRemove={() => remove(index)}
                     />
-                  </div>
-
-                  <button
-                    onClick={() => remove(index)}
-                    className="text-[var(--color-subtle)] hover:text-[var(--color-destructive)] transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </SortableContext>
+            </DndContext>
           </>
         )}
       </div>

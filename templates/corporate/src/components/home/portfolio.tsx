@@ -8,56 +8,17 @@ import type { PortfolioItemCms } from '@/lib/cms-types'
 
 type Category = 'Wszystkie' | 'Aplikacje' | 'Branding' | 'Sklepy' | 'Strony WWW' | 'Video'
 
-const ALL_CATEGORIES: Category[] = ['Wszystkie', 'Aplikacje', 'Branding', 'Sklepy', 'Strony WWW', 'Video']
-
-const DEFAULT_PROJECTS = [
-  {
-    id:          'chicken-king-app',
-    title:       'iOS/Android Chicken King APP',
-    category:    'Aplikacje' as Category,
-    tags:        ['Flutter', 'Dart', 'PHP'],
-    description: 'Aplikacja mobilna iOS i Android dla sieci restauracji. Zamówienia online, program lojalnościowy i powiadomienia push.',
-    image:       '/images/portfolio-chicken-king-app.webp',
-  },
-  {
-    id:          'angielski-od-podstaw',
-    title:       'Angielski od Podstaw',
-    category:    'Strony WWW' as Category,
-    tags:        ['WordPress', 'Elementor'],
-    description: 'Strona internetowa szkoły językowej z systemem zapisów online, blogiem i bazą materiałów edukacyjnych.',
-    image:       '/images/portfolio-angielski.webp',
-  },
-  {
-    id:          'raptor',
-    title:       'Strona wizytówkowa dla sklepu RAPTOR',
-    category:    'Strony WWW' as Category,
-    tags:        ['WordPress', 'Elementor', 'PHP', 'JavaScript'],
-    description: 'Profesjonalna strona wizytówkowa z animacjami, formularzem kontaktowym i integracją z Google Maps.',
-    image:       '/images/portfolio-raptor.webp',
-  },
-  {
-    id:          'chicken-king-family',
-    title:       'Chicken King Family',
-    category:    'Sklepy' as Category,
-    tags:        ['WordPress', 'Divi', 'PHP', 'JavaScript'],
-    description: 'Sklep internetowy z menu restauracyjnym, zamówieniami online, integracją PayU i BLIK.',
-    image:       '/images/portfolio-chicken-king-family.webp',
-  },
-]
-
-export function Portfolio({ cms }: { cms?: PortfolioItemCms[] }) {
-  const projects = cms
-    ? [...cms]
-        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-        .map((p) => ({
-          id:          p._id,
-          title:       p.title,
-          category:    p.category as Category,
-          tags:        p.tags.split(',').map((t) => t.trim()).filter(Boolean),
-          description: p.description,
-          image:       p.image,
-        }))
-    : DEFAULT_PROJECTS
+export function Portfolio({ cms }: { cms: PortfolioItemCms[] }) {
+  const projects = [...cms]
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    .map((p) => ({
+      id:          p._id,
+      title:       p.title,
+      category:    p.category as Category,
+      tags:        p.tags.split(',').map((t) => t.trim()).filter(Boolean),
+      description: p.description,
+      image:       p.image,
+    }))
 
   const categories: Category[] = ['Wszystkie', ...Array.from(new Set(projects.map((p) => p.category)))] as Category[]
 
@@ -87,7 +48,7 @@ export function Portfolio({ cms }: { cms?: PortfolioItemCms[] }) {
 
         {/* Filter tabs */}
         <Reveal style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.5rem', marginBottom: '3rem' }}>
-          {(cms ? categories : ALL_CATEGORIES).map((cat) => (
+          {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setActive(cat)}

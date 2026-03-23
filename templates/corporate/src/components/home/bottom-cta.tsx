@@ -3,7 +3,7 @@
 import { ArrowRight } from 'lucide-react'
 import { Reveal }     from '@/components/gsap/reveal'
 
-export function BottomCta() {
+export function BottomCta({ title, subtitle, buttonText, buttonHref }: { title: string; subtitle: string; buttonText: string; buttonHref: string }) {
   return (
     <section style={{
       background:    'linear-gradient(135deg, #E040FB 0%, #7B2FE0 100%)',
@@ -27,7 +27,7 @@ export function BottomCta() {
             marginBottom:  '1rem',
             lineHeight:    1.2,
           }}>
-            Zamów Bezpłatną Wycenę<br />Projektu
+            {title}
           </h2>
           <p style={{
             fontSize:     'clamp(1rem, 1.8vw, 1.125rem)',
@@ -36,12 +36,10 @@ export function BottomCta() {
             margin:       '0 auto 2.5rem',
             lineHeight:   1.7,
           }}>
-            Potrzebujesz profesjonalnej strony internetowej, sklepu e-commerce lub
-            kampanii reklamowej? Skontaktuj się z nami i otrzymaj indywidualną ofertę
-            w ciągu 24 godzin.
+            {subtitle}
           </p>
           <a
-            href="#kontakt"
+            href={buttonHref}
             style={{
               display:         'inline-flex',
               alignItems:      'center',
@@ -65,7 +63,7 @@ export function BottomCta() {
               ;(e.currentTarget as HTMLAnchorElement).style.boxShadow  = '0 8px 32px rgba(0,0,0,0.25)'
             }}
           >
-            Zamów bezpłatną wycenę
+            {buttonText}
             <ArrowRight size={18} aria-hidden />
           </a>
         </Reveal>

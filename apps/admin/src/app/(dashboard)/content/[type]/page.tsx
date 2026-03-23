@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
@@ -182,14 +182,26 @@ export default function ContentTypePage() {
   const router   = useRouter()
   const qc       = useQueryClient()
 
-  const [page,         setPage]         = useState(1)
-  const [search,       setSearch]       = useState('')
-  const [statusFilter, setStatusFilter] = useState<ContentStatus | ''>('')
+  const [page,            setPage]            = useState(1)
+  const [search,          setSearch]          = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [statusFilter,    setStatusFilter]    = useState<ContentStatus | ''>('')
   const [sortField,    setSortField]    = useState<SortField>('updatedAt')
   const [sortDir,      setSortDir]      = useState<SortDir>('desc')
   const [selected,     setSelected]     = useState<Set<string>>(new Set())
   const [preview,      setPreview]      = useState<ContentItemWithAuthor | null>(null)
   const [bulkLoading,  setBulkLoading]  = useState(false)
+
+  // ── Debounced search ─────────────────────────────────────────────────────
+
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null)
+  useEffect(() => {
+    debounceRef.current = setTimeout(() => {
+      setDebouncedSearch(search)
+      setPage(1)
+    }, 300)
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
+  }, [search])
 
   // ── Data ──────────────────────────────────────────────────────────────────
 
@@ -200,10 +212,10 @@ export default function ContentTypePage() {
   })
 
   const { data, isLoading } = useQuery({
-    queryKey: ['content', type, page, statusFilter, sortField, sortDir],
+    queryKey: ['content', type, page, statusFilter, sortField, sortDir, debouncedSearch],
     queryFn:  () =>
       api.get<ItemsResponse>(
-        `/api/content/${type}?page=${page}&limit=20${statusFilter ? `&status=${statusFilter}` : ''}&sort=${sortField}&dir=${sortDir}`,
+        `/api/content/${type}?page=${page}&limit=20${statusFilter ? `&status=${statusFilter}` : ''}${debouncedSearch ? `&search=${encodeURIComponent(debouncedSearch)}` : ''}&sort=${sortField}&dir=${sortDir}`,
       ),
   })
 
@@ -228,21 +240,15 @@ export default function ContentTypePage() {
 
   const items   = data?.data ?? []
   const meta    = data?.meta
-  const filtered = search
-    ? items.filter((r) =>
-        r.item.title.toLowerCase().includes(search.toLowerCase()) ||
-        r.item.slug.toLowerCase().includes(search.toLowerCase()),
-      )
-    : items
 
-  const allSelected  = filtered.length > 0 && filtered.every((r) => selected.has(r.item.id))
-  const someSelected = filtered.some((r) => selected.has(r.item.id))
+  const allSelected  = items.length > 0 && items.every((r) => selected.has(r.item.id))
+  const someSelected = items.some((r) => selected.has(r.item.id))
 
   function toggleAll() {
     if (allSelected) {
       setSelected(new Set())
     } else {
-      setSelected(new Set(filtered.map((r) => r.item.id)))
+      setSelected(new Set(items.map((r) => r.item.id)))
     }
   }
 
@@ -316,12 +322,12 @@ export default function ContentTypePage() {
           <Input
             placeholder="Szukaj..."
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+            onChange={(e) => setSearch(e.target.value)}
             className="pl-9 h-8"
           />
         </div>
         <div className="flex items-center gap-1.5">
-          {(['', 'draft', 'published', 'archived'] as const).map((s) => (
+          {(['', 'draft', 'published', 'scheduled', 'archived'] as const).map((s) => (
             <button
               key={s}
               onClick={() => { setStatusFilter(s); setPage(1); setSelected(new Set()) }}
@@ -350,7 +356,7 @@ export default function ContentTypePage() {
               </div>
             ))}
           </div>
-        ) : filtered.length === 0 ? (
+        ) : items.length === 0 ? (
           <div className="py-20 text-center">
             <FileText className="w-10 h-10 mx-auto mb-3 text-[var(--color-subtle)] opacity-40" />
             <p className="text-sm text-[var(--color-muted-foreground)]">Brak wpisów</p>
@@ -389,7 +395,7 @@ export default function ContentTypePage() {
 
             {/* Rows */}
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="divide-y divide-[var(--color-border)]">
-              {filtered.map((row) => {
+              {items.map((row) => {
                 const { item, author } = row
                 const sc         = STATUS_CONFIG[item.status] ?? STATUS_CONFIG.draft
                 const isSelected = selected.has(item.id)

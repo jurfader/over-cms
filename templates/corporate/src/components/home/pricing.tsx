@@ -23,107 +23,23 @@ const PLAN_ICONS: Record<string, React.ReactNode> = {
   ),
 }
 
-const DEFAULT_EXTRA = [
-  { label: 'Montaż video',     price: 'od 80 zł/min'       },
-  { label: 'Social Media',     price: 'od 1500 zł/mies'    },
-  { label: 'Kampanie Ads',     price: 'od 500 zł + budżet' },
-  { label: 'Serwis IT',        price: 'od 50 zł/h'         },
-  { label: 'Hosting WWW',      price: 'od 400 zł/rok'      },
-  { label: 'Domena',           price: 'od 120 zł/rok'      },
-  { label: 'Aplikacje mobilne',price: 'od 5000 zł'         },
-]
-
-const DEFAULT_PLANS = [
-  {
-    id:       'basic',
-    name:     'Strona Basic',
-    tagline:  'Idealna dla małych firm i freelancerów',
-    monthly:  800,
-    onetime:  1000,
-    featured: false,
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
-      </svg>
-    ),
-    features: [
-      'Do 5 podstron',
-      'Responsywny design',
-      'Podstawowe SEO',
-      'Formularz kontaktowy',
-      'Certyfikat SSL',
-      'Blog',
-      'Integracje zewnętrzne',
-      '1 miesiąc wsparcia',
-    ],
-  },
-  {
-    id:       'pro',
-    name:     'Strona Pro',
-    tagline:  'Dla firm szukających więcej możliwości',
-    monthly:  1300,
-    onetime:  1625,
-    featured: true,
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-      </svg>
-    ),
-    features: [
-      'Do 15 podstron',
-      'Premium design',
-      'Zaawansowane SEO',
-      'Blog + CMS',
-      'Animacje i efekty',
-      'Google Analytics',
-      'Priorytetowe wsparcie',
-      '6 miesięcy wsparcia',
-    ],
-  },
-  {
-    id:       'ecommerce',
-    name:     'Sklep E-commerce',
-    tagline:  'Zacznij sprzedawać online',
-    monthly:  3000,
-    onetime:  3750,
-    featured: false,
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
-      </svg>
-    ),
-    features: [
-      'WooCommerce',
-      'Integracja płatności',
-      'Kurierzy (InPost, DHL)',
-      'Do 100 produktów',
-      'Panel zarządzania',
-      'Szkolenie z obsługi',
-      '',
-      '12 miesięcy wsparcia',
-    ],
-  },
-]
-
 function fmt(n: number) {
   return n.toLocaleString('pl-PL') + ' zł'
 }
 
-export function Pricing({ cms }: { cms?: PricingPlanCms[] }) {
-  const plans = cms
-    ? [...cms]
-        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-        .map((p) => ({
-          id:       p._id,
-          name:     p.name,
-          tagline:  p.tagline,
-          monthly:  p.price_monthly,
-          onetime:  p.price_onetime,
-          featured: p.is_featured,
-          icon:     PLAN_ICONS[p.icon_key] ?? PLAN_ICONS['basic'],
-          features: p.features.split('\n').map((f) => f.trim()).filter(Boolean),
-        }))
-    : DEFAULT_PLANS
+export function Pricing({ cms }: { cms: PricingPlanCms[] }) {
+  const plans = [...cms]
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    .map((p) => ({
+      id:       p._id,
+      name:     p.name,
+      tagline:  p.tagline,
+      monthly:  p.price_monthly,
+      onetime:  p.price_onetime,
+      featured: p.is_featured,
+      icon:     PLAN_ICONS[p.icon_key] ?? PLAN_ICONS['basic'],
+      features: p.features.split('\n').map((f) => f.trim()).filter(Boolean),
+    }))
 
   const [abonament, setAbonament] = useState(false)
 
@@ -183,7 +99,7 @@ export function Pricing({ cms }: { cms?: PricingPlanCms[] }) {
               flexWrap:            'wrap',
               gap:                 '0.5rem 2rem',
             }}>
-              {DEFAULT_EXTRA.map(({ label, price }) => (
+              {([] as { label: string; price: string }[]).map(({ label, price }) => (
                 <div
                   key={label}
                   style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', whiteSpace: 'nowrap' }}

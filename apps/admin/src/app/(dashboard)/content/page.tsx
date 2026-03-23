@@ -3,25 +3,22 @@
 import { motion } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
-import {
-  FileText, BookOpen, Briefcase, Layers, Plus, ArrowRight,
-  Settings, LayoutGrid, Globe, Newspaper, FolderKanban,
-} from 'lucide-react'
+import { Plus, ArrowRight, Settings } from 'lucide-react'
+import { icons, type LucideIcon } from 'lucide-react'
 import { type Variants } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { api } from '@/lib/api'
 import type { ContentType } from '@/types/content'
 
-// Mapowanie ikon po nazwie (Lucide)
-const iconComponents: Record<string, React.ElementType> = {
-  FileText, BookOpen, Briefcase, Layers, Globe, Newspaper,
-  FolderKanban, LayoutGrid, Settings,
-}
-
-function getIcon(name: string | null): React.ElementType {
-  if (!name) return Layers
-  return iconComponents[name] ?? Layers
+function getIcon(name?: string | null): LucideIcon {
+  if (!name) return icons.Layers
+  // Convert kebab-case or snake_case to PascalCase: "file-text" -> "FileText", "folder_kanban" -> "FolderKanban"
+  const pascal = name
+    .split(/[-_]/)
+    .map(s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase())
+    .join('')
+  return (icons as Record<string, LucideIcon>)[pascal] ?? icons.Layers
 }
 
 const iconColors: Record<string, string> = {
@@ -83,7 +80,7 @@ export default function ContentPage() {
         </div>
       ) : types.length === 0 ? (
         <div className="glass-card rounded-[var(--radius-xl)] p-16 text-center">
-          <Layers className="w-12 h-12 mx-auto mb-4 text-[var(--color-subtle)] opacity-50" />
+          <icons.Layers className="w-12 h-12 mx-auto mb-4 text-[var(--color-subtle)] opacity-50" />
           <p className="text-[var(--color-muted-foreground)] font-medium">Brak typów treści</p>
           <p className="text-sm text-[var(--color-subtle)] mt-1 mb-6">
             Utwórz pierwszy typ aby zacząć dodawać treści

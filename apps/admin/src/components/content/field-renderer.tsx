@@ -1,15 +1,20 @@
 'use client'
 
 import { type Control, type UseFormWatch, type UseFormSetValue, type FieldValues, Controller } from 'react-hook-form'
+import { useQuery } from '@tanstack/react-query'
+import { Plus, Trash2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
 import { CodeEditor } from './code-editor'
+import { RichTextEditor } from './richtext-editor'
 import { MediaPicker } from '@/components/media/media-picker'
 import { BlockEditor } from '@/components/editor/block-editor'
-import type { FieldDefinition } from '@/types/content'
+import { api } from '@/lib/api'
+import type { FieldDefinition, ContentItemWithAuthor } from '@/types/content'
 import type { Block } from '@/components/editor/types'
 
 interface FieldRendererProps {
@@ -17,10 +22,140 @@ interface FieldRendererProps {
   control: Control<FieldValues>
   watch: UseFormWatch<FieldValues>
   setValue: UseFormSetValue<FieldValues>
+  /** Override the field path prefix (used by repeater for nested paths) */
+  pathPrefix?: string
 }
 
-export function FieldRenderer({ field, control }: FieldRendererProps) {
-  const fieldPath = `data.${field.name}` as const
+// ─── Relation Field ──────────────────────────────────────────────────────────
+
+interface RelationFieldProps {
+  field: FieldDefinition
+  value: string
+  onChange: (value: string) => void
+}
+
+function RelationField({ field, value, onChange }: RelationFieldProps) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['relation', field.relationTo],
+    queryFn: () =>
+      api.get<{ data: ContentItemWithAuthor[]; meta: Record<string, unknown> }>(
+        `/api/content/${field.relationTo}?limit=100&status=published`,
+      ),
+    enabled: !!field.relationTo,
+  })
+
+  const items = data?.data ?? []
+
+  return (
+    <Select value={value ?? ''} onValueChange={onChange}>
+      <SelectTrigger id={field.id}>
+        <SelectValue
+          placeholder={
+            isLoading
+              ? 'Ładowanie...'
+              : `Wybierz ${field.label.toLowerCase()}`
+          }
+        />
+      </SelectTrigger>
+      <SelectContent>
+        {items.map(({ item }) => (
+          <SelectItem key={item.id} value={item.id}>
+            {item.title || item.slug}
+          </SelectItem>
+        ))}
+        {!isLoading && items.length === 0 && (
+          <div className="px-3 py-2 text-sm text-[var(--color-muted-foreground)]">
+            Brak elementów
+          </div>
+        )}
+      </SelectContent>
+    </Select>
+  )
+}
+
+// ─── Repeater Field ──────────────────────────────────────────────────────────
+
+interface RepeaterFieldProps {
+  field: FieldDefinition
+  value: Record<string, unknown>[]
+  onChange: (value: Record<string, unknown>[]) => void
+  control: Control<FieldValues>
+  watch: UseFormWatch<FieldValues>
+  setValue: UseFormSetValue<FieldValues>
+  parentPath: string
+}
+
+function RepeaterField({ field, value, onChange, control, watch, setValue, parentPath }: RepeaterFieldProps) {
+  const entries = Array.isArray(value) ? value : []
+  const subFields = field.fields ?? []
+
+  const addEntry = () => {
+    const blank: Record<string, unknown> = {}
+    for (const sf of subFields) {
+      blank[sf.name] = sf.defaultValue ?? (sf.type === 'boolean' ? false : '')
+    }
+    const next = [...entries, blank]
+    onChange(next)
+  }
+
+  const removeEntry = (index: number) => {
+    const next = entries.filter((_, i) => i !== index)
+    onChange(next)
+  }
+
+  return (
+    <div className="space-y-3">
+      {entries.map((_entry, index) => (
+        <div
+          key={index}
+          className="relative rounded-[var(--radius)] border border-[var(--color-border-hover)] bg-[var(--color-surface)] p-4 space-y-3"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-medium text-[var(--color-muted-foreground)]">
+              {field.label} #{index + 1}
+            </span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-[var(--color-destructive)]"
+              onClick={() => removeEntry(index)}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+
+          {subFields.map((subField) => (
+            <FieldRenderer
+              key={subField.id}
+              field={subField}
+              control={control}
+              watch={watch}
+              setValue={setValue}
+              pathPrefix={`${parentPath}.${index}`}
+            />
+          ))}
+        </div>
+      ))}
+
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="w-full"
+        onClick={addEntry}
+      >
+        <Plus className="h-4 w-4 mr-1" />
+        Dodaj {field.label.toLowerCase()}
+      </Button>
+    </div>
+  )
+}
+
+// ─── Main FieldRenderer ─────────────────────────────────────────────────────
+
+export function FieldRenderer({ field, control, watch, setValue, pathPrefix }: FieldRendererProps) {
+  const fieldPath = pathPrefix ? `${pathPrefix}.${field.name}` : `data.${field.name}`
 
   return (
     <div className="space-y-1.5">
@@ -111,6 +246,28 @@ export function FieldRenderer({ field, control }: FieldRendererProps) {
                 </Select>
               )
 
+            case 'relation':
+              return (
+                <RelationField
+                  field={field}
+                  value={(value as string) ?? ''}
+                  onChange={formField.onChange}
+                />
+              )
+
+            case 'repeater':
+              return (
+                <RepeaterField
+                  field={field}
+                  value={(formField.value as Record<string, unknown>[]) ?? []}
+                  onChange={formField.onChange}
+                  control={control}
+                  watch={watch}
+                  setValue={setValue}
+                  parentPath={fieldPath}
+                />
+              )
+
             case 'color':
               return (
                 <div className="flex items-center gap-3">
@@ -144,14 +301,10 @@ export function FieldRenderer({ field, control }: FieldRendererProps) {
 
             case 'richtext':
               return (
-                <div className="rounded-[var(--radius)] overflow-hidden border border-[var(--color-border-hover)]">
-                  <CodeEditor
-                    value={(value as string) ?? ''}
-                    onChange={formField.onChange}
-                    language="html"
-                    height="200px"
-                  />
-                </div>
+                <RichTextEditor
+                  value={(value as string) ?? ''}
+                  onChange={formField.onChange}
+                />
               )
 
             case 'image':

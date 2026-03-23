@@ -6,7 +6,6 @@ import { AboutPreview } from '@/components/home/about-preview'
 import { Pricing }      from '@/components/home/pricing'
 import { Testimonials } from '@/components/home/testimonials'
 import { Cta }          from '@/components/home/cta'
-import { BottomCta }    from '@/components/home/bottom-cta'
 import { getSingleton, getCollection } from '@/lib/cms'
 import type {
   HeroCms,
@@ -36,14 +35,13 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero         cms={hero        ?? undefined} />
-      <Services     cms={services.length    ? services    : undefined} />
-      <Portfolio    cms={portfolio.length   ? portfolio   : undefined} />
-      <AboutPreview cms={about       ?? undefined} />
-      <Pricing      cms={plans.length       ? plans       : undefined} />
-      <Testimonials cms={testimonials.length ? testimonials : undefined} />
-      <Cta          cms={contact     ?? undefined} />
-      <BottomCta />
+      {hero && <Hero cms={hero} />}
+      {services.length > 0 && <Services cms={services} />}
+      {portfolio.length > 0 && <Portfolio cms={portfolio} />}
+      {about && <AboutPreview cms={about} />}
+      {plans.length > 0 && <Pricing cms={plans} />}
+      {testimonials.length > 0 && <Testimonials cms={testimonials} />}
+      {contact && <Cta cms={contact} />}
     </>
   )
 }
