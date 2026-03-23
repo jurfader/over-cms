@@ -167,6 +167,32 @@ services:
       - "traefik.http.routers.portal.tls.certresolver=letsencrypt"
       - "traefik.http.services.portal.loadbalancer.server.port=3004"
 
+  # ─── Client Site (Next.js corporate template) ────────────────────────────────
+  site:
+    build:
+      context: .
+      dockerfile: templates/corporate/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: https://${API_DOMAIN}
+    container_name: overcms_site
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: 3005
+      NEXT_PUBLIC_API_URL: https://${API_DOMAIN}
+    depends_on:
+      - api
+    networks:
+      - internal
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.site.rule=Host(`${SITE_DOMAIN}`)"
+      - "traefik.http.routers.site.tls=true"
+      - "traefik.http.routers.site.tls.certresolver=letsencrypt"
+      - "traefik.http.services.site.loadbalancer.server.port=3005"
+
   # ─── Traefik (reverse proxy + SSL) ───────────────────────────────────────────
   traefik:
     image: traefik:v3.0
