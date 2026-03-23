@@ -49,16 +49,16 @@ const navGroups: NavGroup[] = [
     label: 'Główne',
     items: [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { label: 'Treści',    href: '/content',   icon: FileText },
+      { label: 'Strony',    href: '/pages',      icon: Globe },
       { label: 'Media',     href: '/media',      icon: Image },
     ],
   },
   {
     label: 'Witryna',
     items: [
-      { label: 'SEO',      href: '/seo',        icon: Search },
-      { label: 'Nawigacja',href: '/navigation',  icon: Navigation },
-      { label: 'Strony',   href: '/pages',         icon: Globe },
+      { label: 'SEO',       href: '/seo',        icon: Search },
+      { label: 'Nawigacja', href: '/navigation',  icon: Navigation },
+      { label: 'Treści',    href: '/content',     icon: FileText },
     ],
   },
   {

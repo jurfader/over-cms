@@ -35,22 +35,21 @@ export function PageRenderer({ page, hideTitle }: PageRendererProps) {
   // HTML content page
   if (content) {
     return (
-      <section style={{ paddingTop: '9rem', paddingBottom: 'var(--section-y)' }}>
-        <div className="container" style={{ maxWidth: '800px' }}>
-          {!hideTitle && (
-            <h1
-              className="display"
-              style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', marginBottom: '2.5rem' }}
-            >
-              {page.title}
-            </h1>
-          )}
-          <div
-            style={{ fontSize: '1.0625rem', lineHeight: 1.8 }}
-            dangerouslySetInnerHTML={{ __html: content }}
-          />
-        </div>
-      </section>
+      <>
+        {!hideTitle && (
+          <section style={{ paddingTop: '9rem', paddingBottom: 'var(--section-y)' }}>
+            <div className="container" style={{ maxWidth: '800px' }}>
+              <h1
+                className="display"
+                style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', marginBottom: '2.5rem' }}
+              >
+                {page.title}
+              </h1>
+            </div>
+          </section>
+        )}
+        <div dangerouslySetInnerHTML={{ __html: content }} />
+      </>
     )
   }
 
