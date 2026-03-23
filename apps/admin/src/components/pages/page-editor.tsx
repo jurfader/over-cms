@@ -15,7 +15,10 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { EditorSidebar } from '@/components/content/editor-sidebar'
 import { BlockEditor } from '@/components/editor/block-editor'
+import { CodeEditor } from '@/components/content/code-editor'
 import type { Block } from '@/components/editor/types'
+
+type EditorMode = 'blocks' | 'html'
 import { api } from '@/lib/api'
 import { slugify } from '@/lib/utils'
 import type { ContentType, ContentItem } from '@/types/content'
@@ -54,6 +57,9 @@ export function PageEditor({ contentType, item }: PageEditorProps) {
 
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const [slugManual, setSlugManual] = useState(!!item)
+  const [mode, setMode] = useState<EditorMode>(
+    item?.data?.content ? 'html' : 'blocks'
+  )
 
   // Sidebar fields: excerpt, featured_image, and any other non-body/non-blocks/non-slug fields
   const sidebarFields = contentType.fieldsSchema?.filter(
@@ -235,21 +241,62 @@ export function PageEditor({ contentType, item }: PageEditorProps) {
       {/* ── Body ──────────────────────────────────────────────────── */}
       <div className="flex flex-1 min-h-0">
 
-        {/* Main editor area — always BlockEditor */}
+        {/* Main editor area */}
         <div className="flex-1 flex flex-col min-w-0">
+          {/* Mode toggle */}
+          <div className="flex items-center gap-1 px-4 py-2 border-b border-[var(--color-border)]">
+            <button
+              type="button"
+              onClick={() => setMode('blocks')}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                mode === 'blocks'
+                  ? 'bg-[var(--color-primary-muted)] text-[var(--color-primary)]'
+                  : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
+              }`}
+            >
+              Bloki
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('html')}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                mode === 'html'
+                  ? 'bg-[var(--color-primary-muted)] text-[var(--color-primary)]'
+                  : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
+              }`}
+            >
+              HTML
+            </button>
+          </div>
+
           <div className="flex-1 min-h-0 overflow-hidden">
-            <Controller
-              control={control}
-              name="data.blocks"
-              render={({ field }) => (
-                <div className="h-full overflow-y-auto p-4 scrollbar-thin">
-                  <BlockEditor
-                    value={(field.value as Block[]) ?? []}
+            {mode === 'blocks' ? (
+              <Controller
+                control={control}
+                name="data.blocks"
+                render={({ field }) => (
+                  <div className="h-full overflow-y-auto p-4 scrollbar-thin">
+                    <BlockEditor
+                      value={(field.value as Block[]) ?? []}
+                      onChange={field.onChange}
+                    />
+                  </div>
+                )}
+              />
+            ) : (
+              <Controller
+                control={control}
+                name="data.content"
+                render={({ field }) => (
+                  <CodeEditor
+                    value={(field.value as string) ?? ''}
                     onChange={field.onChange}
+                    language="html"
+                    height="100%"
                   />
-                </div>
-              )}
-            />
+                )}
+              />
+            )}
           </div>
         </div>
 

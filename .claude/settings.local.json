@@ -23,7 +23,8 @@
       "Bash(git commit -m \"feat: server-side license verification system with ED25519 signatures:*)",
       "Bash(ls /Volumes/Nowy/OVERMEDIA/Strony/Projekty/OVERCMS/apps/admin/src/app/\\\\\\(dashboard\\\\\\)/)",
       "Bash(git commit -m \"feat: WordPress-like pages section with block editor:*)",
-      "Bash(git commit -m \"feat: add corporate template \\(site\\) to docker-compose.prod:*)"
+      "Bash(git commit -m \"feat: add corporate template \\(site\\) to docker-compose.prod:*)",
+      "Bash(git commit -m \"feat: add HTML code mode to page editor:*)"
     ]
   }
 }
