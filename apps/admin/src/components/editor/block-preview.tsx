@@ -275,32 +275,6 @@ function HtmlRender({ data }: RenderProps) {
   )
 }
 
-function ColumnsRender({ data }: RenderProps) {
-  const widths  = (data.widths  as number[]                                   | undefined) ?? [50, 50]
-  const columns = (data.columns as { id: string; blocks: Block[] }[] | undefined)
-
-  return (
-    <div className="flex gap-4 items-start">
-      {widths.map((w, i) => {
-        const blocks = columns?.[i]?.blocks ?? []
-        return (
-          <div key={i} style={{ width: `${w}%`, flexShrink: 0 }}>
-            {blocks.length > 0 ? (
-              blocks.map((block) => (
-                <BlockPreviewItem key={block.id} block={block} device="desktop" />
-              ))
-            ) : (
-              <div className="min-h-[60px] rounded border border-dashed border-gray-200 flex items-center justify-center">
-                <p className="text-xs text-gray-400">Kol. {i + 1}</p>
-              </div>
-            )}
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
 function CardRender({ data }: RenderProps) {
   return (
     <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm">
@@ -381,24 +355,254 @@ function CtaRender({ data }: RenderProps) {
   )
 }
 
+// ─── New block renderers ──────────────────────────────────────────────────────
+
+function SectionRender({ data }: RenderProps) {
+  return (
+    <div className={`p-4 rounded border-2 border-dashed border-blue-200 bg-blue-50/50 ${data.fullWidth ? 'w-full' : 'max-w-5xl mx-auto'}`}>
+      <p className="text-xs text-blue-400 font-medium uppercase tracking-wide">
+        Sekcja{data.fullWidth ? ' (pełna szerokość)' : ''}
+      </p>
+    </div>
+  )
+}
+
+function RowRender({ data }: RenderProps) {
+  const structure = (data.columnStructure as string) ?? '1'
+  return (
+    <div className="p-3 rounded border border-dashed border-purple-200 bg-purple-50/50">
+      <p className="text-xs text-purple-400 font-medium">Wiersz · {structure}</p>
+    </div>
+  )
+}
+
+function ColumnRender({ data }: RenderProps) {
+  const width = data.width as number | undefined
+  return (
+    <div className="p-2 rounded border border-dashed border-green-200 bg-green-50/50 min-h-[40px]">
+      <p className="text-xs text-green-400 font-medium">Kolumna{width ? ` · ${width}%` : ''}</p>
+    </div>
+  )
+}
+
+function BlurbRender({ data }: RenderProps) {
+  return (
+    <div className="flex items-start gap-3 p-4">
+      <div
+        className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 font-bold text-lg shrink-0"
+        style={data.iconColor ? { color: String(data.iconColor) } : undefined}
+      >
+        {String(data.icon ?? '★').charAt(0).toUpperCase()}
+      </div>
+      <div>
+        {!!data.title && <p className="font-semibold text-base mb-1">{String(data.title)}</p>}
+        {!!data.text && <p className="text-sm text-gray-600">{String(data.text)}</p>}
+      </div>
+    </div>
+  )
+}
+
+function IconRender({ data }: RenderProps) {
+  const size = Number(data.size ?? 48)
+  return (
+    <div className="flex items-center justify-center p-4">
+      <div
+        className="flex items-center justify-center rounded bg-gray-100"
+        style={{ width: size, height: size, color: (data.color as string) || undefined }}
+      >
+        <span className="text-xs text-gray-500">{String(data.name ?? 'icon')}</span>
+      </div>
+    </div>
+  )
+}
+
+function CounterRender({ data }: RenderProps) {
+  return (
+    <div className="text-center p-4">
+      <p className="text-4xl font-bold text-pink-600">
+        {String(data.number ?? 0)}{String(data.suffix ?? '')}
+      </p>
+      {!!data.title && <p className="text-sm text-gray-600 mt-1">{String(data.title)}</p>}
+    </div>
+  )
+}
+
+function TabsRender({ data }: RenderProps) {
+  const items = (data.items as { label: string; content: string }[]) ?? []
+  return (
+    <div>
+      <div className="flex border-b border-gray-200">
+        {items.map((item, i) => (
+          <div
+            key={i}
+            className={`px-4 py-2 text-sm font-medium ${i === 0 ? 'border-b-2 border-pink-600 text-pink-600' : 'text-gray-500'}`}
+          >
+            {item.label || `Tab ${i + 1}`}
+          </div>
+        ))}
+      </div>
+      {items.length > 0 && (
+        <div className="p-4 text-sm text-gray-600">
+          {items[0]?.content || '—'}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function SliderRender({ data }: RenderProps) {
+  const slides = (data.slides as { title: string; text: string; image: string }[]) ?? []
+  const first = slides[0]
+  return (
+    <div className="relative rounded overflow-hidden bg-gray-100">
+      {first?.image && (
+        <img src={first.image} alt="" className="w-full h-48 object-cover" />
+      )}
+      <div className="p-4">
+        {first?.title && <p className="font-bold text-lg">{first.title}</p>}
+        {first?.text && <p className="text-sm text-gray-600 mt-1">{first.text}</p>}
+        <p className="text-xs text-gray-400 mt-2">{slides.length} slajdów</p>
+      </div>
+    </div>
+  )
+}
+
+function PricingRender({ data }: RenderProps) {
+  const features = ((data.features as string) ?? '').split('\n').filter(Boolean)
+  return (
+    <div className={`rounded-xl border p-6 text-center ${data.featured ? 'border-pink-600 shadow-lg' : 'border-gray-200'}`}>
+      {!!data.title && <p className="font-bold text-lg mb-2">{String(data.title)}</p>}
+      {!!data.price && (
+        <p className="text-3xl font-bold text-pink-600">
+          {String(data.price)}
+          {!!data.period && <span className="text-sm font-normal text-gray-500 ml-1">{String(data.period)}</span>}
+        </p>
+      )}
+      {features.length > 0 && (
+        <ul className="mt-4 space-y-1 text-sm text-gray-600 text-left">
+          {features.map((f, i) => (
+            <li key={i} className="flex items-center gap-2">
+              <span className="text-green-500">✓</span> {f}
+            </li>
+          ))}
+        </ul>
+      )}
+      {!!data.buttonLabel && (
+        <span className="mt-4 inline-block px-6 py-2 bg-pink-600 text-white text-sm rounded-lg font-semibold">
+          {String(data.buttonLabel)}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function TeamRender({ data }: RenderProps) {
+  return (
+    <div className="text-center p-4">
+      {!!data.photo && (
+        <img src={String(data.photo)} alt="" className="w-24 h-24 rounded-full object-cover mx-auto mb-3" />
+      )}
+      {!!data.name && <p className="font-semibold text-base">{String(data.name)}</p>}
+      {!!data.role && <p className="text-sm text-gray-500">{String(data.role)}</p>}
+      {!!data.bio && <p className="text-sm text-gray-600 mt-2">{String(data.bio)}</p>}
+    </div>
+  )
+}
+
+function SocialRender({ data }: RenderProps) {
+  const items = (data.items as { platform: string; url: string }[]) ?? []
+  return (
+    <div className="flex items-center gap-3 p-3">
+      {items.map((item, i) => (
+        <span
+          key={i}
+          className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 text-gray-600 text-xs font-medium"
+          title={item.url}
+        >
+          {item.platform.slice(0, 2).toUpperCase()}
+        </span>
+      ))}
+      {items.length === 0 && (
+        <p className="text-xs text-gray-400">Social media (brak linków)</p>
+      )}
+    </div>
+  )
+}
+
+function FormRender({ data }: RenderProps) {
+  const fields = (data.fields as { label: string; type: string; required: boolean }[]) ?? []
+  return (
+    <div className="rounded border border-gray-200 p-4 space-y-3">
+      {fields.map((field, i) => (
+        <div key={i}>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {field.label || `Pole ${i + 1}`}
+            {field.required && <span className="text-red-500 ml-0.5">*</span>}
+          </label>
+          {field.type === 'textarea' ? (
+            <div className="h-16 rounded border border-gray-200 bg-gray-50" />
+          ) : (
+            <div className="h-9 rounded border border-gray-200 bg-gray-50" />
+          )}
+        </div>
+      ))}
+      {!!data.submitLabel && (
+        <span className="inline-block px-5 py-2 bg-pink-600 text-white text-sm rounded font-medium">
+          {String(data.submitLabel)}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function SpacerRender({ data }: RenderProps) {
+  const height = (data.height as string) ?? '3rem'
+  return (
+    <div
+      className="flex items-center justify-center border border-dashed border-gray-200 bg-gray-50/50 rounded"
+      style={{ height }}
+    >
+      <p className="text-xs text-gray-400">Odstęp · {height}</p>
+    </div>
+  )
+}
+
 // ─── Render map ───────────────────────────────────────────────────────────────
 
 const RENDER_MAP: Record<BlockType, React.FC<RenderProps>> = {
+  // Structure
+  section:     SectionRender,
+  row:         RowRender,
+  column:      ColumnRender,
+  // Text
   heading:     HeadingRender,
   paragraph:   ParagraphRender,
+  quote:       QuoteRender,
+  code:        CodeRender,
+  html:        HtmlRender,
+  // Media
   image:       ImageRender,
   gallery:     GalleryRender,
-  button:      ButtonRender,
   video:       VideoRender,
-  code:        CodeRender,
-  quote:       QuoteRender,
+  icon:        IconRender,
+  // Layout
   divider:     DividerRender,
-  html:        HtmlRender,
-  columns:     ColumnsRender,
   card:        CardRender,
+  spacer:      SpacerRender,
+  tabs:        TabsRender,
+  // Interaction
+  button:      ButtonRender,
   accordion:   AccordionRender,
-  testimonial: TestimonialRender,
+  form:        FormRender,
+  slider:      SliderRender,
+  // Marketing
   cta:         CtaRender,
+  testimonial: TestimonialRender,
+  blurb:       BlurbRender,
+  counter:     CounterRender,
+  pricing:     PricingRender,
+  team:        TeamRender,
+  social:      SocialRender,
 }
 
 // ─── Single block preview ─────────────────────────────────────────────────────

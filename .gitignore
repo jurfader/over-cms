@@ -2,6 +2,10 @@
 node_modules/
 .pnpm-store/
 
+# External plugins (do not commit)
+Divi_5.zip
+Divi/
+
 # Build outputs
 dist/
 .next/

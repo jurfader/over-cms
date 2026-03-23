@@ -24,7 +24,11 @@
       "Bash(ls /Volumes/Nowy/OVERMEDIA/Strony/Projekty/OVERCMS/apps/admin/src/app/\\\\\\(dashboard\\\\\\)/)",
       "Bash(git commit -m \"feat: WordPress-like pages section with block editor:*)",
       "Bash(git commit -m \"feat: add corporate template \\(site\\) to docker-compose.prod:*)",
-      "Bash(git commit -m \"feat: add HTML code mode to page editor:*)"
+      "Bash(git commit -m \"feat: add HTML code mode to page editor:*)",
+      "Bash(unzip -l /Volumes/Nowy/OVERMEDIA/Strony/Projekty/OVERCMS/Divi_5.zip)",
+      "Bash(mkdir -p /tmp/divi-analysis)",
+      "Bash(unzip -q -o /Volumes/Nowy/OVERMEDIA/Strony/Projekty/OVERCMS/Divi_5.zip -d /tmp/divi-analysis)",
+      "Bash(find /tmp/divi-analysis/Divi/includes/builder-5/visual-builder/packages/module-library/src/ -type f -name *.ts -o -name *.tsx -o -name *.js)"
     ]
   }
 }
