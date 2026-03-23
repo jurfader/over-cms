@@ -21,7 +21,8 @@
       "Bash(openssl genpkey:*)",
       "Bash(openssl pkey:*)",
       "Bash(git commit -m \"feat: server-side license verification system with ED25519 signatures:*)",
-      "Bash(ls /Volumes/Nowy/OVERMEDIA/Strony/Projekty/OVERCMS/apps/admin/src/app/\\\\\\(dashboard\\\\\\)/)"
+      "Bash(ls /Volumes/Nowy/OVERMEDIA/Strony/Projekty/OVERCMS/apps/admin/src/app/\\\\\\(dashboard\\\\\\)/)",
+      "Bash(git commit -m \"feat: WordPress-like pages section with block editor:*)"
     ]
   }
 }

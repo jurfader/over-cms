@@ -58,7 +58,7 @@ const navGroups: NavGroup[] = [
     items: [
       { label: 'SEO',      href: '/seo',        icon: Search },
       { label: 'Nawigacja',href: '/navigation',  icon: Navigation },
-      { label: 'Strony',   href: '/content/page', icon: Globe },
+      { label: 'Strony',   href: '/pages',         icon: Globe },
     ],
   },
   {

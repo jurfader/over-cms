@@ -51,7 +51,7 @@ export default function ContentPage() {
     queryFn: () => api.get<{ data: ContentTypeWithCount[] }>('/api/content-types'),
   })
 
-  const types = data?.data ?? []
+  const types = (data?.data ?? []).filter((t: ContentTypeWithCount) => t.slug !== 'page')
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
