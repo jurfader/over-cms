@@ -136,6 +136,84 @@ body {
 }
 
 img { max-width: 100%; height: auto; }
+
+/* ── GrapesJS in-canvas elements ─────────────────────────────── */
+
+/* Drop zone placeholder */
+.gjs-placeholder {
+  border: 2px dashed #E040FB !important;
+  background: rgba(224, 64, 251, 0.08) !important;
+}
+.gjs-placeholder-int {
+  background: rgba(224, 64, 251, 0.12) !important;
+  min-height: 40px;
+}
+
+/* Component highlighter on hover */
+.gjs-highlighter {
+  outline: 2px solid rgba(224, 64, 251, 0.6) !important;
+  outline-offset: -1px;
+}
+.gjs-highlighter-sel {
+  outline: 2px solid #E040FB !important;
+  outline-offset: -1px;
+}
+
+/* Component badge (label shown on hover) */
+.gjs-badge {
+  background: #E040FB !important;
+  color: #fff !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  padding: 2px 8px !important;
+  border-radius: 4px !important;
+  box-shadow: 0 2px 8px rgba(224, 64, 251, 0.4) !important;
+  z-index: 10 !important;
+}
+
+/* Toolbar floating above selected component */
+.gjs-toolbar {
+  background: #181B2C !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important;
+}
+.gjs-toolbar-item {
+  color: rgba(255,255,255,0.7) !important;
+  padding: 4px 6px !important;
+}
+.gjs-toolbar-item:hover {
+  color: #E040FB !important;
+}
+
+/* Resizer handles */
+.gjs-resizer-h {
+  border: 2px solid #E040FB !important;
+  background: rgba(224, 64, 251, 0.15) !important;
+}
+
+/* Empty canvas hint */
+body:empty::before,
+body:not(:has(*))::before {
+  content: 'Przeciągnij bloki z panelu po lewej';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: rgba(255,255,255,0.25);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* Selected component border */
+[data-gjs-type]:not(body) {
+  outline-offset: -1px;
+  transition: outline 0.15s;
+}
+[data-gjs-type]:not(body):hover {
+  outline: 1px dashed rgba(224, 64, 251, 0.3);
+}
 `
 
 // ─── Dark theme CSS overrides for GrapesJS UI ──────────────────────────────
