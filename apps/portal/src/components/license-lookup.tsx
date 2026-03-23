@@ -19,8 +19,11 @@ export function LicenseLookup() {
     setError(null)
 
     try {
-      const licenseUrl = process.env.NEXT_PUBLIC_LICENSE_URL ?? 'http://localhost:3002'
-      const res = await fetch(`${licenseUrl}/customer/${trimmed}`)
+      const res = await fetch('/api/check-license', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: trimmed }),
+      })
 
       if (res.status === 404) {
         setError('Nie znaleziono licencji o podanym kluczu.')
@@ -28,6 +31,13 @@ export function LicenseLookup() {
         return
       }
       if (!res.ok) throw new Error('Server error')
+
+      const data = await res.json() as { valid?: boolean }
+      if (!data.valid) {
+        setError('Licencja jest nieważna.')
+        setLoading(false)
+        return
+      }
 
       router.push(`/portal/${trimmed}`)
     } catch {
