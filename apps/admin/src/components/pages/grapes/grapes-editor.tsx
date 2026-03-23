@@ -868,6 +868,7 @@ export function GrapesEditor({
   const gjsOptions = {
     height: '100%',
     width: 'auto',
+    fromElement: false,
     storageManager: false as const,
     undoManager: { trackSelection: false },
     deviceManager: {
@@ -881,6 +882,36 @@ export function GrapesEditor({
       styles: [
         'https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap',
       ],
+      frameStyle: CANVAS_CSS,
+    },
+    panels: {
+      defaults: [
+        {
+          id: 'views',
+          buttons: [
+            { id: 'open-blocks', active: true, command: 'open-blocks', className: 'fa fa-th-large', attributes: { title: 'Bloki' } },
+            { id: 'open-sm', command: 'open-sm', className: 'fa fa-paint-brush', attributes: { title: 'Style' } },
+            { id: 'open-layers', command: 'open-layers', className: 'fa fa-bars', attributes: { title: 'Warstwy' } },
+            { id: 'open-tm', command: 'open-tm', className: 'fa fa-cog', attributes: { title: 'Ustawienia' } },
+          ],
+        },
+        {
+          id: 'options',
+          buttons: [
+            { id: 'preview', command: 'preview', className: 'fa fa-eye', attributes: { title: 'Podglad' } },
+            { id: 'fullscreen', command: 'fullscreen', className: 'fa fa-arrows-alt', attributes: { title: 'Pelny ekran' } },
+            { id: 'undo', command: 'core:undo', className: 'fa fa-undo', attributes: { title: 'Cofnij' } },
+            { id: 'redo', command: 'core:redo', className: 'fa fa-repeat', attributes: { title: 'Ponow' } },
+            { id: 'export', command: 'export-template', className: 'fa fa-code', attributes: { title: 'Eksportuj kod' } },
+          ],
+        },
+      ],
+    },
+    blockManager: {
+      blocks: [],
+    },
+    selectorManager: {
+      componentFirst: true,
     },
   }
 
