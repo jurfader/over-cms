@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, Controller, type Control, type UseFormWatch, type UseFormSetValue, type FieldValues } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -17,6 +17,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CodeEditor, type CodeLanguage } from './code-editor'
 import { EditorSidebar } from './editor-sidebar'
 import { BlockEditor } from '@/components/editor/block-editor'
+import { FieldRenderer } from './field-renderer'
 import type { Block } from '@/components/editor/types'
 import { api } from '@/lib/api'
 import { slugify } from '@/lib/utils'
@@ -73,10 +74,18 @@ export function ContentEditor({ contentType, item, typeSlug }: ContentEditorProp
   const blocksField = contentType.fieldsSchema?.find((f) => f.type === 'blocks')
   const blocksFieldName = blocksField?.name ?? 'blocks'
 
-  // Pola boczne (wszystko poza body/richtext, slug i blocks)
-  const sidebarFields = contentType.fieldsSchema?.filter(
-    (f) => f.name !== bodyFieldName && f.type !== 'slug' && f.type !== 'blocks',
-  ) ?? []
+  // Detect form-only mode: no body/richtext field found
+  const isFormOnly = !bodyField
+
+  // In form-only mode, ALL fields go to the main area; in normal mode, non-body fields go to sidebar
+  const mainFields = isFormOnly
+    ? (contentType.fieldsSchema?.filter((f) => f.type !== 'slug') ?? [])
+    : []
+  const sidebarFields = isFormOnly
+    ? []
+    : (contentType.fieldsSchema?.filter(
+        (f) => f.name !== bodyFieldName && f.type !== 'slug' && f.type !== 'blocks',
+      ) ?? [])
 
   // Zawsze pozwól używać blokowego editora — dane lądują w data[blocksFieldName]
 
@@ -257,64 +266,90 @@ export function ContentEditor({ contentType, item, typeSlug }: ContentEditorProp
         {/* Main editor area */}
         <div className="flex-1 flex flex-col min-w-0">
 
-          {/* Editor mode switcher */}
-          <div className="flex items-center gap-3 px-4 py-2 border-b border-[var(--color-border)] bg-[var(--color-surface-elevated)] shrink-0">
-            <Tabs value={mode} onValueChange={(v) => setMode(v as EditorMode)}>
-              <TabsList className="h-7">
-                <TabsTrigger value="code" className="gap-1.5 text-xs py-1">
-                  <Code2 className="w-3 h-3" />
-                  Kod
-                </TabsTrigger>
-                <TabsTrigger value="blocks" className="gap-1.5 text-xs py-1">
-                  <Blocks className="w-3 h-3" />
-                  Bloki
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            {mode === 'code' && (
-              <div className="flex items-center gap-1 ml-2">
-                {CODE_LANGS.map((l) => (
-                  <button
-                    key={l.value}
-                    onClick={() => setLang(l.value)}
-                    className={`px-2.5 py-0.5 rounded text-xs font-mono font-medium transition-colors ${
-                      lang === l.value
-                        ? 'bg-[var(--color-primary-muted)] text-[var(--color-primary)]'
-                        : 'text-[var(--color-subtle)] hover:text-[var(--color-muted-foreground)]'
-                    }`}
-                  >
-                    {l.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Editor content */}
-          <div className="flex-1 min-h-0 overflow-hidden">
-            {mode === 'code' ? (
-              <CodeEditor
-                value={codeValue}
-                onChange={setCodeValue}
-                language={lang}
-                height="100%"
-              />
-            ) : (
-              <Controller
-                control={control}
-                name={`data.${blocksFieldName}`}
-                render={({ field }) => (
-                  <div className="h-full overflow-y-auto p-4 scrollbar-thin">
-                    <BlockEditor
-                      value={(field.value as Block[]) ?? []}
-                      onChange={field.onChange}
+          {isFormOnly ? (
+            /* ── Form-only mode: all fields rendered in main area ── */
+            <div className="flex-1 overflow-y-auto scrollbar-thin">
+              <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
+                {mainFields.length > 0 ? (
+                  mainFields.map((f) => (
+                    <FieldRenderer
+                      key={f.id}
+                      field={f}
+                      control={control as unknown as Control<FieldValues>}
+                      watch={watch as unknown as UseFormWatch<FieldValues>}
+                      setValue={setValue as unknown as UseFormSetValue<FieldValues>}
                     />
+                  ))
+                ) : (
+                  <p className="text-sm text-[var(--color-subtle)]">
+                    Ten typ treści nie ma zdefiniowanych pól.
+                  </p>
+                )}
+              </div>
+            </div>
+          ) : (
+            /* ── Normal mode: code / blocks editor ── */
+            <>
+              {/* Editor mode switcher */}
+              <div className="flex items-center gap-3 px-4 py-2 border-b border-[var(--color-border)] bg-[var(--color-surface-elevated)] shrink-0">
+                <Tabs value={mode} onValueChange={(v) => setMode(v as EditorMode)}>
+                  <TabsList className="h-7">
+                    <TabsTrigger value="code" className="gap-1.5 text-xs py-1">
+                      <Code2 className="w-3 h-3" />
+                      Kod
+                    </TabsTrigger>
+                    <TabsTrigger value="blocks" className="gap-1.5 text-xs py-1">
+                      <Blocks className="w-3 h-3" />
+                      Bloki
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+
+                {mode === 'code' && (
+                  <div className="flex items-center gap-1 ml-2">
+                    {CODE_LANGS.map((l) => (
+                      <button
+                        key={l.value}
+                        onClick={() => setLang(l.value)}
+                        className={`px-2.5 py-0.5 rounded text-xs font-mono font-medium transition-colors ${
+                          lang === l.value
+                            ? 'bg-[var(--color-primary-muted)] text-[var(--color-primary)]'
+                            : 'text-[var(--color-subtle)] hover:text-[var(--color-muted-foreground)]'
+                        }`}
+                      >
+                        {l.label}
+                      </button>
+                    ))}
                   </div>
                 )}
-              />
-            )}
-          </div>
+              </div>
+
+              {/* Editor content */}
+              <div className="flex-1 min-h-0 overflow-hidden">
+                {mode === 'code' ? (
+                  <CodeEditor
+                    value={codeValue}
+                    onChange={setCodeValue}
+                    language={lang}
+                    height="100%"
+                  />
+                ) : (
+                  <Controller
+                    control={control}
+                    name={`data.${blocksFieldName}`}
+                    render={({ field }) => (
+                      <div className="h-full overflow-y-auto p-4 scrollbar-thin">
+                        <BlockEditor
+                          value={(field.value as Block[]) ?? []}
+                          onChange={field.onChange}
+                        />
+                      </div>
+                    )}
+                  />
+                )}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Sidebar */}
