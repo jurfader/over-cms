@@ -10,13 +10,15 @@ import { BLOCK_DEFS, BLOCK_CATEGORIES, type BlockType } from './types'
 interface BlockPickerProps {
   onPick:  (type: BlockType) => void
   onClose: () => void
+  allowedTypes?: BlockType[]
 }
 
-export function BlockPicker({ onPick, onClose }: BlockPickerProps) {
+export function BlockPicker({ onPick, onClose, allowedTypes }: BlockPickerProps) {
   const [query,    setQuery]    = useState('')
   const [category, setCategory] = useState<string>('all')
 
   const filtered = BLOCK_DEFS.filter((d) => {
+    if (allowedTypes && !allowedTypes.includes(d.type)) return false
     const matchesCat = category === 'all' || d.category === category
     const matchesQ   = !query || d.label.toLowerCase().includes(query.toLowerCase())
     return matchesCat && matchesQ
