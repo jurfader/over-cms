@@ -1,20 +1,13 @@
 import { useState, useCallback, useRef } from 'react'
-import GjsEditor, {
-  Canvas,
-  BlocksProvider,
-  StylesProvider,
-  TraitsProvider,
-  LayersProvider,
-  DevicesProvider,
-} from '@grapesjs/react'
-import type { Editor, Block as GjsBlock } from 'grapesjs'
+import GjsEditor, { Canvas } from '@grapesjs/react'
+import type { Editor } from 'grapesjs'
 import grapesjs from 'grapesjs'
 import grapesjsPresetWebpage from 'grapesjs-preset-webpage'
+import 'grapesjs/dist/css/grapes.min.css'
 import {
   Monitor, Tablet, Smartphone,
   Undo2, Redo2, Save, Globe,
-  ChevronLeft, Layers, Paintbrush, Settings, LayoutGrid,
-  ChevronDown, ChevronRight,
+  ChevronLeft,
 } from 'lucide-react'
 import Link from 'next/link'
 import { overcmsBlocksPlugin } from './overcms-blocks-plugin'
@@ -145,6 +138,630 @@ body {
 img { max-width: 100%; height: auto; }
 `
 
+// ─── Dark theme CSS overrides for GrapesJS UI ──────────────────────────────
+// Overrides every GrapesJS panel, toolbar, and widget to match OverCMS dark UI.
+
+const DARK_THEME_CSS = `
+/* ── Base color classes ─────────────────────────────────────────────── */
+.gjs-one-bg {
+  background-color: #111421 !important;
+}
+.gjs-two-color {
+  color: rgba(255,255,255,0.85) !important;
+}
+.gjs-three-bg {
+  background-color: #181B2C !important;
+}
+.gjs-four-color,
+.gjs-four-color-h:hover {
+  color: #E91E8C !important;
+}
+
+/* ── Editor root ────────────────────────────────────────────────────── */
+.gjs-editor {
+  background-color: #0A0B14 !important;
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important;
+  border: none !important;
+}
+
+/* ── Canvas ─────────────────────────────────────────────────────────── */
+.gjs-cv-canvas {
+  background-color: #0A0B14 !important;
+  top: 0 !important;
+}
+
+/* ── All panels ─────────────────────────────────────────────────────── */
+.gjs-pn-panel {
+  background-color: #111421 !important;
+  border-color: rgba(255,255,255,0.06) !important;
+  color: rgba(255,255,255,0.85) !important;
+}
+
+.gjs-pn-views,
+.gjs-pn-views-container {
+  background-color: #111421 !important;
+  border-color: rgba(255,255,255,0.06) !important;
+}
+
+.gjs-pn-options,
+.gjs-pn-commands,
+.gjs-pn-devices-c {
+  background-color: #111421 !important;
+}
+
+/* ── Panel buttons ──────────────────────────────────────────────────── */
+.gjs-pn-btn {
+  color: rgba(255,255,255,0.5) !important;
+  border-radius: 6px !important;
+  transition: all 0.15s ease !important;
+}
+.gjs-pn-btn:hover {
+  color: rgba(255,255,255,0.9) !important;
+  background-color: rgba(255,255,255,0.06) !important;
+}
+.gjs-pn-btn.gjs-pn-active {
+  color: #E91E8C !important;
+  background-color: rgba(233,30,140,0.12) !important;
+  box-shadow: none !important;
+}
+
+/* ── Blocks ─────────────────────────────────────────────────────────── */
+.gjs-blocks-c {
+  background-color: #111421 !important;
+  padding: 6px !important;
+}
+
+.gjs-block-categories {
+  background-color: #111421 !important;
+}
+
+.gjs-block-category {
+  background-color: transparent !important;
+  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+}
+
+.gjs-block-category .gjs-title {
+  background-color: transparent !important;
+  color: rgba(255,255,255,0.5) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  padding: 8px 10px !important;
+  border-bottom: none !important;
+}
+.gjs-block-category .gjs-title:hover {
+  color: rgba(255,255,255,0.8) !important;
+}
+
+.gjs-block-category .gjs-caret-icon {
+  color: rgba(255,255,255,0.3) !important;
+}
+
+.gjs-block {
+  color: rgba(255,255,255,0.7) !important;
+  background-color: rgba(255,255,255,0.03) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  border-radius: 8px !important;
+  padding: 8px 6px !important;
+  min-height: 60px !important;
+  transition: all 0.15s ease !important;
+  font-size: 11px !important;
+  width: 45% !important;
+  margin: 4px 2.5% !important;
+  justify-content: center !important;
+}
+.gjs-block:hover {
+  border-color: rgba(233,30,140,0.35) !important;
+  background-color: rgba(233,30,140,0.06) !important;
+  color: rgba(255,255,255,0.95) !important;
+}
+.gjs-block svg {
+  fill: rgba(255,255,255,0.5) !important;
+}
+.gjs-block:hover svg {
+  fill: rgba(255,255,255,0.8) !important;
+}
+.gjs-block .gjs-block-label {
+  color: inherit !important;
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important;
+}
+
+/* ── Right panel (styles / traits / layers) ─────────────────────────── */
+.gjs-pn-views-container {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(255,255,255,0.1) transparent !important;
+}
+
+/* ── Style Manager ──────────────────────────────────────────────────── */
+.gjs-sm-sector {
+  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+  background-color: transparent !important;
+}
+
+.gjs-sm-sector .gjs-sm-sector-title {
+  background-color: transparent !important;
+  color: rgba(255,255,255,0.5) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  border-bottom: none !important;
+  padding: 8px 10px !important;
+}
+.gjs-sm-sector .gjs-sm-sector-title:hover {
+  color: rgba(255,255,255,0.8) !important;
+}
+
+.gjs-sm-sector .gjs-sm-sector-caret {
+  color: rgba(255,255,255,0.3) !important;
+}
+
+.gjs-sm-properties {
+  background-color: transparent !important;
+  padding: 6px 8px !important;
+}
+
+.gjs-sm-label {
+  color: rgba(255,255,255,0.5) !important;
+  font-size: 11px !important;
+}
+
+.gjs-field {
+  background-color: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 6px !important;
+  color: rgba(255,255,255,0.85) !important;
+  transition: border-color 0.15s ease !important;
+}
+.gjs-field:focus-within {
+  border-color: rgba(233,30,140,0.5) !important;
+}
+
+.gjs-field input,
+.gjs-field select,
+.gjs-field textarea {
+  color: rgba(255,255,255,0.85) !important;
+  background: transparent !important;
+}
+
+.gjs-field input::placeholder {
+  color: rgba(255,255,255,0.25) !important;
+}
+
+.gjs-field .gjs-input-holder {
+  background: transparent !important;
+}
+
+.gjs-field-arrows {
+  color: rgba(255,255,255,0.3) !important;
+}
+.gjs-field-arrows:hover {
+  color: rgba(255,255,255,0.6) !important;
+}
+
+.gjs-d-s-arrow {
+  color: rgba(255,255,255,0.3) !important;
+}
+
+.gjs-field-color-picker {
+  background-color: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 6px !important;
+}
+
+.gjs-field-colorp-c {
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  border-radius: 4px !important;
+}
+
+.gjs-sm-composite {
+  background-color: rgba(255,255,255,0.02) !important;
+  border: 1px solid rgba(255,255,255,0.04) !important;
+  border-radius: 6px !important;
+}
+
+/* SM radio / button groups */
+.gjs-sm-btn,
+.gjs-radio-item label {
+  background-color: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  color: rgba(255,255,255,0.5) !important;
+  border-radius: 4px !important;
+  transition: all 0.15s ease !important;
+}
+.gjs-sm-btn:hover,
+.gjs-radio-item label:hover {
+  background-color: rgba(255,255,255,0.08) !important;
+  color: rgba(255,255,255,0.8) !important;
+}
+.gjs-sm-btn.gjs-sm-active,
+.gjs-radio-item input:checked + label {
+  background-color: rgba(233,30,140,0.15) !important;
+  border-color: rgba(233,30,140,0.4) !important;
+  color: #E91E8C !important;
+}
+
+.gjs-radio-items {
+  background: transparent !important;
+}
+
+/* ── Trait Manager ──────────────────────────────────────────────────── */
+.gjs-trt-traits {
+  background-color: transparent !important;
+  padding: 8px !important;
+}
+
+.gjs-trt-trait {
+  padding: 4px 0 !important;
+  border-bottom: 1px solid rgba(255,255,255,0.04) !important;
+}
+.gjs-trt-trait:last-child {
+  border-bottom: none !important;
+}
+
+.gjs-label-wrp {
+  color: rgba(255,255,255,0.5) !important;
+  font-size: 11px !important;
+}
+
+/* ── Layer Manager ──────────────────────────────────────────────────── */
+.gjs-layers {
+  background-color: transparent !important;
+}
+
+.gjs-layer {
+  background-color: transparent !important;
+  border-bottom: 1px solid rgba(255,255,255,0.04) !important;
+}
+.gjs-layer:hover {
+  background-color: rgba(255,255,255,0.03) !important;
+}
+.gjs-layer.gjs-selected {
+  background-color: rgba(233,30,140,0.08) !important;
+}
+
+.gjs-layer-title {
+  background: transparent !important;
+}
+
+.gjs-layer-title-inn {
+  color: rgba(255,255,255,0.7) !important;
+  font-size: 12px !important;
+}
+.gjs-layer.gjs-selected .gjs-layer-title-inn {
+  color: #E91E8C !important;
+}
+
+.gjs-layer-caret {
+  color: rgba(255,255,255,0.3) !important;
+}
+
+.gjs-layer-vis {
+  color: rgba(255,255,255,0.3) !important;
+  border-left: 1px solid rgba(255,255,255,0.06) !important;
+}
+.gjs-layer-vis:hover {
+  color: rgba(255,255,255,0.6) !important;
+}
+
+.gjs-layer-count {
+  color: rgba(255,255,255,0.3) !important;
+}
+
+/* ── Selector Manager ───────────────────────────────────────────────── */
+.gjs-clm-tags {
+  background-color: #111421 !important;
+  padding: 8px !important;
+  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+}
+
+.gjs-clm-tags .gjs-sm-title,
+.gjs-clm-tags #gjs-clm-label {
+  color: rgba(255,255,255,0.5) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+.gjs-clm-tags .gjs-field {
+  background-color: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+.gjs-clm-sels-info {
+  color: rgba(255,255,255,0.4) !important;
+}
+
+.gjs-clm-tag {
+  background-color: rgba(233,30,140,0.12) !important;
+  border: 1px solid rgba(233,30,140,0.25) !important;
+  border-radius: 4px !important;
+  color: #E91E8C !important;
+  padding: 2px 6px !important;
+}
+
+.gjs-clm-tag-close {
+  color: rgba(233,30,140,0.6) !important;
+}
+.gjs-clm-tag-close:hover {
+  color: #E91E8C !important;
+}
+
+.gjs-clm-tag-status {
+  color: rgba(255,255,255,0.5) !important;
+}
+
+/* ── Toolbar (component toolbar) ────────────────────────────────────── */
+.gjs-toolbar {
+  background-color: #111421 !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
+  padding: 2px !important;
+}
+
+.gjs-toolbar-item {
+  color: rgba(255,255,255,0.6) !important;
+  padding: 4px 6px !important;
+  border-radius: 4px !important;
+  transition: all 0.15s ease !important;
+}
+.gjs-toolbar-item:hover {
+  color: #E91E8C !important;
+  background-color: rgba(233,30,140,0.1) !important;
+}
+
+/* ── Resizer ────────────────────────────────────────────────────────── */
+.gjs-resizer-h {
+  border: 2px solid #E91E8C !important;
+}
+
+/* ── Badge ──────────────────────────────────────────────────────────── */
+.gjs-badge {
+  background-color: #E91E8C !important;
+  color: #fff !important;
+  font-size: 10px !important;
+  border-radius: 4px !important;
+  padding: 2px 6px !important;
+}
+
+/* ── Highlighter ────────────────────────────────────────────────────── */
+.gjs-highlighter,
+.gjs-highlighter-sel {
+  outline: 1px solid #E91E8C !important;
+}
+
+/* ── Rich Text Editor toolbar ───────────────────────────────────────── */
+.gjs-rte-toolbar {
+  background-color: #111421 !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
+}
+
+.gjs-rte-action {
+  color: rgba(255,255,255,0.6) !important;
+  border-right: 1px solid rgba(255,255,255,0.06) !important;
+  transition: all 0.15s ease !important;
+}
+.gjs-rte-action:hover {
+  color: rgba(255,255,255,0.9) !important;
+  background-color: rgba(255,255,255,0.06) !important;
+}
+.gjs-rte-active {
+  color: #E91E8C !important;
+  background-color: rgba(233,30,140,0.12) !important;
+}
+
+/* ── Modal ──────────────────────────────────────────────────────────── */
+.gjs-mdl-dialog {
+  background-color: #181B2C !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6) !important;
+  color: rgba(255,255,255,0.85) !important;
+}
+
+.gjs-mdl-header {
+  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+  color: rgba(255,255,255,0.9) !important;
+}
+
+.gjs-mdl-title {
+  color: rgba(255,255,255,0.9) !important;
+  font-weight: 600 !important;
+}
+
+.gjs-mdl-btn-close {
+  color: rgba(255,255,255,0.4) !important;
+  transition: color 0.15s ease !important;
+}
+.gjs-mdl-btn-close:hover {
+  color: rgba(255,255,255,0.8) !important;
+}
+
+.gjs-mdl-content {
+  background: transparent !important;
+}
+
+.gjs-mdl-container {
+  background-color: rgba(0,0,0,0.5) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+/* ── Asset Manager ──────────────────────────────────────────────────── */
+.gjs-am-assets {
+  background: transparent !important;
+}
+
+.gjs-am-assets-header {
+  background: transparent !important;
+  color: rgba(255,255,255,0.5) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+.gjs-am-asset-image {
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  border-radius: 8px !important;
+  background: rgba(255,255,255,0.03) !important;
+  transition: border-color 0.15s ease !important;
+}
+.gjs-am-asset-image:hover {
+  border-color: rgba(233,30,140,0.3) !important;
+}
+
+.gjs-am-file-uploader {
+  background: rgba(255,255,255,0.03) !important;
+  border: 2px dashed rgba(255,255,255,0.1) !important;
+  border-radius: 8px !important;
+  color: rgba(255,255,255,0.5) !important;
+}
+.gjs-am-file-uploader:hover {
+  border-color: rgba(233,30,140,0.3) !important;
+}
+
+/* ── Color Picker ───────────────────────────────────────────────────── */
+.gjs-color-picker,
+.sp-container {
+  background-color: #181B2C !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+}
+
+.sp-input {
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 4px !important;
+  color: rgba(255,255,255,0.85) !important;
+}
+
+.sp-cancel,
+.sp-choose,
+.sp-palette-toggle {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  color: rgba(255,255,255,0.7) !important;
+  border-radius: 4px !important;
+}
+.sp-choose {
+  background: rgba(233,30,140,0.2) !important;
+  border-color: rgba(233,30,140,0.4) !important;
+  color: #E91E8C !important;
+}
+
+/* ── Context Menu ───────────────────────────────────────────────────── */
+.gjs-ctx-menu {
+  background-color: #181B2C !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+  padding: 4px !important;
+}
+
+.gjs-ctx-menu .gjs-ctx-row {
+  color: rgba(255,255,255,0.7) !important;
+  border-radius: 4px !important;
+  padding: 6px 10px !important;
+  transition: all 0.1s ease !important;
+}
+.gjs-ctx-menu .gjs-ctx-row:hover {
+  background-color: rgba(233,30,140,0.1) !important;
+  color: rgba(255,255,255,0.95) !important;
+}
+
+/* ── Placeholder (drag target) ──────────────────────────────────────── */
+.gjs-placeholder {
+  border-color: #E91E8C !important;
+}
+.gjs-placeholder-int {
+  background-color: rgba(233,30,140,0.15) !important;
+}
+
+/* ── Notooltip / empty state ────────────────────────────────────────── */
+.gjs-no-select,
+.gjs-no-app {
+  color: rgba(255,255,255,0.4) !important;
+}
+
+/* ── Scrollbars inside GrapesJS panels ──────────────────────────────── */
+.gjs-editor ::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.gjs-editor ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.gjs-editor ::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 99px;
+}
+.gjs-editor ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* ── View buttons (top-right: Styles / Traits / Layers / Blocks) ──── */
+.gjs-pn-views .gjs-pn-btn {
+  font-size: 18px !important;
+  padding: 6px 8px !important;
+}
+
+/* ── Selected component outline ─────────────────────────────────────── */
+.gjs-selected {
+  outline: 2px solid #E91E8C !important;
+  outline-offset: -2px;
+}
+
+/* ── Hovered component outline ──────────────────────────────────────── */
+.gjs-hovered {
+  outline: 1px solid rgba(233,30,140,0.4) !important;
+}
+
+/* ── Spacing display on components ──────────────────────────────────── */
+.gjs-margin-v-el,
+.gjs-padding-v-el {
+  opacity: 0.4 !important;
+}
+
+/* ── Dropdown / select styling ──────────────────────────────────────── */
+.gjs-field select {
+  background-color: rgba(255,255,255,0.04) !important;
+  border: none !important;
+}
+
+.gjs-field option {
+  background-color: #181B2C !important;
+  color: rgba(255,255,255,0.85) !important;
+}
+
+/* ── SM clear button ────────────────────────────────────────────────── */
+.gjs-sm-clear {
+  color: rgba(255,255,255,0.3) !important;
+  transition: color 0.15s ease !important;
+}
+.gjs-sm-clear:hover {
+  color: #EF4444 !important;
+}
+
+/* ── Units dropdown ─────────────────────────────────────────────────── */
+.gjs-field-units,
+.gjs-input-unit {
+  color: rgba(255,255,255,0.4) !important;
+  background: transparent !important;
+}
+
+/* ── Panels container ───────────────────────────────────────────────── */
+.gjs-pn-panels {
+  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+}
+
+/* ── Fix right container width for usability ────────────────────────── */
+.gjs-cv-canvas__frames {
+  background: #0A0B14 !important;
+}
+`
+
 // ─── Props ──────────────────────────────────────────────────────────────────
 
 interface GrapesEditorProps {
@@ -155,10 +772,6 @@ interface GrapesEditorProps {
   initialHtml?: string
   onSave: (data: { html: string; css: string; project: unknown }) => Promise<void>
 }
-
-// ─── Right sidebar tab ──────────────────────────────────────────────────────
-
-type RightTab = 'styles' | 'traits' | 'layers'
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
@@ -172,8 +785,7 @@ export function GrapesEditor({
 }: GrapesEditorProps) {
   const editorRef = useRef<Editor | null>(null)
   const [isSaving, setIsSaving] = useState(false)
-  const [showRightPanel, setShowRightPanel] = useState(false)
-  const [rightTab, setRightTab] = useState<RightTab>('styles')
+  const [activeDevice, setActiveDevice] = useState('Desktop')
 
   // ── Save handler ────────────────────────────────────────────────────────
 
@@ -192,12 +804,19 @@ export function GrapesEditor({
   }, [onSave, isSaving])
 
   const handlePublish = useCallback(async () => {
-    // Publish is the same as save but the parent component
-    // will handle updating the status field before calling the mutation
     await handleSave()
   }, [handleSave])
 
-  // ── Editor ready callback ───────────────────────────────────────────────
+  // ── Device switcher ───────────────────────────────────────────────────
+
+  const switchDevice = useCallback((deviceName: string) => {
+    const editor = editorRef.current
+    if (!editor) return
+    editor.setDevice(deviceName)
+    setActiveDevice(deviceName)
+  }, [])
+
+  // ── Editor ready callback ─────────────────────────────────────────────
 
   const onEditor = useCallback(
     (editor: Editor) => {
@@ -210,13 +829,26 @@ export function GrapesEditor({
         editor.setComponents(initialHtml)
       }
 
-      // Show right sidebar on component selection
-      editor.on('component:selected', () => {
-        setShowRightPanel(true)
+      // Inject canvas CSS (template design tokens) into the iframe
+      const canvasDoc = editor.Canvas.getDocument()
+      if (canvasDoc) {
+        const style = canvasDoc.createElement('style')
+        style.textContent = CANVAS_CSS
+        canvasDoc.head.appendChild(style)
+      }
+      // Also apply on subsequent frame loads
+      editor.on('canvas:frame:load', ({ window: frameWindow }) => {
+        if (frameWindow?.document) {
+          const s = frameWindow.document.createElement('style')
+          s.textContent = CANVAS_CSS
+          frameWindow.document.head.appendChild(s)
+        }
       })
 
-      editor.on('component:deselected', () => {
-        // Keep the panel visible so user can still browse layers/styles
+      // Track device changes from the built-in GrapesJS device manager too
+      editor.on('device:select', () => {
+        const dev = editor.getDevice()
+        setActiveDevice(dev)
       })
 
       // Keyboard shortcut for save
@@ -235,308 +867,146 @@ export function GrapesEditor({
 
   const gjsOptions = {
     height: '100%',
+    width: 'auto',
     storageManager: false as const,
     undoManager: { trackSelection: false },
+    deviceManager: {
+      devices: [
+        { name: 'Desktop', width: '' },
+        { name: 'Tablet', width: '768px', widthMedia: '992px' },
+        { name: 'Mobile', width: '375px', widthMedia: '480px' },
+      ],
+    },
     canvas: {
       styles: [
         'https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap',
       ],
     },
-    deviceManager: {
-      devices: [
-        { name: 'Desktop', width: '' },
-        { name: 'Tablet', width: '768px', widthMedia: '768px' },
-        { name: 'Mobile', width: '375px', widthMedia: '375px' },
-      ],
-    },
-    // Hide default panels — we build our own UI
-    panels: { defaults: [] },
-    // Block categories to keep organized
-    blockManager: {
-      appendTo: undefined as unknown as string, // we render with BlocksProvider
-    },
-    styleManager: {
-      appendTo: undefined as unknown as string,
-    },
-    layerManager: {
-      appendTo: undefined as unknown as string,
-    },
-    traitManager: {
-      appendTo: undefined as unknown as string,
-    },
   }
 
-  // ── Device icons ────────────────────────────────────────────────────────
+  // ── Device definitions for our toolbar ─────────────────────────────────
 
-  const deviceIcons: Record<string, typeof Monitor> = {
-    Desktop: Monitor,
-    Tablet: Tablet,
-    Mobile: Smartphone,
-  }
+  const devices = [
+    { name: 'Desktop', icon: Monitor },
+    { name: 'Tablet', icon: Tablet },
+    { name: 'Mobile', icon: Smartphone },
+  ]
 
   // ── Render ──────────────────────────────────────────────────────────────
 
   return (
     <div className="flex flex-col h-full bg-[var(--color-background)]">
-      <GjsEditor
-        className="flex flex-col flex-1 min-h-0"
-        grapesjs={grapesjs}
-        grapesjsCss="https://unpkg.com/grapesjs/dist/css/grapes.min.css"
-        options={gjsOptions}
-        plugins={[
-          overcmsBlocksPlugin,
-          grapesjsPresetWebpage as unknown as (() => void),
-        ]}
-        onEditor={onEditor}
-      >
-        {/* ── Top Toolbar ──────────────────────────────────────────── */}
-        <div className="flex items-center gap-3 px-4 py-2 border-b border-[var(--color-border)] bg-[var(--glass-card-bg)] backdrop-blur-sm shrink-0 z-10">
-          {/* Back */}
-          <Link
-            href="/pages"
-            className="flex items-center gap-1.5 text-xs text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Strony
-          </Link>
+      {/* Inject dark theme CSS overrides */}
+      <style dangerouslySetInnerHTML={{ __html: DARK_THEME_CSS }} />
 
-          {/* Separator */}
-          <div className="w-px h-5 bg-[var(--color-border)]" />
+      {/* ── Top Toolbar ──────────────────────────────────────────── */}
+      <div className="flex items-center gap-3 px-4 py-2 border-b border-[var(--color-border)] bg-[var(--glass-card-bg)] backdrop-blur-sm shrink-0 z-10">
+        {/* Back */}
+        <Link
+          href="/pages"
+          className="flex items-center gap-1.5 text-xs text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Strony
+        </Link>
 
-          {/* Page title */}
-          <span className="text-sm font-medium text-[var(--color-foreground)] truncate max-w-[200px]">
-            {initialTitle || 'Nowa strona'}
-          </span>
+        {/* Separator */}
+        <div className="w-px h-5 bg-[var(--color-border)]" />
 
-          {/* Separator */}
-          <div className="w-px h-5 bg-[var(--color-border)]" />
+        {/* Page title */}
+        <span className="text-sm font-medium text-[var(--color-foreground)] truncate max-w-[200px]">
+          {initialTitle || 'Nowa strona'}
+        </span>
 
-          {/* Device switcher */}
-          <DevicesProvider>
-            {({ devices, selected, select }) => (
-              <div className="flex items-center gap-1">
-                {devices.map((device) => {
-                  const Icon = deviceIcons[device.getName?.() ?? ''] ?? Monitor
-                  const isActive = selected === device.id
-                  return (
-                    <button
-                      key={device.id}
-                      type="button"
-                      onClick={() => select(String(device.id))}
-                      className={`p-1.5 rounded-[var(--radius-sm)] transition-colors ${
-                        isActive
-                          ? 'bg-[var(--color-primary-muted)] text-[var(--color-primary)]'
-                          : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-elevated)]'
-                      }`}
-                      title={device.getName()}
-                    >
-                      <Icon className="w-4 h-4" />
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-          </DevicesProvider>
+        {/* Separator */}
+        <div className="w-px h-5 bg-[var(--color-border)]" />
 
-          {/* Spacer */}
-          <div className="flex-1" />
-
-          {/* Undo / Redo */}
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => editorRef.current?.UndoManager.undo()}
-              className="p-1.5 rounded-[var(--radius-sm)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-elevated)] transition-colors"
-              title="Cofnij (Ctrl+Z)"
-            >
-              <Undo2 className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => editorRef.current?.UndoManager.redo()}
-              className="p-1.5 rounded-[var(--radius-sm)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-elevated)] transition-colors"
-              title="Ponów (Ctrl+Shift+Z)"
-            >
-              <Redo2 className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Separator */}
-          <div className="w-px h-5 bg-[var(--color-border)]" />
-
-          {/* Save */}
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={isSaving}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-sm)] text-xs font-medium border border-[var(--color-border-hover)] text-[var(--color-foreground)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors disabled:opacity-40"
-          >
-            <Save className="w-3.5 h-3.5" />
-            {isSaving ? 'Zapisywanie...' : 'Zapisz'}
-          </button>
-
-          {/* Publish */}
-          <button
-            type="button"
-            onClick={handlePublish}
-            disabled={isSaving}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-sm)] text-xs font-medium text-white gradient-bg shadow-[var(--shadow-pink)] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40"
-          >
-            <Globe className="w-3.5 h-3.5" />
-            Opublikuj
-          </button>
-        </div>
-
-        {/* ── Main layout: left sidebar + canvas + right sidebar ── */}
-        <div className="flex flex-1 min-h-0">
-
-          {/* ── Left Sidebar: Blocks ─────────────────────────────── */}
-          <div className="w-[280px] shrink-0 border-r border-[var(--color-border)] bg-[var(--color-surface)] overflow-y-auto scrollbar-thin flex flex-col">
-            <div className="px-3 py-2.5 border-b border-[var(--color-border)] flex items-center gap-2">
-              <LayoutGrid className="w-4 h-4 text-[var(--color-primary)]" />
-              <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
-                Bloki
-              </span>
-            </div>
-            <div className="flex-1 overflow-y-auto p-2">
-              <BlocksProvider>
-                {({ mapCategoryBlocks, dragStart, dragStop }) => (
-                  <div className="space-y-1">
-                    {Array.from(mapCategoryBlocks).map(([category, blocks]) => (
-                      <BlockCategory
-                        key={category}
-                        category={category}
-                        blocks={blocks}
-                        dragStart={dragStart}
-                        dragStop={dragStop}
-                      />
-                    ))}
-                  </div>
-                )}
-              </BlocksProvider>
-            </div>
-          </div>
-
-          {/* ── Canvas ───────────────────────────────────────────── */}
-          <div className="flex-1 min-w-0 relative">
-            {/* Inject CSS into the canvas iframe */}
-            <Canvas
-              className="h-full w-full"
-              // @ts-expect-error GrapesJS canvas accepts additional frame styles
-              frameStyle={CANVAS_CSS}
-            />
-          </div>
-
-          {/* ── Right Sidebar: Styles / Traits / Layers ──────────── */}
-          {showRightPanel && (
-            <div className="w-[280px] shrink-0 border-l border-[var(--color-border)] bg-[var(--color-surface)] flex flex-col overflow-hidden">
-              {/* Tabs */}
-              <div className="flex border-b border-[var(--color-border)] shrink-0">
-                {([
-                  { key: 'styles' as RightTab, icon: Paintbrush, label: 'Style' },
-                  { key: 'traits' as RightTab, icon: Settings, label: 'Ustawienia' },
-                  { key: 'layers' as RightTab, icon: Layers, label: 'Warstwy' },
-                ] as const).map(({ key, icon: Icon, label }) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setRightTab(key)}
-                    className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2.5 text-xs font-medium transition-colors ${
-                      rightTab === key
-                        ? 'text-[var(--color-primary)] border-b-2 border-[var(--color-primary)]'
-                        : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
-                    }`}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    {label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Tab content */}
-              <div className="flex-1 overflow-y-auto scrollbar-thin">
-                {rightTab === 'styles' && (
-                  <StylesProvider>
-                    {(props) => <props.Container>{null}</props.Container>}
-                  </StylesProvider>
-                )}
-                {rightTab === 'traits' && (
-                  <TraitsProvider>
-                    {(props) => <props.Container>{null}</props.Container>}
-                  </TraitsProvider>
-                )}
-                {rightTab === 'layers' && (
-                  <LayersProvider>
-                    {(props) => <props.Container>{null}</props.Container>}
-                  </LayersProvider>
-                )}
-              </div>
-
-              {/* Close panel button */}
+        {/* Device switcher */}
+        <div className="flex items-center gap-1">
+          {devices.map(({ name, icon: Icon }) => {
+            const isActive = activeDevice === name
+            return (
               <button
+                key={name}
                 type="button"
-                onClick={() => setShowRightPanel(false)}
-                className="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 border-t border-[var(--color-border)] text-xs text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors"
+                onClick={() => switchDevice(name)}
+                className={`p-1.5 rounded-[var(--radius-sm)] transition-colors ${
+                  isActive
+                    ? 'bg-[var(--color-primary-muted)] text-[var(--color-primary)]'
+                    : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-elevated)]'
+                }`}
+                title={name}
               >
-                Zamknij panel
+                <Icon className="w-4 h-4" />
               </button>
-            </div>
-          )}
+            )
+          })}
         </div>
-      </GjsEditor>
-    </div>
-  )
-}
 
-// ─── Block Category (collapsible) ───────────────────────────────────────────
+        {/* Spacer */}
+        <div className="flex-1" />
 
-interface BlockCategoryProps {
-  category: string
-  blocks: GjsBlock[]
-  dragStart: (block: GjsBlock, ev?: Event) => void
-  dragStop: (cancel?: boolean) => void
-}
-
-function BlockCategory({ category, blocks, dragStart, dragStop }: BlockCategoryProps) {
-  const [open, setOpen] = useState(true)
-
-  return (
-    <div className="mb-1">
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 w-full px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] rounded-[var(--radius-sm)] hover:bg-[var(--color-surface-elevated)] transition-colors"
-      >
-        {open ? (
-          <ChevronDown className="w-3 h-3 shrink-0" />
-        ) : (
-          <ChevronRight className="w-3 h-3 shrink-0" />
-        )}
-        {category || 'Inne'}
-      </button>
-      {open && (
-        <div className="grid grid-cols-2 gap-1.5 px-1 pt-1 pb-2">
-          {blocks.map((block) => (
-            <div
-              key={block.getId()}
-              className="flex flex-col items-center gap-1 p-2 rounded-[var(--radius)] border border-[var(--color-border)] bg-[var(--color-surface-elevated)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-muted)] cursor-grab active:cursor-grabbing transition-colors select-none"
-              draggable
-              onDragStart={(ev) => dragStart(block, ev.nativeEvent)}
-              onDragEnd={() => dragStop(false)}
-            >
-              <div
-                className="w-6 h-6 text-[var(--color-muted-foreground)] [&_svg]:w-full [&_svg]:h-full"
-                dangerouslySetInnerHTML={{
-                  __html: block.getMedia()?.toString() ?? '',
-                }}
-              />
-              <span className="text-[10px] text-center leading-tight text-[var(--color-muted-foreground)] line-clamp-2">
-                {block.getLabel()}
-              </span>
-            </div>
-          ))}
+        {/* Undo / Redo */}
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => editorRef.current?.UndoManager.undo()}
+            className="p-1.5 rounded-[var(--radius-sm)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-elevated)] transition-colors"
+            title="Cofnij (Ctrl+Z)"
+          >
+            <Undo2 className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => editorRef.current?.UndoManager.redo()}
+            className="p-1.5 rounded-[var(--radius-sm)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-elevated)] transition-colors"
+            title="Ponow (Ctrl+Shift+Z)"
+          >
+            <Redo2 className="w-4 h-4" />
+          </button>
         </div>
-      )}
+
+        {/* Separator */}
+        <div className="w-px h-5 bg-[var(--color-border)]" />
+
+        {/* Save */}
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-sm)] text-xs font-medium border border-[var(--color-border-hover)] text-[var(--color-foreground)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors disabled:opacity-40"
+        >
+          <Save className="w-3.5 h-3.5" />
+          {isSaving ? 'Zapisywanie...' : 'Zapisz'}
+        </button>
+
+        {/* Publish */}
+        <button
+          type="button"
+          onClick={handlePublish}
+          disabled={isSaving}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-sm)] text-xs font-medium text-white gradient-bg shadow-[var(--shadow-pink)] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40"
+        >
+          <Globe className="w-3.5 h-3.5" />
+          Opublikuj
+        </button>
+      </div>
+
+      {/* ── GrapesJS Editor (renders its own full UI) ───────────── */}
+      <div className="flex-1 min-h-0">
+        <GjsEditor
+          className="h-full"
+          grapesjs={grapesjs}
+          options={gjsOptions}
+          plugins={[
+            overcmsBlocksPlugin,
+            grapesjsPresetWebpage as unknown as (() => void),
+          ]}
+          onEditor={onEditor}
+        >
+          <Canvas className="h-full" />
+        </GjsEditor>
+      </div>
     </div>
   )
 }
