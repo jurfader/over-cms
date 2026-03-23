@@ -92,7 +92,12 @@ export default function PagesListPage() {
       resetDialog()
       router.push(`/pages/${id}`)
     } catch (err: unknown) {
-      setCreateError(err instanceof Error ? err.message : 'Nie udało się utworzyć strony')
+      const msg = err instanceof Error ? err.message : String(err)
+      if (msg.includes('409') || msg.toLowerCase().includes('conflict') || msg.toLowerCase().includes('already exists')) {
+        setCreateError('Strona z tym slugiem już istnieje. Zmień slug lub edytuj istniejącą stronę.')
+      } else {
+        setCreateError(msg || 'Nie udało się utworzyć strony')
+      }
       setIsCreating(false)
     }
   }
