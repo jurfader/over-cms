@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-interface CustomerResponse {
+interface LicenseData {
   key: string
   plan: string
   status: string
@@ -10,6 +10,12 @@ interface CustomerResponse {
   activations: Array<{ domain: string; installationId: string; activatedAt: string }>
   expiresAt?: string | null
 }
+
+interface CustomerResponse {
+  data?: LicenseData
+  signature?: string
+}
+
 
 /**
  * Server-side license check endpoint
@@ -48,15 +54,23 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const data = await res.json() as CustomerResponse
+    const response = await res.json() as CustomerResponse
+    const lic = response.data
+
+    if (!lic) {
+      return NextResponse.json(
+        { valid: false, error: 'Invalid license response' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({
-      valid: data.status === 'active',
-      plan: data.plan,
-      status: data.status,
-      maxInstallations: data.maxInstallations,
-      activeCount: data.activeCount,
-      expiresAt: data.expiresAt,
+      valid: lic.status === 'active',
+      plan: lic.plan,
+      status: lic.status,
+      maxInstallations: lic.maxInstallations,
+      activeCount: lic.activeCount,
+      expiresAt: lic.expiresAt,
     })
   } catch (err) {
     console.error('[Portal] License check failed:', err instanceof Error ? err.message : err)

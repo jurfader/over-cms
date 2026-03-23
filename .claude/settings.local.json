@@ -3,7 +3,24 @@
     "allow": [
       "Bash(pnpm install:*)",
       "Bash(npm --version)",
-      "WebFetch(domain:overmedia.pl)"
+      "WebFetch(domain:overmedia.pl)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"feat: full transfer system — media files, relations, URL remapping:*)",
+      "Bash(git push:*)",
+      "Bash(xargs kill:*)",
+      "Bash(pg_isready)",
+      "Bash(psql $DATABASE_URL -c \"SELECT 1\")",
+      "Bash(brew services:*)",
+      "Bash(docker compose:*)",
+      "Bash(docker --version)",
+      "Bash(pnpm --filter @overcms/core db:push)",
+      "Bash(ls /Volumes/Nowy/OVERMEDIA/Strony/Projekty/OVERCMS/drizzle.config* /Volumes/Nowy/OVERMEDIA/Strony/Projekty/OVERCMS/packages/core/drizzle.config*)",
+      "Bash(git commit -m \"v1.0.0 — versioning system:*)",
+      "Bash(git tag:*)",
+      "Bash(git commit -m \"fix: portal Docker build — add missing COPY, remove unused variable:*)",
+      "Bash(openssl genpkey:*)",
+      "Bash(openssl pkey:*)",
+      "Bash(git commit -m \"feat: server-side license verification system with ED25519 signatures:*)"
     ]
   }
 }
