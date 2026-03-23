@@ -117,7 +117,6 @@ function MediaCard({ item, selected, onSelect, onDelete }: MediaCardProps) {
       {/* Thumbnail */}
       <div className="aspect-square bg-[var(--color-surface-elevated)] flex items-center justify-center overflow-hidden">
         {isImage(item.mimeType) ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={item.url}
             alt={item.alt ?? item.originalName}
@@ -347,7 +346,6 @@ export default function MediaPage() {
               {/* Preview */}
               <div className="aspect-square rounded-[var(--radius)] overflow-hidden bg-[var(--color-surface-elevated)] flex items-center justify-center">
                 {isImage(selectedItem.mimeType) ? (
-                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={selectedItem.url} alt={selectedItem.alt ?? ''} className="w-full h-full object-contain" />
                 ) : (
                   <FileText className="w-12 h-12 text-[var(--color-subtle)]" />

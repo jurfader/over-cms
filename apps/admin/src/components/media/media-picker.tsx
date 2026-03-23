@@ -76,7 +76,6 @@ export function MediaPicker({ value, onChange, accept = 'all' }: MediaPickerProp
       >
         {value ? (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={value} alt="" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <p className="text-white text-xs font-medium">Zmień plik</p>
@@ -186,7 +185,6 @@ export function MediaPicker({ value, onChange, accept = 'all' }: MediaPickerProp
                           )}
                         >
                           {item.mimeType.startsWith('image/') ? (
-                            // eslint-disable-next-line @next/next/no-img-element
                             <img src={item.url} alt={item.alt ?? ''} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">

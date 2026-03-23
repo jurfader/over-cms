@@ -176,8 +176,7 @@ export function ContentEditor({ contentType, item, typeSlug }: ContentEditorProp
     return () => {
       if (autoSaveRef.current) clearInterval(autoSaveRef.current)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item?.id])
+  }, [item?.id]) // saveMutation is stable via useMutation
 
   return (
     <div className="flex flex-col h-[calc(100vh-var(--topbar-height))] -mt-6 -mx-6">

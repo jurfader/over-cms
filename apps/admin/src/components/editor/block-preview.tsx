@@ -145,7 +145,6 @@ function ImageRender({ data }: RenderProps) {
   if (data.url) {
     return (
       <figure>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={String(data.url)} alt={String(data.alt ?? '')} className="w-full rounded object-cover max-h-96" />
         {!!data.caption && <figcaption className="text-xs text-center mt-1 opacity-60">{String(data.caption)}</figcaption>}
       </figure>
@@ -173,7 +172,6 @@ function GalleryRender({ data }: RenderProps) {
   return (
     <div className="grid grid-cols-3 gap-1">
       {images.map((url, i) => (
-        // eslint-disable-next-line @next/next/no-img-element
         <img key={i} src={url} alt="" className="w-full h-24 object-cover rounded" />
       ))}
     </div>
@@ -307,7 +305,6 @@ function CardRender({ data }: RenderProps) {
   return (
     <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm">
       {!!data.image && (
-        // eslint-disable-next-line @next/next/no-img-element
         <img src={String(data.image)} alt="" className="w-full h-48 object-cover" />
       )}
       <div className="p-4">
@@ -349,7 +346,6 @@ function TestimonialRender({ data }: RenderProps) {
       <p className="text-base italic mb-4">&ldquo;{String(data.text ?? '')}&rdquo;</p>
       <div className="flex items-center gap-3">
         {!!data.avatar && (
-          // eslint-disable-next-line @next/next/no-img-element
           <img src={String(data.avatar)} alt="" className="w-10 h-10 rounded-full object-cover" />
         )}
         <div>

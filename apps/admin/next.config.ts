@@ -11,6 +11,7 @@ function readVersion(): string {
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  basePath: '/admin',
   env: {
     APP_VERSION: readVersion(),
   },
