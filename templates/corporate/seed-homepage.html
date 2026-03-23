@@ -1,0 +1,826 @@
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     OVERMEDIA Homepage — seed HTML for CMS
+     Rendered inside the corporate template layout (dark theme, navbar, footer,
+     fonts, CSS variables already loaded).
+     ═══════════════════════════════════════════════════════════════════════════ -->
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<section id="home" style="position:relative;min-height:100svh;display:flex;align-items:center;padding-top:7rem;padding-bottom:5rem;overflow:hidden;">
+
+  <!-- Background glows -->
+  <div aria-hidden="true" style="position:absolute;inset:0;z-index:0;pointer-events:none;">
+    <div style="position:absolute;top:-20%;right:-5%;width:70vw;height:70vw;max-width:900px;max-height:900px;border-radius:50%;background:radial-gradient(circle,rgba(224,64,251,0.1) 0%,transparent 60%);filter:blur(60px);"></div>
+    <div style="position:absolute;bottom:-10%;left:-5%;width:50vw;height:50vw;max-width:600px;border-radius:50%;background:radial-gradient(circle,rgba(123,47,224,0.07) 0%,transparent 65%);filter:blur(80px);"></div>
+  </div>
+
+  <div class="container" style="position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center;">
+
+    <!-- Left: text content -->
+    <div>
+      <!-- Badge -->
+      <div style="margin-bottom:1.5rem;">
+        <span style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.375rem 1rem;border-radius:999px;font-size:0.8125rem;font-weight:600;background:rgba(224,64,251,0.1);color:var(--color-primary);border:1px solid rgba(224,64,251,0.25);letter-spacing:0.04em;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+          </svg>
+          AGENCJA INTERAKTYWNA | POLSKA
+        </span>
+      </div>
+
+      <!-- Heading -->
+      <h1 style="font-size:clamp(2.5rem,5.5vw,4.5rem);font-weight:800;line-height:1.1;letter-spacing:-0.02em;margin-bottom:1.5rem;">
+        Profesjonalne<br/>
+        <span class="gradient-text">Strony WWW</span><br/>
+        i Marketing Cyfrowy
+      </h1>
+
+      <!-- Subtitle -->
+      <p style="font-size:clamp(0.9rem,1.5vw,1.0625rem);color:rgba(255,255,255,0.6);max-width:520px;margin-bottom:2.5rem;line-height:1.75;">
+        Kompleksowe usługi digital dla Twojej firmy: tworzenie stron internetowych, sklepy e-commerce WooCommerce, aplikacje mobilne iOS i Android, montaż wideo oraz kampanie Google Ads, Meta Ads i TikTok Ads.
+      </p>
+
+      <!-- CTAs -->
+      <div style="display:flex;flex-wrap:wrap;gap:1rem;margin-bottom:3.5rem;">
+        <a href="#kontakt" class="btn btn-primary" style="font-size:1rem;padding:0.875rem 2rem;">
+          Bezpłatna wycena projektu
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+        <a href="#portfolio" class="btn btn-outline" style="font-size:1rem;padding:0.875rem 2rem;">
+          Nasze realizacje
+        </a>
+      </div>
+
+      <!-- Stats -->
+      <div style="display:flex;flex-wrap:wrap;gap:2.5rem;padding-top:2.5rem;border-top:1px solid rgba(255,255,255,0.08);">
+        <div>
+          <p style="font-size:clamp(1.75rem,3vw,2.5rem);font-weight:800;letter-spacing:-0.02em;color:#fff;">150+</p>
+          <p style="font-size:0.875rem;color:rgba(255,255,255,0.5);margin-top:0.1rem;">Zrealizowanych projektów</p>
+        </div>
+        <div>
+          <p style="font-size:clamp(1.75rem,3vw,2.5rem);font-weight:800;letter-spacing:-0.02em;color:#fff;">98%</p>
+          <p style="font-size:0.875rem;color:rgba(255,255,255,0.5);margin-top:0.1rem;">Zadowolonych klientów</p>
+        </div>
+        <div>
+          <p style="font-size:clamp(1.75rem,3vw,2.5rem);font-weight:800;letter-spacing:-0.02em;color:#fff;">5</p>
+          <p style="font-size:0.875rem;color:rgba(255,255,255,0.5);margin-top:0.1rem;">Lat na rynku</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: visual -->
+    <div style="position:relative;display:flex;align-items:center;justify-content:center;min-height:480px;">
+      <!-- Outer glow ring -->
+      <div style="position:absolute;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(123,47,224,0.25) 0%,rgba(224,64,251,0.05) 60%,transparent 80%);border:1px dashed rgba(224,64,251,0.2);" aria-hidden="true"></div>
+
+      <!-- Logo centered -->
+      <div style="position:relative;z-index:2;">
+        <img src="/images/logo.webp" alt="OVERMEDIA" width="220" height="220" style="width:clamp(160px,18vw,220px);height:auto;filter:drop-shadow(0 0 48px rgba(224,64,251,0.45));"/>
+      </div>
+
+      <!-- Floating service badges -->
+      <div style="position:absolute;top:14%;left:-8%;right:auto;display:flex;align-items:center;gap:0.625rem;padding:0.625rem 1.125rem;border-radius:12px;background:rgba(20,20,28,0.85);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.1);box-shadow:0 8px 32px rgba(0,0,0,0.4);font-weight:600;font-size:0.9375rem;color:#fff;white-space:nowrap;z-index:3;">
+        <span style="width:2rem;height:2rem;border-radius:8px;background:rgba(224,64,251,0.15);display:flex;align-items:center;justify-content:center;color:var(--color-primary);flex-shrink:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+        </span>
+        Strony WWW
+      </div>
+
+      <div style="position:absolute;top:22%;left:auto;right:-12%;display:flex;align-items:center;gap:0.625rem;padding:0.625rem 1.125rem;border-radius:12px;background:rgba(20,20,28,0.85);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.1);box-shadow:0 8px 32px rgba(0,0,0,0.4);font-weight:600;font-size:0.9375rem;color:#fff;white-space:nowrap;z-index:3;">
+        <span style="width:2rem;height:2rem;border-radius:8px;background:rgba(224,64,251,0.15);display:flex;align-items:center;justify-content:center;color:var(--color-primary);flex-shrink:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </span>
+        Aplikacje
+      </div>
+
+      <div style="position:absolute;top:auto;left:-4%;right:auto;bottom:26%;display:flex;align-items:center;gap:0.625rem;padding:0.625rem 1.125rem;border-radius:12px;background:rgba(20,20,28,0.85);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.1);box-shadow:0 8px 32px rgba(0,0,0,0.4);font-weight:600;font-size:0.9375rem;color:#fff;white-space:nowrap;z-index:3;">
+        <span style="width:2rem;height:2rem;border-radius:8px;background:rgba(224,64,251,0.15);display:flex;align-items:center;justify-content:center;color:var(--color-primary);flex-shrink:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        </span>
+        Video
+      </div>
+
+      <div style="position:absolute;top:auto;left:auto;right:-10%;bottom:16%;display:flex;align-items:center;gap:0.625rem;padding:0.625rem 1.125rem;border-radius:12px;background:rgba(20,20,28,0.85);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.1);box-shadow:0 8px 32px rgba(0,0,0,0.4);font-weight:600;font-size:0.9375rem;color:#fff;white-space:nowrap;z-index:3;">
+        <span style="width:2rem;height:2rem;border-radius:8px;background:rgba(224,64,251,0.15);display:flex;align-items:center;justify-content:center;color:var(--color-primary);flex-shrink:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="m8 12 4-4 4 4"/></svg>
+        </span>
+        Marketing
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll indicator -->
+  <div style="position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:0.25rem;color:rgba(255,255,255,0.25);font-size:0.6875rem;letter-spacing:0.1em;text-transform:uppercase;animation:hero-bounce 2s ease infinite;">
+    <span>Przewiń w dół</span>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+  </div>
+
+  <style>
+    @keyframes hero-bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50%      { transform: translateX(-50%) translateY(6px); }
+    }
+    @media (max-width: 860px) {
+      #home .container { grid-template-columns: 1fr !important; }
+      #home .container > div:last-child { display: none !important; }
+    }
+  </style>
+</section>
+
+
+<!-- ═══════════════════ SERVICES ═══════════════════ -->
+<section id="uslugi" style="padding:var(--section-y) 0;background:var(--color-surface);">
+  <div class="container">
+
+    <div style="text-align:center;margin-bottom:4rem;">
+      <p class="section-label" style="justify-content:center;margin-bottom:1rem;">Usługi Digital i IT</p>
+      <h2 style="font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-0.02em;margin-bottom:1rem;">
+        Kompleksowe Usługi Tworzenia<br/>Stron i Marketingu
+      </h2>
+      <p style="font-size:1.0625rem;color:rgba(255,255,255,0.55);max-width:540px;margin:0 auto;">
+        Od strategii przez wdrożenie aż po stałą obsługę — wszystko w jednym miejscu.
+      </p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem;">
+
+      <!-- Tworzenie Stron Internetowych -->
+      <div class="glass" style="border-radius:var(--radius-lg);padding:1.75rem;height:100%;position:relative;">
+        <div style="width:3rem;height:3rem;border-radius:var(--radius-sm);background:rgba(224,64,251,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;color:var(--color-primary);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </div>
+        <h3 style="font-weight:700;font-size:1rem;margin-bottom:0.625rem;line-height:1.3;">Tworzenie Stron Internetowych</h3>
+        <p style="font-size:0.875rem;color:rgba(255,255,255,0.5);line-height:1.7;margin-bottom:1rem;">Profesjonalne strony WWW dla firm, wizytówki, landing page. Responsywne, zoptymalizowane pod SEO.</p>
+        <p style="font-size:0.9375rem;font-weight:700;color:var(--color-primary);">od 800 zł</p>
+      </div>
+
+      <!-- Sklepy E-commerce WooCommerce -->
+      <div class="glass" style="border-radius:var(--radius-lg);padding:1.75rem;height:100%;position:relative;">
+        <div style="width:3rem;height:3rem;border-radius:var(--radius-sm);background:rgba(224,64,251,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;color:var(--color-primary);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+        </div>
+        <h3 style="font-weight:700;font-size:1rem;margin-bottom:0.625rem;line-height:1.3;">Sklepy E-commerce WooCommerce</h3>
+        <p style="font-size:0.875rem;color:rgba(255,255,255,0.5);line-height:1.7;margin-bottom:1rem;">Sklepy internetowe z PayU, Przelewy24, BLIK. Integracje z InPost, DPD, DHL i pełne zarządzanie.</p>
+        <p style="font-size:0.9375rem;font-weight:700;color:var(--color-primary);">od 3 000 zł</p>
+      </div>
+
+      <!-- Aplikacje Mobilne iOS i Android -->
+      <div class="glass" style="border-radius:var(--radius-lg);padding:1.75rem;height:100%;position:relative;">
+        <div style="width:3rem;height:3rem;border-radius:var(--radius-sm);background:rgba(224,64,251,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;color:var(--color-primary);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </div>
+        <h3 style="font-weight:700;font-size:1rem;margin-bottom:0.625rem;line-height:1.3;">Aplikacje Mobilne iOS i Android</h3>
+        <p style="font-size:0.875rem;color:rgba(255,255,255,0.5);line-height:1.7;margin-bottom:1rem;">Natywne aplikacje mobilne w React Native i Flutter — od MVP po publikację w App Store i Google Play.</p>
+        <p style="font-size:0.9375rem;font-weight:700;color:var(--color-primary);">od 5 000 zł</p>
+      </div>
+
+      <!-- Profesjonalny Montaż Wideo -->
+      <div class="glass" style="border-radius:var(--radius-lg);padding:1.75rem;height:100%;position:relative;">
+        <div style="width:3rem;height:3rem;border-radius:var(--radius-sm);background:rgba(224,64,251,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;color:var(--color-primary);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        </div>
+        <h3 style="font-weight:700;font-size:1rem;margin-bottom:0.625rem;line-height:1.3;">Profesjonalny Montaż Wideo</h3>
+        <p style="font-size:0.875rem;color:rgba(255,255,255,0.5);line-height:1.7;margin-bottom:1rem;">Filmy promocyjne, reklamy, materiały YouTube. Color grading, animacje, efekty specjalne i sound design.</p>
+        <p style="font-size:0.9375rem;font-weight:700;color:var(--color-primary);">od 80 zł/min</p>
+      </div>
+
+      <!-- Rolki & Reels -->
+      <div class="glass" style="border-radius:var(--radius-lg);padding:1.75rem;height:100%;position:relative;">
+        <div style="width:3rem;height:3rem;border-radius:var(--radius-sm);background:rgba(224,64,251,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;color:var(--color-primary);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42C1 8.14 1 11.61 1 11.61s0 3.47.46 5.19a2.78 2.78 0 0 0 1.95 1.95C5.12 19.22 12 19.22 12 19.22s6.88 0 8.59-.47a2.78 2.78 0 0 0 1.95-1.95C23 15.08 23 11.61 23 11.61s0-3.47-.46-5.19z"/><polygon points="9.75 15.02 15.5 11.61 9.75 8.2 9.75 15.02"/></svg>
+        </div>
+        <h3 style="font-weight:700;font-size:1rem;margin-bottom:0.625rem;line-height:1.3;">Rolki &amp; Reels</h3>
+        <p style="font-size:0.875rem;color:rgba(255,255,255,0.5);line-height:1.7;margin-bottom:1rem;">Viralowe treści wideo na Instagram Reels, TikTok i YouTube Shorts. Scenariusz, nagranie i montaż.</p>
+        <p style="font-size:0.9375rem;font-weight:700;color:var(--color-primary);">od 450 zł / 5 rolek</p>
+      </div>
+
+      <!-- Social Media -->
+      <div class="glass" style="border-radius:var(--radius-lg);padding:1.75rem;height:100%;position:relative;">
+        <div style="width:3rem;height:3rem;border-radius:var(--radius-sm);background:rgba(224,64,251,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;color:var(--color-primary);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3 style="font-weight:700;font-size:1rem;margin-bottom:0.625rem;line-height:1.3;">Social Media</h3>
+        <p style="font-size:0.875rem;color:rgba(255,255,255,0.5);line-height:1.7;margin-bottom:1rem;">Kompleksowe prowadzenie mediów społecznościowych: strategia, content, publikacja, moderacja i raportowanie.</p>
+        <p style="font-size:0.9375rem;font-weight:700;color:var(--color-primary);">od 1 500 zł/m-c</p>
+      </div>
+
+      <!-- Serwis IT -->
+      <div class="glass" style="border-radius:var(--radius-lg);padding:1.75rem;height:100%;position:relative;">
+        <div style="width:3rem;height:3rem;border-radius:var(--radius-sm);background:rgba(224,64,251,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;color:var(--color-primary);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </div>
+        <h3 style="font-weight:700;font-size:1rem;margin-bottom:0.625rem;line-height:1.3;">Serwis IT</h3>
+        <p style="font-size:0.875rem;color:rgba(255,255,255,0.5);line-height:1.7;margin-bottom:1rem;">Wsparcie techniczne dla firm: konfiguracja sprzętu, serwerów, oprogramowania i sieci komputerowych.</p>
+        <p style="font-size:0.9375rem;font-weight:700;color:var(--color-primary);">od 50 zł/h</p>
+      </div>
+
+      <!-- Kampanie Ads -->
+      <div class="glass" style="border-radius:var(--radius-lg);padding:1.75rem;height:100%;position:relative;">
+        <span style="position:absolute;top:1.25rem;right:1.25rem;padding:0.2rem 0.6rem;border-radius:999px;font-size:0.6875rem;font-weight:700;letter-spacing:0.06em;background:rgba(224,64,251,0.15);color:var(--color-primary);border:1px solid rgba(224,64,251,0.3);">Popularne</span>
+        <div style="width:3rem;height:3rem;border-radius:var(--radius-sm);background:rgba(224,64,251,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;color:var(--color-primary);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>
+        </div>
+        <h3 style="font-weight:700;font-size:1rem;margin-bottom:0.625rem;line-height:1.3;">Kampanie Ads</h3>
+        <p style="font-size:0.875rem;color:rgba(255,255,255,0.5);line-height:1.7;margin-bottom:1rem;">Google Ads, Meta Ads i TikTok Ads — skuteczne kampanie reklamowe z gwarancją mierzalnych wyników.</p>
+        <p style="font-size:0.9375rem;font-weight:700;color:var(--color-primary);">od 500 zł + budżet</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════ PORTFOLIO ═══════════════════ -->
+<section id="portfolio" style="padding:var(--section-y) 0;">
+  <div class="container">
+
+    <div style="text-align:center;margin-bottom:3rem;">
+      <p class="section-label" style="justify-content:center;margin-bottom:1rem;">Portfolio Realizacji</p>
+      <h2 style="font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-0.02em;margin-bottom:1rem;">
+        Przykłady Stron i <span class="gradient-text">Projektów</span>
+      </h2>
+      <p style="font-size:1.0625rem;color:rgba(255,255,255,0.55);max-width:540px;margin:0 auto;">
+        Prezentujemy wybrane realizacje stron internetowych, sklepów e-commerce i projektów wideo.
+        Każdy projekt jest indywidualnie dopasowany do potrzeb klienta i jego branży.
+      </p>
+    </div>
+
+    <!-- Grid -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem;margin-bottom:3rem;">
+
+      <!-- iOS/Android Chicken King APP -->
+      <div class="glass" style="border-radius:var(--radius-lg);overflow:hidden;">
+        <div style="position:relative;height:220px;background:#161616;overflow:hidden;">
+          <img src="/images/portfolio-chicken-king-app.webp" alt="iOS/Android Chicken King APP" style="width:100%;height:100%;object-fit:cover;"/>
+          <span style="position:absolute;top:0.75rem;left:0.75rem;font-size:0.6875rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.9);padding:0.3rem 0.75rem;border-radius:999px;background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);">Aplikacje</span>
+        </div>
+        <div style="padding:1.5rem;">
+          <h3 style="font-weight:700;font-size:1.0625rem;margin-bottom:0.625rem;line-height:1.3;">iOS/Android Chicken King APP</h3>
+          <p style="font-size:0.875rem;color:rgba(255,255,255,0.5);line-height:1.7;margin-bottom:1rem;">Aplikacja mobilna iOS i Android dla sieci restauracji. Zamówienia online, program lojalnościowy i powiadomienia push.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:0.375rem;">
+            <span style="padding:0.2rem 0.625rem;border-radius:4px;font-size:0.75rem;font-weight:600;background:rgba(224,64,251,0.1);color:var(--color-primary);border:1px solid rgba(224,64,251,0.2);">Flutter</span>
+            <span style="padding:0.2rem 0.625rem;border-radius:4px;font-size:0.75rem;font-weight:600;background:rgba(224,64,251,0.1);color:var(--color-primary);border:1px solid rgba(224,64,251,0.2);">Dart</span>
+            <span style="padding:0.2rem 0.625rem;border-radius:4px;font-size:0.75rem;font-weight:600;background:rgba(224,64,251,0.1);color:var(--color-primary);border:1px solid rgba(224,64,251,0.2);">PHP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Angielski od Podstaw -->
+      <div class="glass" style="border-radius:var(--radius-lg);overflow:hidden;">
+        <div style="position:relative;height:220px;background:#161616;overflow:hidden;">
+          <img src="/images/portfolio-angielski.webp" alt="Angielski od Podstaw" style="width:100%;height:100%;object-fit:cover;"/>
+          <span style="position:absolute;top:0.75rem;left:0.75rem;font-size:0.6875rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.9);padding:0.3rem 0.75rem;border-radius:999px;background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);">Strony WWW</span>
+        </div>
+        <div style="padding:1.5rem;">
+          <h3 style="font-weight:700;font-size:1.0625rem;margin-bottom:0.625rem;line-height:1.3;">Angielski od Podstaw</h3>
+          <p style="font-size:0.875rem;color:rgba(255,255,255,0.5);line-height:1.7;margin-bottom:1rem;">Strona internetowa szkoły językowej z systemem zapisów online, blogiem i bazą materiałów edukacyjnych.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:0.375rem;">
+            <span style="padding:0.2rem 0.625rem;border-radius:4px;font-size:0.75rem;font-weight:600;background:rgba(224,64,251,0.1);color:var(--color-primary);border:1px solid rgba(224,64,251,0.2);">WordPress</span>
+            <span style="padding:0.2rem 0.625rem;border-radius:4px;font-size:0.75rem;font-weight:600;background:rgba(224,64,251,0.1);color:var(--color-primary);border:1px solid rgba(224,64,251,0.2);">Elementor</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Strona wizytówkowa dla sklepu RAPTOR -->
+      <div class="glass" style="border-radius:var(--radius-lg);overflow:hidden;">
+        <div style="position:relative;height:220px;background:#161616;overflow:hidden;">
+          <img src="/images/portfolio-raptor.webp" alt="Strona wizytówkowa dla sklepu RAPTOR" style="width:100%;height:100%;object-fit:cover;"/>
+          <span style="position:absolute;top:0.75rem;left:0.75rem;font-size:0.6875rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.9);padding:0.3rem 0.75rem;border-radius:999px;background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);">Strony WWW</span>
+        </div>
+        <div style="padding:1.5rem;">
+          <h3 style="font-weight:700;font-size:1.0625rem;margin-bottom:0.625rem;line-height:1.3;">Strona wizytówkowa dla sklepu RAPTOR</h3>
+          <p style="font-size:0.875rem;color:rgba(255,255,255,0.5);line-height:1.7;margin-bottom:1rem;">Profesjonalna strona wizytówkowa z animacjami, formularzem kontaktowym i integracją z Google Maps.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:0.375rem;">
+            <span style="padding:0.2rem 0.625rem;border-radius:4px;font-size:0.75rem;font-weight:600;background:rgba(224,64,251,0.1);color:var(--color-primary);border:1px solid rgba(224,64,251,0.2);">WordPress</span>
+            <span style="padding:0.2rem 0.625rem;border-radius:4px;font-size:0.75rem;font-weight:600;background:rgba(224,64,251,0.1);color:var(--color-primary);border:1px solid rgba(224,64,251,0.2);">Elementor</span>
+            <span style="padding:0.2rem 0.625rem;border-radius:4px;font-size:0.75rem;font-weight:600;background:rgba(224,64,251,0.1);color:var(--color-primary);border:1px solid rgba(224,64,251,0.2);">PHP</span>
+            <span style="padding:0.2rem 0.625rem;border-radius:4px;font-size:0.75rem;font-weight:600;background:rgba(224,64,251,0.1);color:var(--color-primary);border:1px solid rgba(224,64,251,0.2);">JavaScript</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chicken King Family -->
+      <div class="glass" style="border-radius:var(--radius-lg);overflow:hidden;">
+        <div style="position:relative;height:220px;background:#161616;overflow:hidden;">
+          <img src="/images/portfolio-chicken-king-family.webp" alt="Chicken King Family" style="width:100%;height:100%;object-fit:cover;"/>
+          <span style="position:absolute;top:0.75rem;left:0.75rem;font-size:0.6875rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.9);padding:0.3rem 0.75rem;border-radius:999px;background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);">Sklepy</span>
+        </div>
+        <div style="padding:1.5rem;">
+          <h3 style="font-weight:700;font-size:1.0625rem;margin-bottom:0.625rem;line-height:1.3;">Chicken King Family</h3>
+          <p style="font-size:0.875rem;color:rgba(255,255,255,0.5);line-height:1.7;margin-bottom:1rem;">Sklep internetowy z menu restauracyjnym, zamówieniami online, integracją PayU i BLIK.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:0.375rem;">
+            <span style="padding:0.2rem 0.625rem;border-radius:4px;font-size:0.75rem;font-weight:600;background:rgba(224,64,251,0.1);color:var(--color-primary);border:1px solid rgba(224,64,251,0.2);">WordPress</span>
+            <span style="padding:0.2rem 0.625rem;border-radius:4px;font-size:0.75rem;font-weight:600;background:rgba(224,64,251,0.1);color:var(--color-primary);border:1px solid rgba(224,64,251,0.2);">Divi</span>
+            <span style="padding:0.2rem 0.625rem;border-radius:4px;font-size:0.75rem;font-weight:600;background:rgba(224,64,251,0.1);color:var(--color-primary);border:1px solid rgba(224,64,251,0.2);">PHP</span>
+            <span style="padding:0.2rem 0.625rem;border-radius:4px;font-size:0.75rem;font-weight:600;background:rgba(224,64,251,0.1);color:var(--color-primary);border:1px solid rgba(224,64,251,0.2);">JavaScript</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CTA -->
+    <div style="text-align:center;">
+      <a href="#kontakt" class="btn btn-outline" style="font-size:1rem;padding:0.875rem 2rem;">
+        Zobacz więcej projektów
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════ ABOUT ═══════════════════ -->
+<section id="o-nas" style="padding:var(--section-y) 0;">
+  <div class="container">
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:clamp(2.5rem,6vw,5rem);align-items:center;margin-bottom:4rem;">
+
+      <!-- Left: person photo with stat badges -->
+      <div style="position:relative;max-width:440px;">
+        <div style="border-radius:var(--radius-lg);overflow:hidden;position:relative;aspect-ratio:3/4;max-height:520px;background:#161616;">
+          <img src="/images/pawel.webp" alt="Paweł — OVERMEDIA" style="width:100%;height:100%;object-fit:cover;object-position:top center;"/>
+        </div>
+
+        <!-- Stat badge: lat na rynku -->
+        <div style="position:absolute;bottom:2rem;left:-1.5rem;background:rgba(10,10,10,0.9);backdrop-filter:blur(12px);border:1px solid rgba(224,64,251,0.3);border-radius:var(--radius);padding:1rem 1.5rem;">
+          <p style="font-size:2rem;font-weight:800;color:var(--color-primary);line-height:1;">5</p>
+          <p style="font-size:0.8125rem;color:rgba(255,255,255,0.6);margin-top:0.25rem;">Lat na rynku</p>
+        </div>
+
+        <!-- Stat badge: projektów -->
+        <div style="position:absolute;top:2rem;right:-1.5rem;background:rgba(10,10,10,0.9);backdrop-filter:blur(12px);border:1px solid rgba(224,64,251,0.3);border-radius:var(--radius);padding:1rem 1.5rem;">
+          <p style="font-size:2rem;font-weight:800;color:var(--color-primary);line-height:1;">150+</p>
+          <p style="font-size:0.8125rem;color:rgba(255,255,255,0.6);margin-top:0.25rem;">Projektów</p>
+        </div>
+
+        <!-- Top label -->
+        <div style="position:absolute;top:1.25rem;left:1.25rem;background:rgba(10,10,10,0.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);border-radius:999px;padding:0.375rem 0.875rem;font-size:0.75rem;font-weight:600;letter-spacing:0.08em;color:rgba(255,255,255,0.7);text-transform:uppercase;">
+          Zaufany partner biznesowy
+        </div>
+      </div>
+
+      <!-- Right: text -->
+      <div>
+        <p class="section-label" style="margin-bottom:1rem;">O Agencji OVERMEDIA</p>
+        <h2 style="font-size:clamp(1.875rem,4vw,3rem);font-weight:800;letter-spacing:-0.02em;margin-bottom:1.25rem;line-height:1.15;">
+          Agencja Interaktywna<br/>z <span class="gradient-text">Wieloletnim Doświadczeniem</span>
+        </h2>
+        <p style="font-size:1rem;color:rgba(255,255,255,0.55);line-height:1.75;margin-bottom:0.875rem;">
+          OVERMEDIA to polska agencja digital specjalizująca się w tworzeniu stron internetowych, sklepów e-commerce i kompleksowym marketingu cyfrowym dla firm.
+        </p>
+        <p style="font-size:1rem;color:rgba(255,255,255,0.55);line-height:1.75;margin-bottom:2rem;">
+          Oferujemy profesjonalne usługi web developmentu na WordPress, produkcję materiałów wideo, prowadzenie social media oraz kampanie reklamowe Google Ads i Meta Ads. Specjalizujemy się w obsłudze małych firm, startupów i przedsiębiorców w całej Polsce.
+        </p>
+
+        <a href="#kontakt" class="btn btn-primary">
+          Porozmawiajmy
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════ PRICING ═══════════════════ -->
+<section id="cennik" style="padding:var(--section-y) 0;background:var(--color-surface);">
+  <div class="container">
+
+    <div style="text-align:center;margin-bottom:2.5rem;">
+      <p class="section-label" style="justify-content:center;margin-bottom:1rem;">Cennik Usług</p>
+      <h2 style="font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-0.02em;margin-bottom:1rem;">
+        Ile Kosztuje Strona <span class="gradient-text">Internetowa?</span>
+      </h2>
+      <p style="font-size:1.0625rem;color:rgba(255,255,255,0.55);max-width:600px;margin:0 auto 2rem;">
+        Przejrzyste ceny stron WWW, sklepów e-commerce i kampanii reklamowych.
+        Oferujemy konkurencyjne stawki z gwarancją jakości. Każdy projekt wyceniamy indywidualnie.
+      </p>
+
+      <!-- Toggle (static — show jednorazowo prices) -->
+      <div style="display:inline-flex;background:rgba(255,255,255,0.06);border-radius:999px;padding:4px;">
+        <span style="padding:0.5rem 1.25rem;border-radius:999px;font-size:0.875rem;font-weight:600;background:var(--color-primary);color:#fff;">Jednorazowo</span>
+        <span style="padding:0.5rem 1.25rem;border-radius:999px;font-size:0.875rem;font-weight:600;background:transparent;color:rgba(255,255,255,0.55);">Abonament −20%</span>
+      </div>
+    </div>
+
+    <!-- Main pricing cards -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;margin-bottom:2rem;">
+
+      <!-- Strona Basic -->
+      <div style="border-radius:var(--radius-lg);padding:2rem;height:100%;position:relative;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.025);display:flex;flex-direction:column;">
+        <!-- Icon -->
+        <div style="width:3rem;height:3rem;border-radius:var(--radius-sm);background:rgba(224,64,251,0.1);display:flex;align-items:center;justify-content:center;color:var(--color-primary);margin-bottom:1.25rem;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </div>
+        <h3 style="font-weight:800;font-size:1.25rem;margin-bottom:0.375rem;">Strona Basic</h3>
+        <p style="font-size:0.875rem;color:rgba(255,255,255,0.45);margin-bottom:1.5rem;">Idealna dla małych firm i freelancerów</p>
+        <div style="margin-bottom:1.75rem;">
+          <span style="font-size:clamp(2rem,4vw,2.75rem);font-weight:800;letter-spacing:-0.02em;">1 000 zł</span>
+          <span style="font-size:0.875rem;color:rgba(255,255,255,0.4);margin-left:0.375rem;">jednorazowo</span>
+        </div>
+        <ul style="list-style:none;padding:0;margin:0 0 2rem;display:flex;flex-direction:column;gap:0.75rem;flex:1;">
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            Do 5 podstron
+          </li>
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            Responsywny design
+          </li>
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            Podstawowe SEO
+          </li>
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            Formularz kontaktowy
+          </li>
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            Certyfikat SSL
+          </li>
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            Blog
+          </li>
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            Integracje zewnętrzne
+          </li>
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            1 miesiąc wsparcia
+          </li>
+        </ul>
+        <a href="#kontakt" class="btn btn-outline" style="justify-content:center;">
+          Zamów wycenę
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      <!-- Strona Pro (FEATURED) -->
+      <div style="border-radius:var(--radius-lg);padding:2rem;height:100%;position:relative;border:1px solid rgba(224,64,251,0.45);background:rgba(224,64,251,0.05);display:flex;flex-direction:column;">
+        <div style="position:absolute;top:-1px;left:50%;transform:translateX(-50%);padding:0.25rem 1.125rem;border-radius:0 0 999px 999px;background:var(--color-primary);font-size:0.6875rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#fff;white-space:nowrap;">Najpopularniejszy</div>
+        <!-- Icon -->
+        <div style="width:3rem;height:3rem;border-radius:var(--radius-sm);background:rgba(224,64,251,0.1);display:flex;align-items:center;justify-content:center;color:var(--color-primary);margin-bottom:1.25rem;margin-top:1.25rem;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+        </div>
+        <h3 style="font-weight:800;font-size:1.25rem;margin-bottom:0.375rem;">Strona Pro</h3>
+        <p style="font-size:0.875rem;color:rgba(255,255,255,0.45);margin-bottom:1.5rem;">Dla firm szukających więcej możliwości</p>
+        <div style="margin-bottom:1.75rem;">
+          <span style="font-size:clamp(2rem,4vw,2.75rem);font-weight:800;letter-spacing:-0.02em;">1 625 zł</span>
+          <span style="font-size:0.875rem;color:rgba(255,255,255,0.4);margin-left:0.375rem;">jednorazowo</span>
+        </div>
+        <ul style="list-style:none;padding:0;margin:0 0 2rem;display:flex;flex-direction:column;gap:0.75rem;flex:1;">
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            Do 15 podstron
+          </li>
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            Premium design
+          </li>
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            Zaawansowane SEO
+          </li>
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            Blog + CMS
+          </li>
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            Animacje i efekty
+          </li>
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            Google Analytics
+          </li>
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            Priorytetowe wsparcie
+          </li>
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            6 miesięcy wsparcia
+          </li>
+        </ul>
+        <a href="#kontakt" class="btn btn-primary" style="justify-content:center;">
+          Zamów wycenę
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      <!-- Sklep E-commerce -->
+      <div style="border-radius:var(--radius-lg);padding:2rem;height:100%;position:relative;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.025);display:flex;flex-direction:column;">
+        <!-- Icon -->
+        <div style="width:3rem;height:3rem;border-radius:var(--radius-sm);background:rgba(224,64,251,0.1);display:flex;align-items:center;justify-content:center;color:var(--color-primary);margin-bottom:1.25rem;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+        </div>
+        <h3 style="font-weight:800;font-size:1.25rem;margin-bottom:0.375rem;">Sklep E-commerce</h3>
+        <p style="font-size:0.875rem;color:rgba(255,255,255,0.45);margin-bottom:1.5rem;">Zacznij sprzedawać online</p>
+        <div style="margin-bottom:1.75rem;">
+          <span style="font-size:clamp(2rem,4vw,2.75rem);font-weight:800;letter-spacing:-0.02em;">3 750 zł</span>
+          <span style="font-size:0.875rem;color:rgba(255,255,255,0.4);margin-left:0.375rem;">jednorazowo</span>
+        </div>
+        <ul style="list-style:none;padding:0;margin:0 0 2rem;display:flex;flex-direction:column;gap:0.75rem;flex:1;">
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            WooCommerce
+          </li>
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            Integracja płatności
+          </li>
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            Kurierzy (InPost, DHL)
+          </li>
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            Do 100 produktów
+          </li>
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            Panel zarządzania
+          </li>
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            Szkolenie z obsługi
+          </li>
+          <li style="display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:rgba(255,255,255,0.7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            12 miesięcy wsparcia
+          </li>
+        </ul>
+        <a href="#kontakt" class="btn btn-outline" style="justify-content:center;">
+          Zamów wycenę
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Bottom note -->
+    <div style="text-align:center;">
+      <p style="font-size:0.9375rem;color:rgba(255,255,255,0.4);">
+        Potrzebujesz indywidualnej wyceny? Każdy projekt jest unikalny —
+        <a href="#kontakt" style="color:var(--color-primary);font-weight:600;text-decoration:none;">zapytaj o wycenę.</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════ TESTIMONIALS ═══════════════════ -->
+<section id="opinie" style="padding:var(--section-y) 0;">
+  <div class="container">
+
+    <div style="text-align:center;margin-bottom:4rem;">
+      <p class="section-label" style="justify-content:center;margin-bottom:1rem;">Opinie Klientów</p>
+      <h2 style="font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-0.02em;margin-bottom:1rem;">
+        Co mówią nasi klienci?
+      </h2>
+      <p style="font-size:1.0625rem;color:rgba(255,255,255,0.55);max-width:440px;margin:0 auto;">
+        Zaufali nam — i wrócili po więcej.
+      </p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1.5rem;">
+
+      <!-- Piotr Wiśniewski -->
+      <div class="glass" style="border-radius:var(--radius-lg);padding:2rem;height:100%;display:flex;flex-direction:column;gap:1.25rem;">
+        <!-- Stars: 5 -->
+        <div style="display:flex;gap:2px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#E040FB" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#E040FB" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#E040FB" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#E040FB" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#E040FB" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+        </div>
+        <blockquote style="flex:1;font-size:0.9375rem;color:rgba(255,255,255,0.75);line-height:1.75;margin:0;">
+          &ldquo;OVERMEDIA wykonała dla nas zarówno stronę internetową, sklep WooCommerce jak i aplikację mobilną. Efekty przeszły nasze oczekiwania — sprzedaż online wzrosła o 40% w ciągu pierwszego kwartału.&rdquo;
+        </blockquote>
+        <div style="display:flex;align-items:center;gap:0.875rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,0.08);">
+          <div style="width:2.5rem;height:2.5rem;border-radius:50%;background:linear-gradient(135deg,var(--color-primary),var(--color-accent));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;flex-shrink:0;">P</div>
+          <div>
+            <p style="font-weight:700;font-size:0.9375rem;">Piotr Wiśniewski</p>
+            <p style="font-size:0.8125rem;color:rgba(255,255,255,0.4);">Właściciel · Chicken King</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Anna Kowalczyk -->
+      <div class="glass" style="border-radius:var(--radius-lg);padding:2rem;height:100%;display:flex;flex-direction:column;gap:1.25rem;">
+        <!-- Stars: 5 -->
+        <div style="display:flex;gap:2px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#E040FB" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#E040FB" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#E040FB" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#E040FB" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#E040FB" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+        </div>
+        <blockquote style="flex:1;font-size:0.9375rem;color:rgba(255,255,255,0.75);line-height:1.75;margin:0;">
+          &ldquo;Profesjonalne podejście, terminowość i świetny kontakt przez cały projekt. Strona wygląda doskonale na każdym urządzeniu, a liczba zapisów na kursy wzrosła dwukrotnie.&rdquo;
+        </blockquote>
+        <div style="display:flex;align-items:center;gap:0.875rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,0.08);">
+          <div style="width:2.5rem;height:2.5rem;border-radius:50%;background:linear-gradient(135deg,var(--color-primary),var(--color-accent));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;flex-shrink:0;">A</div>
+          <div>
+            <p style="font-weight:700;font-size:0.9375rem;">Anna Kowalczyk</p>
+            <p style="font-size:0.8125rem;color:rgba(255,255,255,0.4);">Dyrektor · Szkoła Językowa</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Marek Nowak -->
+      <div class="glass" style="border-radius:var(--radius-lg);padding:2rem;height:100%;display:flex;flex-direction:column;gap:1.25rem;">
+        <!-- Stars: 5 -->
+        <div style="display:flex;gap:2px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#E040FB" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#E040FB" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#E040FB" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#E040FB" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#E040FB" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+        </div>
+        <blockquote style="flex:1;font-size:0.9375rem;color:rgba(255,255,255,0.75);line-height:1.75;margin:0;">
+          &ldquo;Polecam OVERMEDIA każdemu, kto szuka solidnej agencji digital. Realizacja szybka, cena uczciwa, a strona wizytówkowa wygląda super profesjonalnie. Kampanie Google Ads przyniosły wymierny efekt.&rdquo;
+        </blockquote>
+        <div style="display:flex;align-items:center;gap:0.875rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,0.08);">
+          <div style="width:2.5rem;height:2.5rem;border-radius:50%;background:linear-gradient(135deg,var(--color-primary),var(--color-accent));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;flex-shrink:0;">M</div>
+          <div>
+            <p style="font-weight:700;font-size:0.9375rem;">Marek Nowak</p>
+            <p style="font-size:0.8125rem;color:rgba(255,255,255,0.4);">CEO · RAPTOR Sp. z o.o.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════ CONTACT / CTA ═══════════════════ -->
+<section id="kontakt" style="padding:var(--section-y) 0;background:var(--color-surface);">
+  <div class="container">
+
+    <div style="text-align:center;margin-bottom:4rem;">
+      <p class="section-label" style="justify-content:center;margin-bottom:1rem;">Kontakt z Agencją</p>
+      <h2 style="font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-0.02em;margin-bottom:1rem;">
+        Bezpłatna Wycena Strony<br/>
+        <span class="gradient-text">lub Projektu</span>
+      </h2>
+      <p style="font-size:1.0625rem;color:rgba(255,255,255,0.55);max-width:560px;margin:0 auto;">
+        Potrzebujesz wyceny strony internetowej, sklepu e-commerce lub kampanii reklamowej?
+        Wypełnij formularz kontaktowy, a odpowiemy w ciągu 24 godzin z indywidualną ofertą.
+      </p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:3rem;align-items:start;">
+
+      <!-- Contact info -->
+      <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+        <!-- Email -->
+        <div class="glass" style="border-radius:var(--radius);padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;">
+          <div style="width:2.5rem;height:2.5rem;border-radius:var(--radius-sm);background:rgba(224,64,251,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--color-primary);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          </div>
+          <div>
+            <p style="font-size:0.75rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:0.2rem;">Email</p>
+            <a href="mailto:kontakt@overmedia.pl" style="font-weight:600;color:var(--color-primary);font-size:1rem;text-decoration:none;">kontakt@overmedia.pl</a>
+          </div>
+        </div>
+
+        <!-- Phone -->
+        <div class="glass" style="border-radius:var(--radius);padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;">
+          <div style="width:2.5rem;height:2.5rem;border-radius:var(--radius-sm);background:rgba(224,64,251,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--color-primary);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+          <div>
+            <p style="font-size:0.75rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:0.2rem;">Telefon</p>
+            <a href="tel:+48571501896" style="font-weight:600;color:var(--color-primary);font-size:1rem;text-decoration:none;">+48 571 501 896</a>
+          </div>
+        </div>
+
+        <!-- NIP -->
+        <div class="glass" style="border-radius:var(--radius);padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;">
+          <div style="width:2.5rem;height:2.5rem;border-radius:var(--radius-sm);background:rgba(224,64,251,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--color-primary);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
+          </div>
+          <div>
+            <p style="font-size:0.75rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:0.2rem;">NIP</p>
+            <p style="font-weight:600;color:var(--color-fg);font-size:1rem;">875-156-53-27</p>
+          </div>
+        </div>
+
+        <!-- Hours + social -->
+        <div class="glass" style="border-radius:var(--radius);padding:1.5rem;">
+          <div style="margin-bottom:1.25rem;">
+            <p style="font-size:0.75rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:0.75rem;">Godziny pracy</p>
+            <p style="font-size:0.9375rem;color:rgba(255,255,255,0.65);line-height:1.75;">
+              Pon – Pt: 9:00 – 17:00<br/>
+              <span style="color:rgba(255,255,255,0.35);">Sob – Nd: Zamknięte</span>
+            </p>
+          </div>
+          <p style="font-size:0.75rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:0.75rem;">Szybka odpowiedź</p>
+          <p style="font-size:0.875rem;color:rgba(255,255,255,0.5);">Zazwyczaj odpowiadamy w ciągu 24 godzin</p>
+        </div>
+
+        <!-- Social -->
+        <div class="glass" style="border-radius:var(--radius);padding:1.25rem 1.5rem;">
+          <p style="font-size:0.75rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:0.875rem;">Znajdziesz nas też na:</p>
+          <div style="display:flex;gap:0.875rem;">
+            <a href="https://facebook.com/overmedia.pl" target="_blank" rel="noopener noreferrer" aria-label="Facebook" style="width:2.25rem;height:2.25rem;border-radius:50%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.6);text-decoration:none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+            </a>
+            <a href="https://instagram.com/overmedia.pl" target="_blank" rel="noopener noreferrer" aria-label="Instagram" style="width:2.25rem;height:2.25rem;border-radius:50%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.6);text-decoration:none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z M17.5 6.5h.01 M7.5 2h9a5.5 5.5 0 0 1 5.5 5.5v9a5.5 5.5 0 0 1-5.5 5.5h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2z"/></svg>
+            </a>
+            <a href="https://tiktok.com/@overmedia.pl" target="_blank" rel="noopener noreferrer" aria-label="TikTok" style="width:2.25rem;height:2.25rem;border-radius:50%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.6);text-decoration:none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.79 1.53V6.77a4.85 4.85 0 0 1-1.02-.08z"/></svg>
+            </a>
+            <a href="https://youtube.com/@overmedia.pl" target="_blank" rel="noopener noreferrer" aria-label="YouTube" style="width:2.25rem;height:2.25rem;border-radius:50%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.6);text-decoration:none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42C1 8.14 1 11.61 1 11.61s0 3.47.46 5.19a2.78 2.78 0 0 0 1.95 1.95C5.12 19.22 12 19.22 12 19.22s6.88 0 8.59-.47a2.78 2.78 0 0 0 1.95-1.95C23 15.08 23 11.61 23 11.61s0-3.47-.46-5.19z M9.75 15.02 15.5 11.61 9.75 8.2 9.75 15.02"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form action="#" method="POST" class="glass" style="border-radius:var(--radius-lg);padding:2rem;display:flex;flex-direction:column;gap:1rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div>
+            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.5rem;color:rgba(255,255,255,0.6);">Imię i nazwisko *</label>
+            <input required type="text" name="name" placeholder="Jan Kowalski" style="width:100%;padding:0.75rem 1rem;border-radius:var(--radius-sm);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:0.9375rem;outline:none;box-sizing:border-box;font-family:inherit;"/>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.5rem;color:rgba(255,255,255,0.6);">Telefon</label>
+            <input type="tel" name="phone" placeholder="+48 123 456 789" style="width:100%;padding:0.75rem 1rem;border-radius:var(--radius-sm);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:0.9375rem;outline:none;box-sizing:border-box;font-family:inherit;"/>
+          </div>
+        </div>
+
+        <div>
+          <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.5rem;color:rgba(255,255,255,0.6);">Email *</label>
+          <input required type="email" name="email" placeholder="jan@firma.pl" style="width:100%;padding:0.75rem 1rem;border-radius:var(--radius-sm);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:0.9375rem;outline:none;box-sizing:border-box;font-family:inherit;"/>
+        </div>
+
+        <div>
+          <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.5rem;color:rgba(255,255,255,0.6);">Usługa</label>
+          <select name="service" style="width:100%;padding:0.75rem 1rem;border-radius:var(--radius-sm);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:0.9375rem;outline:none;box-sizing:border-box;font-family:inherit;cursor:pointer;">
+            <option value="" style="background:#111;">Wybierz usługę...</option>
+            <option value="Strona internetowa" style="background:#111;">Strona internetowa</option>
+            <option value="Sklep e-commerce" style="background:#111;">Sklep e-commerce</option>
+            <option value="Aplikacja mobilna" style="background:#111;">Aplikacja mobilna</option>
+            <option value="Montaż wideo" style="background:#111;">Montaż wideo</option>
+            <option value="Rolki & Reels" style="background:#111;">Rolki &amp; Reels</option>
+            <option value="Social Media" style="background:#111;">Social Media</option>
+            <option value="Kampanie Ads" style="background:#111;">Kampanie Ads</option>
+            <option value="Serwis IT" style="background:#111;">Serwis IT</option>
+            <option value="Inne" style="background:#111;">Inne</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:0.5rem;color:rgba(255,255,255,0.6);">Wiadomość *</label>
+          <textarea required rows="5" name="message" placeholder="Opisz swój projekt lub zadaj pytanie..." style="width:100%;padding:0.75rem 1rem;border-radius:var(--radius-sm);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:0.9375rem;outline:none;box-sizing:border-box;font-family:inherit;resize:vertical;"></textarea>
+        </div>
+
+        <!-- GDPR -->
+        <label style="display:flex;align-items:flex-start;gap:0.75rem;cursor:pointer;">
+          <input required type="checkbox" name="gdpr" style="margin-top:0.2rem;accent-color:var(--color-primary);flex-shrink:0;"/>
+          <span style="font-size:0.8125rem;color:rgba(255,255,255,0.45);line-height:1.6;">
+            Wyrażam zgodę na przetwarzanie moich danych osobowych zgodnie z Polityką Prywatności. *
+          </span>
+        </label>
+
+        <button type="submit" class="btn btn-primary" style="justify-content:center;font-size:1rem;padding:0.875rem;">
+          Wyślij wiadomość
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════ BOTTOM CTA ═══════════════════ -->
+<section style="background:linear-gradient(135deg,#E040FB 0%,#7B2FE0 100%);padding:clamp(4rem,8vw,6rem) 0;position:relative;overflow:hidden;">
+  <!-- Decorative circles -->
+  <div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;">
+    <div style="position:absolute;top:-30%;right:-5%;width:500px;height:500px;border-radius:50%;border:1px solid rgba(255,255,255,0.12);"></div>
+    <div style="position:absolute;bottom:-40%;left:-5%;width:400px;height:400px;border-radius:50%;border:1px solid rgba(255,255,255,0.08);"></div>
+  </div>
+
+  <div class="container" style="position:relative;z-index:1;text-align:center;">
+    <h2 style="font-size:clamp(1.75rem,4vw,3rem);font-weight:800;letter-spacing:-0.02em;color:#fff;margin-bottom:1rem;line-height:1.2;">
+      Gotowy na nową stronę?
+    </h2>
+    <p style="font-size:clamp(1rem,1.8vw,1.125rem);color:rgba(255,255,255,0.8);max-width:540px;margin:0 auto 2.5rem;line-height:1.7;">
+      Skontaktuj się z nami i otrzymaj bezpłatną wycenę projektu. Odpowiadamy w ciągu 24 godzin.
+    </p>
+    <a href="#kontakt" style="display:inline-flex;align-items:center;gap:0.5rem;padding:1rem 2.5rem;border-radius:999px;background:#fff;color:#E040FB;font-weight:700;font-size:1.0625rem;text-decoration:none;box-shadow:0 8px 32px rgba(0,0,0,0.25);">
+      Rozpocznij projekt
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
