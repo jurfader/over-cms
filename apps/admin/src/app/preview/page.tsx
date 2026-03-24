@@ -58,52 +58,8 @@ export default function PreviewPage() {
 
   return (
     <>
-      {/* Corporate template CSS variables */}
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap');
-        :root {
-          --font-sans: 'Open Sans', system-ui, sans-serif;
-          --color-bg: #0a0a0a;
-          --color-surface: #111111;
-          --color-fg: #ffffff;
-          --color-muted: rgba(255,255,255,0.55);
-          --color-primary: #E040FB;
-          --color-accent: #7B2FE0;
-          --color-border: rgba(255,255,255,0.08);
-          --section-y: clamp(4.5rem, 9vw, 8rem);
-          --radius-sm: 0.5rem;
-          --radius: 0.875rem;
-          --radius-lg: 1.5rem;
-        }
-        *, *::before, *::after { box-sizing: border-box; }
-        body {
-          font-family: var(--font-sans);
-          background: var(--color-bg);
-          color: var(--color-fg);
-          margin: 0;
-          min-height: 100vh;
-        }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 clamp(1rem, 5vw, 2.5rem); }
-        .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(12px); border: 1px solid var(--color-border); }
-        .gradient-text { background: linear-gradient(135deg, #E040FB, #7B2FE0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .section-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-primary); }
-        .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 999px; font-weight: 700; font-size: 0.9375rem; text-decoration: none; cursor: pointer; border: none; }
-        .btn-primary { background: var(--color-primary); color: #fff; }
-        .btn-outline { background: transparent; color: var(--color-fg); border: 1.5px solid rgba(255,255,255,0.2); }
-        img { max-width: 100%; height: auto; }
-        /* Empty column placeholder */
-        [data-block-type="column"]:empty::after {
-          content: '+';
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          min-height: 60px;
-          border: 1px dashed rgba(255,255,255,0.1);
-          border-radius: 8px;
-          color: rgba(255,255,255,0.15);
-          font-size: 1.25rem;
-        }
-      `}</style>
+      {/* Theme CSS loaded from API — matches the live site theme exactly */}
+      <link rel="stylesheet" href="/api/settings/theme-css" />
 
       {/* Rendered content */}
       {html ? (
