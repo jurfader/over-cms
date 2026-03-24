@@ -238,6 +238,19 @@ export function PageEditor({ contentType, item }: PageEditorProps) {
         </div>
       </div>
 
+      {/* Visual Builder link */}
+      {item?.id && (
+        <div className="flex items-center justify-center px-6 py-2 border-b border-[var(--color-border)] bg-[var(--color-surface-elevated)]">
+          <Link
+            href={`/pages/${item.id}/visual-builder`}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white hover:opacity-90 transition-opacity"
+          >
+            <Globe className="w-4 h-4" />
+            Otwórz Visual Builder
+          </Link>
+        </div>
+      )}
+
       {/* ── Body ──────────────────────────────────────────────────── */}
       <div className="flex flex-1 min-h-0">
 
