@@ -16,10 +16,9 @@ import { Badge } from '@/components/ui/badge'
 import { EditorSidebar } from '@/components/content/editor-sidebar'
 import { BlockEditor } from '@/components/editor/block-editor'
 import { CodeEditor } from '@/components/content/code-editor'
-import { VisualEditor } from '@/components/pages/grapes/visual-editor'
 import type { Block } from '@/components/editor/types'
 
-type EditorMode = 'blocks' | 'html' | 'visual'
+type EditorMode = 'blocks' | 'html'
 import { api } from '@/lib/api'
 import { slugify } from '@/lib/utils'
 import type { ContentType, ContentItem } from '@/types/content'
@@ -59,11 +58,7 @@ export function PageEditor({ contentType, item }: PageEditorProps) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const [slugManual, setSlugManual] = useState(!!item)
   const [mode, setMode] = useState<EditorMode>(
-    item?.data?.editorMode === 'visual'
-      ? 'visual'
-      : item?.data?.content
-        ? 'html'
-        : 'blocks'
+    item?.data?.content ? 'html' : 'blocks'
   )
 
   // Sidebar fields: excerpt, featured_image, and any other non-body/non-blocks/non-slug fields
@@ -153,23 +148,6 @@ export function PageEditor({ contentType, item }: PageEditorProps) {
 
   const isBusy = saveMutation.isPending || publishMutation.isPending
 
-  // ── Visual editor save callback ───────────────────────────────────────────
-
-  const handleVisualSave = async (data: { html: string; css: string; project: unknown }) => {
-    const currentValues = form.getValues()
-    const updatedValues: FormValues = {
-      ...currentValues,
-      data: {
-        ...currentValues.data,
-        editorMode: 'visual',
-        grapesProject: data.project,
-        content: data.html,
-        styles: data.css,
-      },
-    }
-    saveMutation.mutate(updatedValues)
-  }
-
   // ── Auto-save every 30s (only for existing drafts) ──────────────────────
 
   const autoSaveRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -186,73 +164,6 @@ export function PageEditor({ contentType, item }: PageEditorProps) {
   }, [item?.id]) // auto-save setup depends only on item identity
 
   // ── Render ──────────────────────────────────────────────────────────────
-
-  // Visual mode takes over the full layout — toolbar and sidebar are hidden,
-  // GrapesJS provides its own UI chrome.
-  if (mode === 'visual') {
-    return (
-      <div className="flex flex-col h-[calc(100vh-var(--topbar-height))] -mt-6 -mx-6">
-        {/* Minimal mode switcher bar */}
-        <div className="flex items-center gap-1 px-4 py-2 border-b border-[var(--color-border)] bg-[var(--glass-card-bg)] backdrop-blur-sm shrink-0 z-10">
-          <button
-            type="button"
-            onClick={() => setMode('blocks')}
-            className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
-          >
-            Bloki
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode('html')}
-            className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
-          >
-            HTML
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode('visual')}
-            className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors bg-[var(--color-primary-muted)] text-[var(--color-primary)]"
-          >
-            Wizualny
-          </button>
-
-          {/* Save status indicator */}
-          <div className="ml-auto flex items-center gap-2">
-            {saveStatus === 'saving' && (
-              <span className="flex items-center gap-1.5 text-xs text-[var(--color-subtle)]">
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                Zapisywanie...
-              </span>
-            )}
-            {saveStatus === 'saved' && (
-              <span className="flex items-center gap-1.5 text-xs text-[var(--color-success)]">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                Zapisano
-              </span>
-            )}
-            {saveStatus === 'error' && (
-              <span className="flex items-center gap-1.5 text-xs text-[var(--color-destructive)]">
-                <AlertCircle className="w-3.5 h-3.5" />
-                Blad zapisu
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* GrapesJS editor fills remaining space */}
-        <div className="flex-1 min-h-0">
-          <VisualEditor
-            pageId={item?.id}
-            initialTitle={watch('title')}
-            initialSlug={watch('slug')}
-            initialProject={item?.data?.grapesProject as unknown}
-            initialHtml={item?.data?.content as string | undefined}
-            onSave={handleVisualSave}
-          />
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-var(--topbar-height))] -mt-6 -mx-6">
@@ -355,13 +266,6 @@ export function PageEditor({ contentType, item }: PageEditorProps) {
               }`}
             >
               HTML
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode('visual')}
-              className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
-            >
-              Wizualny
             </button>
           </div>
 
