@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useCallback } from 'react'
 import { useVisualBuilderStore } from './vb-store'
 import { sendToIframe, onIframeMessage } from './vb-messages'
 import { VBCanvasOverlay } from './vb-canvas-overlay'
@@ -143,10 +143,32 @@ export function VBCanvas() {
 
   const deviceWidth = DEVICE_WIDTHS[device] ?? '100%'
 
+  // ── Parent-side drop handler ─────────────────────────────────────────
+  // Cross-origin iframes can't read dataTransfer, so we handle the drop
+  // on the parent div wrapping the iframe instead.
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    if (!isDragging) return
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'copy'
+  }, [isDragging])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    if (!isDragging || !dragBlockType) return
+    e.preventDefault()
+
+    // Find the nearest block to drop after by asking the iframe
+    // For simplicity, add at the end of root (auto-wrap handles structure)
+    addBlock(dragBlockType as Parameters<typeof addBlock>[0], 'root')
+    endDrag()
+  }, [isDragging, dragBlockType, addBlock, endDrag])
+
   return (
     <div
       className="flex-1 flex items-start justify-center bg-[#0a0a14] overflow-auto p-4"
       data-vb-backdrop
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
     >
       <div
         className="relative"
@@ -161,7 +183,7 @@ export function VBCanvas() {
           src="/admin/preview"
           title="Podgląd strony"
           className="w-full border-0 bg-white rounded-lg shadow-2xl"
-          style={{ minHeight: '100vh' }}
+          style={{ minHeight: '100vh', pointerEvents: isDragging ? 'none' : 'auto' }}
         />
 
         {/* Selection / hover overlay */}

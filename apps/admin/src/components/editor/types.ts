@@ -388,6 +388,16 @@ export const BLOCK_CATEGORIES = [
 
 export function createBlock(type: BlockType, overrides?: Partial<Block>): Block {
   const def = BLOCK_DEF_MAP[type]
+  if (!def) {
+    console.warn(`[OverCMS] Unknown block type: "${type}", using fallback`)
+    return {
+      id: uid(),
+      type,
+      data: {},
+      children: [],
+      ...overrides,
+    }
+  }
   const block: Block = {
     id: uid(),
     type,

@@ -29,6 +29,8 @@ function groupByCategory(defs: BlockDef[]): Map<BlockCategory, BlockDef[]> {
 export function VBModulePicker() {
   const startDrag = useVisualBuilderStore((s) => s.startDrag)
   const endDrag = useVisualBuilderStore((s) => s.endDrag)
+  const addBlock = useVisualBuilderStore((s) => s.addBlock)
+  const selectedBlockId = useVisualBuilderStore((s) => s.selectedBlockId)
 
   const [search, setSearch] = useState('')
   const [collapsed, setCollapsed] = useState<Set<BlockCategory>>(new Set())
@@ -73,6 +75,16 @@ export function VBModulePicker() {
   const handleDragEnd = useCallback(() => {
     endDrag()
   }, [endDrag])
+
+  // ── Click to add (alternative to drag) ────────────────────────────────
+  const handleClick = useCallback(
+    (def: BlockDef) => {
+      // If a block is selected, add inside it (or its parent column)
+      // Otherwise add at root level (auto-wrap will create section/row/column)
+      addBlock(def.type, selectedBlockId ?? 'root')
+    },
+    [addBlock, selectedBlockId],
+  )
 
   // ── Render ─────────────────────────────────────────────────────────────
 
@@ -125,6 +137,7 @@ export function VBModulePicker() {
                       def={def}
                       onDragStart={handleDragStart}
                       onDragEnd={handleDragEnd}
+                      onClick={handleClick}
                     />
                   ))}
                 </div>
@@ -150,10 +163,12 @@ function BlockCard({
   def,
   onDragStart,
   onDragEnd,
+  onClick,
 }: {
   def: BlockDef
   onDragStart: (e: React.DragEvent, def: BlockDef) => void
   onDragEnd: () => void
+  onClick: (def: BlockDef) => void
 }) {
   const Icon = def.icon
 
@@ -162,7 +177,8 @@ function BlockCard({
       draggable
       onDragStart={(e) => onDragStart(e, def)}
       onDragEnd={onDragEnd}
-      className="flex flex-col items-center gap-1.5 p-2.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-primary)]/5 cursor-grab active:cursor-grabbing transition-colors group"
+      onClick={() => onClick(def)}
+      className="flex flex-col items-center gap-1.5 p-2.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-primary)]/5 cursor-pointer active:cursor-grabbing transition-colors group"
       title={def.description}
     >
       <Icon className="w-5 h-5 text-[var(--color-muted-foreground)] group-hover:text-[var(--color-primary)] transition-colors" />
