@@ -83,7 +83,6 @@ export function VBToolbar({ pageId, initialTitle, initialSlug }: VBToolbarProps)
         data: { blocks },
         status: 'published',
       })
-      await api.post(`/api/content/page/${pageId}/publish`)
       markClean()
       setSaveStatus('saved')
       setTimeout(() => setSaveStatus('idle'), 3000)
