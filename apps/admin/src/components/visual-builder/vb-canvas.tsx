@@ -158,7 +158,7 @@ export function VBCanvas() {
       >
         <iframe
           ref={iframeRef}
-          src="/preview"
+          src="/admin/preview"
           title="Podgląd strony"
           className="w-full border-0 bg-white rounded-lg shadow-2xl"
           style={{ minHeight: '100vh' }}
