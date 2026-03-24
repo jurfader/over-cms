@@ -26,7 +26,7 @@ async function getSharp() {
 
 const router    = new Hono<AppEnv>()
 const UPLOAD_DIR = path.resolve('public/uploads')
-const BASE_URL   = process.env['API_BASE_URL'] ?? 'http://localhost:3001'
+const BASE_URL   = process.env['API_BASE_URL'] ?? ''
 const MAX_SIZE   = 50 * 1024 * 1024 // 50 MB
 
 const ALLOWED_IMAGE_TYPES = new Set([
