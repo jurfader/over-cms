@@ -3,7 +3,7 @@
 import { useCallback, useState } from 'react'
 import Link from 'next/link'
 import {
-  ChevronLeft, Save, Globe,
+  ChevronLeft, Save, Globe, ExternalLink,
   Loader2, CheckCircle2, AlertCircle,
   Undo2, Redo2,
   Monitor, Tablet, Smartphone,
@@ -206,6 +206,15 @@ export function VBToolbar({ pageId, initialTitle, initialSlug, initialStatus = '
         )}
 
         {/* Actions */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => window.open(`/${slug}`, '_blank')}
+          title="Podgląd strony w nowej karcie"
+        >
+          <ExternalLink className="w-3.5 h-3.5" />
+          Podgląd
+        </Button>
         <Button variant="outline" size="sm" onClick={handleSave} disabled={isBusy}>
           <Save className="w-3.5 h-3.5" />
           Zapisz
