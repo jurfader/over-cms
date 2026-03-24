@@ -8,6 +8,7 @@ import {
   LayoutDashboard, FileText, Image, Settings, Users,
   Search, Puzzle, Globe, Navigation, ChevronRight,
   PanelLeftClose, PanelLeftOpen, ShoppingCart, BarChart3, Mail,
+  PanelTop,
 } from 'lucide-react'
 import { useQuery }   from '@tanstack/react-query'
 import { api }        from '@/lib/api'
@@ -56,9 +57,10 @@ const navGroups: NavGroup[] = [
   {
     label: 'Witryna',
     items: [
-      { label: 'SEO',       href: '/seo',        icon: Search },
-      { label: 'Nawigacja', href: '/navigation',  icon: Navigation },
-      { label: 'Treści',    href: '/content',     icon: FileText },
+      { label: 'SEO',        href: '/seo',        icon: Search },
+      { label: 'Nawigacja',  href: '/navigation',  icon: Navigation },
+      { label: 'Szablony',   href: '/templates',   icon: PanelTop },
+      { label: 'Treści',     href: '/content',     icon: FileText },
     ],
   },
   {

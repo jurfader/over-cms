@@ -76,6 +76,22 @@ export async function getPageBySlug(slug: string): Promise<CmsPage | null> {
   }
 }
 
+// ─── Global templates (header/footer) ─────────────────────────────────────────
+
+export interface GlobalTemplate {
+  blocks: Array<Record<string, unknown>>
+}
+
+/** Fetch global header blocks. Returns null if not configured. */
+export async function getGlobalHeader(): Promise<GlobalTemplate | null> {
+  return getSingleton<GlobalTemplate>('global_header')
+}
+
+/** Fetch global footer blocks. Returns null if not configured. */
+export async function getGlobalFooter(): Promise<GlobalTemplate | null> {
+  return getSingleton<GlobalTemplate>('global_footer')
+}
+
 /** Fetch all published page slugs — for generateStaticParams. */
 export async function getAllPageSlugs(): Promise<string[]> {
   try {
