@@ -6,6 +6,7 @@ import { VBToolbar } from './vb-toolbar'
 import { VBLeftPanel } from './vb-left-panel'
 import { VBCanvas } from './vb-canvas'
 import { VBRightPanel } from './vb-right-panel'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import type { Block } from '@/components/editor/types'
 import type { ContentType } from '@/types/content'
 
@@ -106,6 +107,7 @@ export function VisualBuilder({
   )
 
   return (
+    <TooltipProvider>
     <div className="flex flex-col h-[calc(100vh-var(--topbar-height))] -mt-6 -mx-6 bg-[#08080f]">
       {/* Top toolbar */}
       <VBToolbar
@@ -144,5 +146,6 @@ export function VisualBuilder({
         </div>
       </div>
     </div>
+    </TooltipProvider>
   )
 }
