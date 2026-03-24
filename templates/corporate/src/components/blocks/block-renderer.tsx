@@ -1,6 +1,13 @@
 import type { CSSProperties, ReactNode } from 'react'
 import type { BlockStyle } from '@/sdk/core-types'
 
+// ─── Media URL fix ───────────────────────────────────────────────────────────
+// Normalize media URLs: strip localhost references from development uploads
+function fixUrl(url: unknown): string {
+  if (typeof url !== 'string' || !url) return ''
+  return url.replace(/^https?:\/\/localhost:\d+/, '')
+}
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface Block {
@@ -995,15 +1002,22 @@ function BlockItem({ block, depth = 0 }: { block: Block; depth?: number }) {
   const st = block.style ?? {}
   if (st.hidden) return null
 
+  // Fix media URLs (strip localhost references from dev uploads)
+  const data = { ...block.data }
+  for (const key of ['url', 'image', 'photo', 'avatar', 'bgImage'] as const) {
+    if (typeof data[key] === 'string') data[key] = fixUrl(data[key])
+  }
+  const fixedBlock = { ...block, data }
+
   let content: ReactNode
 
-  switch (block.type) {
+  switch (fixedBlock.type) {
     // ── Structural (Divi-like hierarchy) ──
     case 'section':
-      content = <SectionBlock data={block.data} blockChildren={block.children} depth={depth} />
+      content = <SectionBlock data={data} blockChildren={block.children} depth={depth} />
       break
     case 'row':
-      content = <RowBlock data={block.data} blockChildren={block.children} depth={depth} />
+      content = <RowBlock data={data} blockChildren={block.children} depth={depth} />
       break
     case 'column':
       content = <ColumnBlock blockChildren={block.children} depth={depth} />
@@ -1011,36 +1025,36 @@ function BlockItem({ block, depth = 0 }: { block: Block; depth?: number }) {
 
     // ── Legacy layout ──
     case 'columns':
-      content = <ColumnsBlock data={block.data} depth={depth} />
+      content = <ColumnsBlock data={data} depth={depth} />
       break
 
     // ── Original modules ──
-    case 'heading':     content = <HeadingBlock     data={block.data} />;  break
-    case 'paragraph':   content = <ParagraphBlock   data={block.data} />;  break
-    case 'image':       content = <ImageBlock       data={block.data} />;  break
-    case 'gallery':     content = <GalleryBlock     data={block.data} />;  break
-    case 'button':      content = <ButtonBlock      data={block.data} />;  break
-    case 'video':       content = <VideoBlock       data={block.data} />;  break
-    case 'code':        content = <CodeBlock        data={block.data} />;  break
-    case 'quote':       content = <QuoteBlock       data={block.data} />;  break
-    case 'divider':     content = <DividerBlock     data={block.data} />;  break
-    case 'html':        content = <HtmlBlock        data={block.data} />;  break
-    case 'card':        content = <CardBlock        data={block.data} />;  break
-    case 'accordion':   content = <AccordionBlock   data={block.data} />;  break
-    case 'testimonial': content = <TestimonialBlock data={block.data} />;  break
-    case 'cta':         content = <CtaBlock         data={block.data} />;  break
+    case 'heading':     content = <HeadingBlock     data={data} />;  break
+    case 'paragraph':   content = <ParagraphBlock   data={data} />;  break
+    case 'image':       content = <ImageBlock       data={data} />;  break
+    case 'gallery':     content = <GalleryBlock     data={data} />;  break
+    case 'button':      content = <ButtonBlock      data={data} />;  break
+    case 'video':       content = <VideoBlock       data={data} />;  break
+    case 'code':        content = <CodeBlock        data={data} />;  break
+    case 'quote':       content = <QuoteBlock       data={data} />;  break
+    case 'divider':     content = <DividerBlock     data={data} />;  break
+    case 'html':        content = <HtmlBlock        data={data} />;  break
+    case 'card':        content = <CardBlock        data={data} />;  break
+    case 'accordion':   content = <AccordionBlock   data={data} />;  break
+    case 'testimonial': content = <TestimonialBlock data={data} />;  break
+    case 'cta':         content = <CtaBlock         data={data} />;  break
 
     // ── New modules ──
-    case 'blurb':       content = <BlurbBlock       data={block.data} />;  break
-    case 'icon':        content = <IconBlock        data={block.data} />;  break
-    case 'counter':     content = <CounterBlock     data={block.data} />;  break
-    case 'tabs':        content = <TabsBlock        data={block.data} />;  break
-    case 'slider':      content = <SliderBlock      data={block.data} />;  break
-    case 'pricing':     content = <PricingBlock     data={block.data} />;  break
-    case 'team':        content = <TeamBlock        data={block.data} />;  break
-    case 'social':      content = <SocialBlock      data={block.data} />;  break
-    case 'form':        content = <FormBlock        data={block.data} />;  break
-    case 'spacer':      content = <SpacerBlock      data={block.data} />;  break
+    case 'blurb':       content = <BlurbBlock       data={data} />;  break
+    case 'icon':        content = <IconBlock        data={data} />;  break
+    case 'counter':     content = <CounterBlock     data={data} />;  break
+    case 'tabs':        content = <TabsBlock        data={data} />;  break
+    case 'slider':      content = <SliderBlock      data={data} />;  break
+    case 'pricing':     content = <PricingBlock     data={data} />;  break
+    case 'team':        content = <TeamBlock        data={data} />;  break
+    case 'social':      content = <SocialBlock      data={data} />;  break
+    case 'form':        content = <FormBlock        data={data} />;  break
+    case 'spacer':      content = <SpacerBlock      data={data} />;  break
 
     default: return null
   }
