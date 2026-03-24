@@ -21,6 +21,7 @@ interface VBToolbarProps {
   pageId: string
   initialTitle: string
   initialSlug: string
+  initialStatus?: string
 }
 
 // ─── Device config ──────────────────────────────────────────────────────────
@@ -33,7 +34,7 @@ const DEVICES = [
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
-export function VBToolbar({ pageId, initialTitle, initialSlug }: VBToolbarProps) {
+export function VBToolbar({ pageId, initialTitle, initialSlug, initialStatus = 'draft' }: VBToolbarProps) {
   const blocks = useVisualBuilderStore((s) => s.blocks)
   const device = useVisualBuilderStore((s) => s.device)
   const setDevice = useVisualBuilderStore((s) => s.setDevice)
@@ -52,6 +53,7 @@ export function VBToolbar({ pageId, initialTitle, initialSlug }: VBToolbarProps)
   const slug = pageSlug || initialSlug
 
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
+  const [status, setStatus] = useState(initialStatus)
 
   // ── Save ───────────────────────────────────────────────────────────────
 
@@ -62,6 +64,7 @@ export function VBToolbar({ pageId, initialTitle, initialSlug }: VBToolbarProps)
         title,
         slug,
         data: { blocks },
+        status, // preserve current status
       })
       markClean()
       setSaveStatus('saved')
@@ -70,7 +73,7 @@ export function VBToolbar({ pageId, initialTitle, initialSlug }: VBToolbarProps)
       setSaveStatus('error')
       setTimeout(() => setSaveStatus('idle'), 4000)
     }
-  }, [pageId, title, slug, blocks, markClean])
+  }, [pageId, title, slug, blocks, status, markClean])
 
   // ── Publish ────────────────────────────────────────────────────────────
 
@@ -83,6 +86,7 @@ export function VBToolbar({ pageId, initialTitle, initialSlug }: VBToolbarProps)
         data: { blocks },
         status: 'published',
       })
+      setStatus('published')
       markClean()
       setSaveStatus('saved')
       setTimeout(() => setSaveStatus('idle'), 3000)
@@ -206,10 +210,18 @@ export function VBToolbar({ pageId, initialTitle, initialSlug }: VBToolbarProps)
           <Save className="w-3.5 h-3.5" />
           Zapisz
         </Button>
-        <Button size="sm" onClick={handlePublish} disabled={isBusy}>
-          <Globe className="w-3.5 h-3.5" />
-          Opublikuj
-        </Button>
+        {status !== 'published' && (
+          <Button size="sm" onClick={handlePublish} disabled={isBusy}>
+            <Globe className="w-3.5 h-3.5" />
+            Opublikuj
+          </Button>
+        )}
+        {status === 'published' && (
+          <span className="flex items-center gap-1.5 text-xs text-emerald-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            Opublikowany
+          </span>
+        )}
       </div>
     </div>
   )

@@ -17,6 +17,7 @@ interface VisualBuilderProps {
   initialBlocks: Block[]
   initialTitle: string
   initialSlug: string
+  initialStatus?: string
   contentType: ContentType
 }
 
@@ -27,6 +28,7 @@ export function VisualBuilder({
   initialBlocks,
   initialTitle,
   initialSlug,
+  initialStatus,
   contentType: _contentType,
 }: VisualBuilderProps) {
   const init = useVisualBuilderStore((s) => s.init)
@@ -114,6 +116,7 @@ export function VisualBuilder({
         pageId={pageId}
         initialTitle={initialTitle}
         initialSlug={initialSlug}
+        initialStatus={initialStatus}
       />
 
       {/* Body: left panel + canvas + right panel */}

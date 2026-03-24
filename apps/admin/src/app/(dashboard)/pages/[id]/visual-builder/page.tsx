@@ -49,6 +49,7 @@ export default function VisualBuilderPage() {
       initialBlocks={(item.data?.blocks ?? []) as Block[]}
       initialTitle={item.title}
       initialSlug={item.slug}
+      initialStatus={item.status}
       contentType={pageType}
     />
   )

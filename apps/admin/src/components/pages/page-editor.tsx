@@ -299,16 +299,43 @@ export function PageEditor({ contentType, item }: PageEditorProps) {
             ) : (
               <Controller
                 control={control}
-                name="data.content"
-                render={({ field }) => (
-                  <textarea
-                    value={(field.value as string) ?? ''}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    className="w-full h-full p-4 bg-[var(--color-surface)] text-[var(--color-foreground)] font-mono text-sm border-0 outline-none resize-none scrollbar-thin"
-                    placeholder="Wpisz kod HTML..."
-                    spellCheck={false}
-                  />
-                )}
+                name="data"
+                render={({ field }) => {
+                  const data = field.value as Record<string, unknown> | undefined
+                  const hasBlocks = Array.isArray(data?.blocks) && (data.blocks as unknown[]).length > 0
+                  const htmlContent = typeof data?.content === 'string' ? data.content : ''
+
+                  if (hasBlocks) {
+                    return (
+                      <div className="h-full flex flex-col items-center justify-center gap-3 text-[var(--color-muted-foreground)] p-8">
+                        <Globe className="w-8 h-8 text-[var(--color-primary)]" />
+                        <p className="text-sm font-medium">Strona zbudowana w Visual Builder</p>
+                        <p className="text-xs text-center max-w-sm">
+                          Ta strona używa bloków z Visual Buildera. Edytuj ją przez Visual Builder lub usuń bloki aby przełączyć na tryb HTML.
+                        </p>
+                        {item?.id && (
+                          <Link
+                            href={`/pages/${item.id}/visual-builder`}
+                            className="mt-2 flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white hover:opacity-90 transition-opacity"
+                          >
+                            <Globe className="w-4 h-4" />
+                            Otwórz Visual Builder
+                          </Link>
+                        )}
+                      </div>
+                    )
+                  }
+
+                  return (
+                    <textarea
+                      value={htmlContent}
+                      onChange={(e) => field.onChange({ ...data, content: e.target.value })}
+                      className="w-full h-full p-4 bg-[var(--color-surface)] text-[var(--color-foreground)] font-mono text-sm border-0 outline-none resize-none scrollbar-thin"
+                      placeholder="Wpisz kod HTML..."
+                      spellCheck={false}
+                    />
+                  )
+                }}
               />
             )}
           </div>
