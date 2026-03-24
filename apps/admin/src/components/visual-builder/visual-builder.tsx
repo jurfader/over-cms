@@ -40,7 +40,7 @@ export function VisualBuilder({
   const didInit = useRef(false)
   useEffect(() => {
     if (!didInit.current) {
-      init(initialBlocks)
+      init(initialBlocks, { pageId, title: initialTitle, slug: initialSlug })
       didInit.current = true
     }
   }, []) // init runs once on mount

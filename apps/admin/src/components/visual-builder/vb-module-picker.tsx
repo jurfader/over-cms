@@ -62,7 +62,8 @@ export function VBModulePicker() {
 
   const handleDragStart = useCallback(
     (e: React.DragEvent, def: BlockDef) => {
-      e.dataTransfer.setData('text/plain', def.type)
+      e.dataTransfer.setData('text/overcms-block', def.type)
+      e.dataTransfer.setData('text/plain', def.type) // fallback
       e.dataTransfer.effectAllowed = 'copy'
       startDrag(def.type)
     },

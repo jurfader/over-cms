@@ -322,7 +322,20 @@ export function initCanvasScript(): void {
     removeDropZones()
 
     const blocks = allBlockElements()
-    if (blocks.length === 0) return
+
+    // Empty page: create a single full-width drop zone
+    if (blocks.length === 0) {
+      dropZones.push(
+        makeDropZoneElement(
+          100, // some offset from top
+          0,
+          document.body.clientWidth,
+          'root',
+          0,
+        ),
+      )
+      return
+    }
 
     blocks.forEach((block, index) => {
       const rect = block.getBoundingClientRect()
@@ -416,10 +429,27 @@ export function initCanvasScript(): void {
     activeDropZoneIndex = index
   }
 
+  // ── Detect drag from parent via dataTransfer (fallback for race condition)
+  function detectDragFromTransfer(e: DragEvent): boolean {
+    if (activeDragType) return true
+    // Check if the drag carries our custom type or plain text as a block type
+    if (e.dataTransfer?.types?.includes('text/overcms-block')) return true
+    if (e.dataTransfer?.types?.includes('text/plain')) return true
+    return false
+  }
+
   // Global dragover/drop listeners for when parent initiates a drag
   document.addEventListener('dragover', (e) => {
-    if (!activeDragType) return
+    if (!detectDragFromTransfer(e)) return
     e.preventDefault()
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy'
+
+    // Lazily create drop zones if the postMessage hasn't arrived yet
+    if (!activeDragType && dropZones.length === 0) {
+      activeDragType = '__pending__'
+      createDropZones()
+    }
+
     const nearest = findNearestDropZone(e.clientY)
     highlightDropZone(nearest)
   })
@@ -433,15 +463,24 @@ export function initCanvasScript(): void {
   })
 
   document.addEventListener('drop', (e) => {
-    if (!activeDragType) return
+    if (!activeDragType && !detectDragFromTransfer(e)) return
     e.preventDefault()
 
-    if (activeDropZoneIndex !== null) {
+    // Resolve the block type: prefer activeDragType set via postMessage,
+    // fall back to reading from dataTransfer
+    const blockType =
+      (activeDragType && activeDragType !== '__pending__')
+        ? activeDragType
+        : e.dataTransfer?.getData('text/overcms-block')
+          || e.dataTransfer?.getData('text/plain')
+          || null
+
+    if (blockType && activeDropZoneIndex !== null) {
       const zone = dropZones[activeDropZoneIndex]
       if (zone) {
         sendToParent({
           type: 'vb:drop',
-          blockType: activeDragType,
+          blockType,
           targetParentId: zone.dataset.parentId || 'root',
           targetIndex: parseInt(zone.dataset.index || '0', 10),
         })

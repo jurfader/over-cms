@@ -3,6 +3,10 @@ import type { Block, BlockStyle, BlockType } from '../editor/types'
 import { createBlock } from '../editor/types'
 import * as tree from './vb-tree-ops'
 
+// ─── Structural types ───────────────────────────────────────────────────────
+
+const STRUCTURAL_TYPES = new Set<BlockType>(['section', 'row', 'column'])
+
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const MAX_HISTORY = 50
@@ -12,6 +16,11 @@ const MAX_HISTORY = 50
 export interface VisualBuilderState {
   // Block tree
   blocks: Block[]
+
+  // Page metadata (set during init, used by toolbar for save)
+  pageId: string | null
+  pageTitle: string
+  pageSlug: string
 
   // Selection
   selectedBlockId: string | null
@@ -37,7 +46,7 @@ export interface VisualBuilderState {
   isDirty: boolean
 
   // Actions
-  init: (blocks: Block[]) => void
+  init: (blocks: Block[], meta?: { pageId: string; title: string; slug: string }) => void
   selectBlock: (id: string | null) => void
   hoverBlock: (id: string | null) => void
   updateBlockData: (id: string, data: Record<string, unknown>) => void
@@ -55,6 +64,8 @@ export interface VisualBuilderState {
   setIframeReady: (ready: boolean) => void
   startDrag: (type: BlockType) => void
   endDrag: () => void
+  setPageTitle: (title: string) => void
+  markClean: () => void
 }
 
 // ─── History helper ──────────────────────────────────────────────────────────
@@ -72,6 +83,10 @@ export const useVisualBuilderStore = create<VisualBuilderState>((set, get) => ({
   // ── Initial state ────────────────────────────────────────────────────────
 
   blocks: [],
+
+  pageId: null,
+  pageTitle: '',
+  pageSlug: '',
 
   selectedBlockId: null,
   hoveredBlockId: null,
@@ -92,7 +107,7 @@ export const useVisualBuilderStore = create<VisualBuilderState>((set, get) => ({
 
   // ── Actions ──────────────────────────────────────────────────────────────
 
-  init: (blocks) =>
+  init: (blocks, meta) =>
     set({
       blocks,
       selectedBlockId: null,
@@ -100,6 +115,9 @@ export const useVisualBuilderStore = create<VisualBuilderState>((set, get) => ({
       past: [],
       future: [],
       isDirty: false,
+      ...(meta
+        ? { pageId: meta.pageId, pageTitle: meta.title, pageSlug: meta.slug }
+        : {}),
     }),
 
   selectBlock: (id) => set({ selectedBlockId: id }),
@@ -129,25 +147,69 @@ export const useVisualBuilderStore = create<VisualBuilderState>((set, get) => ({
   addBlock: (type, parentId, index) => {
     const state = get()
     const block = createBlock(type)
+    const isModule = !STRUCTURAL_TYPES.has(type)
+
+    // ── Auto-wrapping: wrap bare modules in the required structure ──────
+    // Dropping at root (parentId === 'root') with a non-structural module:
+    //   → Section > Row > Column > Module
+    // Dropping into a section with a non-structural module:
+    //   → Row > Column > Module
+    // Dropping into a row with a non-structural module:
+    //   → Column > Module
+
+    let blockToInsert: Block = block
+    const effectiveParentId = parentId
+
+    if (isModule) {
+      const parentBlock = parentId !== 'root'
+        ? tree.findInTree(state.blocks, parentId)
+        : null
+      const parentType = parentBlock?.type
+
+      if (parentId === 'root') {
+        // Wrap: Section → Row → Column → Module
+        const column = createBlock('column')
+        column.children = [block]
+        const row = createBlock('row')
+        row.children = [column]
+        const section = createBlock('section')
+        section.children = [row]
+        blockToInsert = section
+      } else if (parentType === 'section') {
+        // Wrap: Row → Column → Module
+        const column = createBlock('column')
+        column.children = [block]
+        const row = createBlock('row')
+        row.children = [column]
+        blockToInsert = row
+      } else if (parentType === 'row') {
+        // Wrap: Column → Module
+        const column = createBlock('column')
+        column.children = [block]
+        blockToInsert = column
+      }
+      // If parentType === 'column' → insert directly (no wrapping needed)
+    }
+
     let newBlocks: Block[]
 
-    if (parentId === 'root') {
+    if (effectiveParentId === 'root') {
       // Insert at root level (top-level blocks array)
       const clampedIndex = index !== undefined
         ? Math.max(0, Math.min(index, state.blocks.length))
         : state.blocks.length
       newBlocks = [...state.blocks]
-      newBlocks.splice(clampedIndex, 0, block)
+      newBlocks.splice(clampedIndex, 0, blockToInsert)
     } else {
       newBlocks =
         index !== undefined
-          ? tree.insertAt(state.blocks, parentId, index, block)
-          : tree.addChildTo(state.blocks, parentId, block)
+          ? tree.insertAt(state.blocks, effectiveParentId, index, blockToInsert)
+          : tree.addChildTo(state.blocks, effectiveParentId, blockToInsert)
     }
 
     set({
       blocks: newBlocks,
-      selectedBlockId: block.id,
+      selectedBlockId: block.id, // Select the innermost module
       isDirty: true,
       ...pushHistory(state),
     })
@@ -223,4 +285,8 @@ export const useVisualBuilderStore = create<VisualBuilderState>((set, get) => ({
   startDrag: (type) => set({ isDragging: true, dragBlockType: type }),
 
   endDrag: () => set({ isDragging: false, dragBlockType: null }),
+
+  setPageTitle: (title) => set({ pageTitle: title, isDirty: true }),
+
+  markClean: () => set({ isDirty: false }),
 }))

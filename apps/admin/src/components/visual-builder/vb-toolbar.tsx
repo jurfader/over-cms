@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import Link from 'next/link'
 import {
   ChevronLeft, Save, Globe,
@@ -41,8 +41,16 @@ export function VBToolbar({ pageId, initialTitle, initialSlug }: VBToolbarProps)
   const future = useVisualBuilderStore((s) => s.future)
   const undo = useVisualBuilderStore((s) => s.undo)
   const redo = useVisualBuilderStore((s) => s.redo)
+  const isDirty = useVisualBuilderStore((s) => s.isDirty)
+  const pageTitle = useVisualBuilderStore((s) => s.pageTitle)
+  const pageSlug = useVisualBuilderStore((s) => s.pageSlug)
+  const setPageTitle = useVisualBuilderStore((s) => s.setPageTitle)
+  const markClean = useVisualBuilderStore((s) => s.markClean)
 
-  const [title, setTitle] = useState(initialTitle)
+  // Use store values, falling back to initial props for first render
+  const title = pageTitle || initialTitle
+  const slug = pageSlug || initialSlug
+
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
 
   // ── Save ───────────────────────────────────────────────────────────────
@@ -52,16 +60,17 @@ export function VBToolbar({ pageId, initialTitle, initialSlug }: VBToolbarProps)
     try {
       await api.put(`/api/content/page/${pageId}`, {
         title,
-        slug: initialSlug,
+        slug,
         data: { blocks },
       })
+      markClean()
       setSaveStatus('saved')
       setTimeout(() => setSaveStatus('idle'), 3000)
     } catch {
       setSaveStatus('error')
       setTimeout(() => setSaveStatus('idle'), 4000)
     }
-  }, [pageId, title, initialSlug, blocks])
+  }, [pageId, title, slug, blocks, markClean])
 
   // ── Publish ────────────────────────────────────────────────────────────
 
@@ -70,17 +79,19 @@ export function VBToolbar({ pageId, initialTitle, initialSlug }: VBToolbarProps)
     try {
       await api.put(`/api/content/page/${pageId}`, {
         title,
-        slug: initialSlug,
+        slug,
         data: { blocks },
+        status: 'published',
       })
       await api.post(`/api/content/page/${pageId}/publish`)
+      markClean()
       setSaveStatus('saved')
       setTimeout(() => setSaveStatus('idle'), 3000)
     } catch {
       setSaveStatus('error')
       setTimeout(() => setSaveStatus('idle'), 4000)
     }
-  }, [pageId, title, initialSlug, blocks])
+  }, [pageId, title, slug, blocks, markClean])
 
   const isBusy = saveStatus === 'saving'
 
@@ -102,7 +113,7 @@ export function VBToolbar({ pageId, initialTitle, initialSlug }: VBToolbarProps)
 
         <input
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => setPageTitle(e.target.value)}
           placeholder="Tytuł strony..."
           className="flex-1 bg-transparent text-sm font-semibold text-[var(--color-foreground)] placeholder:text-[var(--color-subtle)] focus:outline-none min-w-0"
         />
@@ -182,6 +193,12 @@ export function VBToolbar({ pageId, initialTitle, initialSlug }: VBToolbarProps)
           <span className="flex items-center gap-1.5 text-xs text-[var(--color-destructive)]">
             <AlertCircle className="w-3.5 h-3.5" />
             Błąd zapisu
+          </span>
+        )}
+        {saveStatus === 'idle' && isDirty && (
+          <span className="flex items-center gap-1.5 text-xs text-amber-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+            Niezapisane zmiany
           </span>
         )}
 
