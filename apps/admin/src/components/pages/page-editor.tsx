@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { EditorSidebar } from '@/components/content/editor-sidebar'
 import { BlockEditor } from '@/components/editor/block-editor'
-import { CodeEditor } from '@/components/content/code-editor'
+// CodeEditor removed — HTML tab uses plain textarea for reliability
 import type { Block } from '@/components/editor/types'
 
 type EditorMode = 'blocks' | 'html'
@@ -301,11 +301,12 @@ export function PageEditor({ contentType, item }: PageEditorProps) {
                 control={control}
                 name="data.content"
                 render={({ field }) => (
-                  <CodeEditor
+                  <textarea
                     value={(field.value as string) ?? ''}
-                    onChange={field.onChange}
-                    language="html"
-                    height="100%"
+                    onChange={(e) => field.onChange(e.target.value)}
+                    className="w-full h-full p-4 bg-[var(--color-surface)] text-[var(--color-foreground)] font-mono text-sm border-0 outline-none resize-none scrollbar-thin"
+                    placeholder="Wpisz kod HTML..."
+                    spellCheck={false}
                   />
                 )}
               />
