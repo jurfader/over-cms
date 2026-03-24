@@ -97,7 +97,7 @@ export function VBToolbar({ pageId, initialTitle, initialSlug }: VBToolbarProps)
   // ── Render ─────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex items-center gap-3 px-4 py-2 border-b border-[var(--color-border)] bg-[var(--glass-card-bg)] backdrop-filter backdrop-blur-sm shrink-0">
+    <div className="flex items-center gap-3 px-4 py-2 border-b border-[var(--color-border)] bg-[#0c0c18] shrink-0 sticky top-0 z-50">
 
       {/* ── Left: Back + title ──────────────────────────────────────── */}
       <div className="flex items-center gap-2 flex-1 min-w-0">
