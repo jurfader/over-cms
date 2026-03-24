@@ -168,7 +168,12 @@ function injectStyles(): void {
 
 // ─── Main entry ─────────────────────────────────────────────────
 
+let _scriptInitialised = false
+
 export function initCanvasScript(): void {
+  if (_scriptInitialised) return
+  _scriptInitialised = true
+
   injectStyles()
 
   // State

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { X } from 'lucide-react'
 import { useVisualBuilderStore } from './vb-store'
 import { findInTree } from './vb-tree-ops'
@@ -29,6 +29,13 @@ export function VBRightPanel() {
   const selectBlock = useVisualBuilderStore((s) => s.selectBlock)
 
   const [tab, setTab] = useState<PanelTab>('content')
+
+  // Reset tab to 'content' when a different block is selected
+  const prevSelectedId = useRef(selectedBlockId)
+  if (prevSelectedId.current !== selectedBlockId) {
+    prevSelectedId.current = selectedBlockId
+    if (tab !== 'content') setTab('content')
+  }
 
   // Find the selected block
   const block = selectedBlockId ? findInTree(blocks, selectedBlockId) : null

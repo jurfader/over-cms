@@ -2,7 +2,6 @@
 
 import { useEffect, useCallback, useRef } from 'react'
 import { useVisualBuilderStore } from './vb-store'
-import { onIframeMessage } from './vb-messages'
 import { VBToolbar } from './vb-toolbar'
 import { VBLeftPanel } from './vb-left-panel'
 import { VBCanvas } from './vb-canvas'
@@ -31,7 +30,9 @@ export function VisualBuilder({
 }: VisualBuilderProps) {
   const init = useVisualBuilderStore((s) => s.init)
   const selectBlock = useVisualBuilderStore((s) => s.selectBlock)
-  const hoverBlock = useVisualBuilderStore((s) => s.hoverBlock)
+  const removeBlock = useVisualBuilderStore((s) => s.removeBlock)
+  const undo = useVisualBuilderStore((s) => s.undo)
+  const redo = useVisualBuilderStore((s) => s.redo)
   const selectedBlockId = useVisualBuilderStore((s) => s.selectedBlockId)
   const leftPanel = useVisualBuilderStore((s) => s.leftPanel)
 
@@ -44,23 +45,55 @@ export function VisualBuilder({
     }
   }, []) // init runs once on mount
 
-  // Listen for iframe messages
+  // Note: iframe message handling (vb:click, vb:hover-in, vb:hover-out etc.)
+  // is done in VBCanvas which forwards events to the store. No duplicate
+  // listeners needed here.
+
+  // ── Keyboard shortcuts (undo, redo, delete, deselect) ─────────────────
   useEffect(() => {
-    const cleanup = onIframeMessage((msg) => {
-      switch (msg.type) {
-        case 'vb:click':
-          selectBlock(msg.blockId)
-          break
-        case 'vb:hover-in':
-          hoverBlock(msg.blockId)
-          break
-        case 'vb:hover-out':
-          hoverBlock(null)
-          break
+    function handleKeyDown(e: KeyboardEvent) {
+      const meta = e.metaKey || e.ctrlKey
+
+      // Ignore shortcuts when user is typing in an input
+      const tag = (e.target as HTMLElement).tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+      if ((e.target as HTMLElement).isContentEditable) return
+
+      // Ctrl+Z / Cmd+Z = undo
+      if (meta && !e.shiftKey && e.key === 'z') {
+        e.preventDefault()
+        undo()
+        return
       }
-    })
-    return cleanup
-  }, [selectBlock, hoverBlock])
+      // Ctrl+Shift+Z / Cmd+Shift+Z = redo
+      if (meta && e.shiftKey && e.key === 'z') {
+        e.preventDefault()
+        redo()
+        return
+      }
+      // Ctrl+Y / Cmd+Y = redo (alternative)
+      if (meta && e.key === 'y') {
+        e.preventDefault()
+        redo()
+        return
+      }
+      // Delete / Backspace = remove selected block
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedBlockId) {
+        e.preventDefault()
+        removeBlock(selectedBlockId)
+        selectBlock(null)
+        return
+      }
+      // Escape = deselect
+      if (e.key === 'Escape' && selectedBlockId) {
+        selectBlock(null)
+        return
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [undo, redo, removeBlock, selectBlock, selectedBlockId])
 
   // Click outside canvas deselects
   const handleBackdropClick = useCallback(

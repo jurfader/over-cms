@@ -19,18 +19,24 @@ export function VBCanvas() {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const blocks = useVisualBuilderStore((s) => s.blocks)
   const device = useVisualBuilderStore((s) => s.device)
+  const selectedBlockId = useVisualBuilderStore((s) => s.selectedBlockId)
+  const hoveredBlockId = useVisualBuilderStore((s) => s.hoveredBlockId)
   const iframeReady = useVisualBuilderStore((s) => s.iframeReady)
   const setIframeReady = useVisualBuilderStore((s) => s.setIframeReady)
   const selectBlock = useVisualBuilderStore((s) => s.selectBlock)
   const hoverBlock = useVisualBuilderStore((s) => s.hoverBlock)
   const addBlock = useVisualBuilderStore((s) => s.addBlock)
   const moveBlock = useVisualBuilderStore((s) => s.moveBlock)
+  const isDragging = useVisualBuilderStore((s) => s.isDragging)
+  const dragBlockType = useVisualBuilderStore((s) => s.dragBlockType)
   const endDrag = useVisualBuilderStore((s) => s.endDrag)
+
+  const updateBlockData = useVisualBuilderStore((s) => s.updateBlockData)
 
   const blocksRef = useRef(blocks)
   blocksRef.current = blocks
 
-  // ── Listen for iframe ready ────────────────────────────────────────────
+  // ── Listen for iframe messages ───────────────────────────────────────
 
   useEffect(() => {
     const cleanup = onIframeMessage((msg) => {
@@ -58,6 +64,11 @@ export function VBCanvas() {
           hoverBlock(null)
           break
 
+        case 'vb:inline-update':
+          // User finished inline editing in the preview — update the store
+          updateBlockData(msg.blockId, { [msg.field]: msg.value })
+          break
+
         case 'vb:drop':
           addBlock(
             msg.blockType as Parameters<typeof addBlock>[0],
@@ -80,7 +91,7 @@ export function VBCanvas() {
     })
 
     return cleanup
-  }, [setIframeReady, selectBlock, hoverBlock, addBlock, moveBlock, endDrag])
+  }, [setIframeReady, selectBlock, hoverBlock, updateBlockData, addBlock, moveBlock, endDrag])
 
   // ── Send blocks to iframe on change ────────────────────────────────────
 
@@ -91,6 +102,42 @@ export function VBCanvas() {
       blocks: blocks as unknown as Record<string, unknown>[],
     })
   }, [blocks, iframeReady])
+
+  // ── Sync selected block to iframe ────────────────────────────────────
+
+  useEffect(() => {
+    if (!iframeReady || !iframeRef.current) return
+    sendToIframe(iframeRef.current, {
+      type: 'vb:select',
+      blockId: selectedBlockId,
+    })
+  }, [selectedBlockId, iframeReady])
+
+  // ── Sync hovered block to iframe ─────────────────────────────────────
+
+  useEffect(() => {
+    if (!iframeReady || !iframeRef.current) return
+    sendToIframe(iframeRef.current, {
+      type: 'vb:hover',
+      blockId: hoveredBlockId,
+    })
+  }, [hoveredBlockId, iframeReady])
+
+  // ── Forward drag state to iframe ─────────────────────────────────────
+
+  useEffect(() => {
+    if (!iframeReady || !iframeRef.current) return
+    if (isDragging && dragBlockType) {
+      sendToIframe(iframeRef.current, {
+        type: 'vb:start-drag',
+        blockType: dragBlockType,
+      })
+    } else {
+      sendToIframe(iframeRef.current, {
+        type: 'vb:end-drag',
+      })
+    }
+  }, [isDragging, dragBlockType, iframeReady])
 
   // ── Width based on device ──────────────────────────────────────────────
 

@@ -129,10 +129,22 @@ export const useVisualBuilderStore = create<VisualBuilderState>((set, get) => ({
   addBlock: (type, parentId, index) => {
     const state = get()
     const block = createBlock(type)
-    const newBlocks =
-      index !== undefined
-        ? tree.insertAt(state.blocks, parentId, index, block)
-        : tree.addChildTo(state.blocks, parentId, block)
+    let newBlocks: Block[]
+
+    if (parentId === 'root') {
+      // Insert at root level (top-level blocks array)
+      const clampedIndex = index !== undefined
+        ? Math.max(0, Math.min(index, state.blocks.length))
+        : state.blocks.length
+      newBlocks = [...state.blocks]
+      newBlocks.splice(clampedIndex, 0, block)
+    } else {
+      newBlocks =
+        index !== undefined
+          ? tree.insertAt(state.blocks, parentId, index, block)
+          : tree.addChildTo(state.blocks, parentId, block)
+    }
+
     set({
       blocks: newBlocks,
       selectedBlockId: block.id,

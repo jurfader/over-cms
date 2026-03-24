@@ -45,8 +45,12 @@ export function removeFromTree(blocks: Block[], id: string): Block[] {
   return result
 }
 
-/** Add a child block to the end of a parent's children list */
+/** Add a child block to the end of a parent's children list.
+ *  When parentId is 'root', appends to the top-level blocks array. */
 export function addChildTo(blocks: Block[], parentId: string, child: Block): Block[] {
+  if (parentId === 'root') {
+    return [...blocks, child]
+  }
   return updateInTree(blocks, parentId, (parent) => ({
     ...parent,
     children: [...(parent.children ?? []), child],
@@ -95,13 +99,20 @@ export function findInTree(blocks: Block[], id: string): Block | undefined {
 
 // ─── New tree operations ─────────────────────────────────────────────────────
 
-/** Insert a child block at a specific index within a parent's children */
+/** Insert a child block at a specific index within a parent's children.
+ *  When parentId is 'root', inserts at the top level of the blocks array. */
 export function insertAt(
   blocks: Block[],
   parentId: string,
   index: number,
   child: Block,
 ): Block[] {
+  if (parentId === 'root') {
+    const clampedIndex = Math.max(0, Math.min(index, blocks.length))
+    const result = [...blocks]
+    result.splice(clampedIndex, 0, child)
+    return result
+  }
   return updateInTree(blocks, parentId, (parent) => {
     const children = parent.children ?? []
     const clampedIndex = Math.max(0, Math.min(index, children.length))
@@ -111,7 +122,8 @@ export function insertAt(
   })
 }
 
-/** Move a block from its current location to a new parent at a specific index */
+/** Move a block from its current location to a new parent at a specific index.
+ *  Supports parentId 'root' for top-level moves. */
 export function moveToParent(
   blocks: Block[],
   blockId: string,
