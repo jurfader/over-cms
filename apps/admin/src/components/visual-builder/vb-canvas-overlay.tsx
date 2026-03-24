@@ -51,7 +51,7 @@ export function VBCanvasOverlay({ iframeRef }: VBCanvasOverlayProps) {
 
   const [selectionRect, setSelectionRect] = useState<CapturedRect | null>(null)
   const [hoverRect, setHoverRect] = useState<CapturedRect | null>(null)
-  const [iframeOffset, setIframeOffset] = useState({ top: 0, left: 0 })
+  const [, setIframeOffset] = useState({ top: 0, left: 0 })
   const [iframeScroll, setIframeScroll] = useState(0)
 
   // Context menu state
@@ -176,8 +176,8 @@ export function VBCanvasOverlay({ iframeRef }: VBCanvasOverlayProps) {
   function translate(rect: CapturedRect) {
     const scrollDelta = iframeScroll - rect.capturedScrollY
     return {
-      top: iframeOffset.top + rect.top - scrollDelta,
-      left: iframeOffset.left + rect.left,
+      top: rect.top - scrollDelta,
+      left: rect.left,
       width: rect.width,
       height: rect.height,
     }
@@ -296,7 +296,7 @@ export function VBCanvasOverlay({ iframeRef }: VBCanvasOverlayProps) {
   const showHover = hoverRect && hoverRect.blockId !== selectedBlockId
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-50">
+    <div className="pointer-events-none absolute inset-0 z-50 overflow-hidden">
 
       {/* Hover outline */}
       {showHover && (
