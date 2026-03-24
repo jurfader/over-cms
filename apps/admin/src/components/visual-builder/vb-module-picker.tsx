@@ -8,6 +8,32 @@ import type { BlockDef, BlockCategory } from '@/components/editor/types'
 import { useVisualBuilderStore } from './vb-store'
 import { cn } from '@/lib/utils'
 
+// ─── Tree helpers ────────────────────────────────────────────────────────────
+
+import type { Block } from '@/components/editor/types'
+
+function findBlockInTree(blocks: Block[], id: string): Block | null {
+  for (const b of blocks) {
+    if (b.id === id) return b
+    if (b.children?.length) {
+      const found = findBlockInTree(b.children, id)
+      if (found) return found
+    }
+  }
+  return null
+}
+
+function findParentOf(blocks: Block[], childId: string): Block | null {
+  for (const b of blocks) {
+    if (b.children?.some(c => c.id === childId)) return b
+    if (b.children?.length) {
+      const found = findParentOf(b.children, childId)
+      if (found) return found
+    }
+  }
+  return null
+}
+
 // ─── Filter out column (auto-created inside rows) ───────────────────────────
 
 const PICKABLE_BLOCKS = BLOCK_DEFS.filter((d) => d.type !== 'column')
@@ -31,6 +57,7 @@ export function VBModulePicker() {
   const endDrag = useVisualBuilderStore((s) => s.endDrag)
   const addBlock = useVisualBuilderStore((s) => s.addBlock)
   const selectedBlockId = useVisualBuilderStore((s) => s.selectedBlockId)
+  const blocks = useVisualBuilderStore((s) => s.blocks)
 
   const [search, setSearch] = useState('')
   const [collapsed, setCollapsed] = useState<Set<BlockCategory>>(new Set())
@@ -79,11 +106,52 @@ export function VBModulePicker() {
   // ── Click to add (alternative to drag) ────────────────────────────────
   const handleClick = useCallback(
     (def: BlockDef) => {
-      // If a block is selected, add inside it (or its parent column)
-      // Otherwise add at root level (auto-wrap will create section/row/column)
-      addBlock(def.type, selectedBlockId ?? 'root')
+      const isStructural = def.type === 'section' || def.type === 'row'
+
+      // Structural blocks always go to root
+      if (isStructural || !selectedBlockId) {
+        addBlock(def.type, 'root')
+        return
+      }
+
+      // Find selected block to determine best parent
+      const selected = findBlockInTree(blocks, selectedBlockId)
+      if (!selected) {
+        addBlock(def.type, 'root')
+        return
+      }
+
+      // If selected is a column → add inside it
+      if (selected.type === 'column') {
+        addBlock(def.type, selectedBlockId)
+        return
+      }
+
+      // If selected is a row → find first column child
+      if (selected.type === 'row' && selected.children?.length) {
+        addBlock(def.type, selected.children[0]!.id)
+        return
+      }
+
+      // If selected is a section → find first row's first column
+      if (selected.type === 'section' && selected.children?.length) {
+        const firstRow = selected.children[0]
+        if (firstRow?.children?.length) {
+          addBlock(def.type, firstRow.children[0]!.id)
+          return
+        }
+      }
+
+      // If selected is a module → add to its parent (sibling)
+      const parentCol = findParentOf(blocks, selectedBlockId)
+      if (parentCol) {
+        addBlock(def.type, parentCol.id)
+        return
+      }
+
+      addBlock(def.type, 'root')
     },
-    [addBlock, selectedBlockId],
+    [addBlock, selectedBlockId, blocks],
   )
 
   // ── Render ─────────────────────────────────────────────────────────────
