@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { Block, BlockStyle, BlockType } from '../editor/types'
-import { createBlock } from '../editor/types'
+import { createBlock, columnsForStructure } from '../editor/types'
 import * as tree from './vb-tree-ops'
 
 // ─── Structural types ───────────────────────────────────────────────────────
@@ -126,10 +126,22 @@ export const useVisualBuilderStore = create<VisualBuilderState>((set, get) => ({
 
   updateBlockData: (id, data) => {
     const state = get()
-    const newBlocks = tree.updateInTree(state.blocks, id, (b) => ({
-      ...b,
-      data: { ...b.data, ...data },
-    }))
+    const newBlocks = tree.updateInTree(state.blocks, id, (b) => {
+      const merged = { ...b.data, ...data }
+
+      // When changing column structure on a row, regenerate column children
+      if (b.type === 'row' && data.columnStructure && data.columnStructure !== b.data.columnStructure) {
+        const newCols = columnsForStructure(data.columnStructure as string)
+        const oldCols = b.children ?? []
+        // Preserve existing column content where possible
+        for (let i = 0; i < Math.min(oldCols.length, newCols.length); i++) {
+          newCols[i]!.children = oldCols[i]?.children ?? []
+        }
+        return { ...b, data: merged, children: newCols }
+      }
+
+      return { ...b, data: merged }
+    })
     if (newBlocks === state.blocks) return
     set({ blocks: newBlocks, isDirty: true, ...pushHistory(state) })
   },

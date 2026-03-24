@@ -103,7 +103,7 @@ export interface BlockDef {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function columnsForStructure(structureId: string): Block[] {
+export function columnsForStructure(structureId: string): Block[] {
   const structure = COLUMN_STRUCTURES.find((s) => s.id === structureId)
   const widths = structure ? structure.widths : [100]
   return widths.map((w) => ({
