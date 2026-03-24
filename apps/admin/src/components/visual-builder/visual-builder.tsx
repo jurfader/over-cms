@@ -120,14 +120,28 @@ export function VisualBuilder({
         onClick={handleBackdropClick}
         data-vb-backdrop
       >
-        {/* Left panel (collapsible) */}
-        {leftPanel !== null && <VBLeftPanel />}
+        {/* Left panel (collapsible with transition) */}
+        <div
+          className="shrink-0 overflow-hidden transition-[width] duration-200 ease-in-out"
+          style={{ width: leftPanel !== null ? 280 : 0 }}
+        >
+          <div className="w-[280px] h-full">
+            <VBLeftPanel />
+          </div>
+        </div>
 
         {/* Canvas */}
         <VBCanvas />
 
-        {/* Right panel (shown when a block is selected) */}
-        {selectedBlockId && <VBRightPanel />}
+        {/* Right panel (shown when a block is selected, with transition) */}
+        <div
+          className="shrink-0 overflow-hidden transition-[width] duration-200 ease-in-out"
+          style={{ width: selectedBlockId ? 320 : 0 }}
+        >
+          <div className="w-[320px] h-full">
+            <VBRightPanel />
+          </div>
+        </div>
       </div>
     </div>
   )

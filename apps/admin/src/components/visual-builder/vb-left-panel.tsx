@@ -2,6 +2,7 @@
 
 import { useVisualBuilderStore } from './vb-store'
 import { VBModulePicker } from './vb-module-picker'
+import { VBLayersPanel } from './vb-layers-panel'
 import { cn } from '@/lib/utils'
 
 // ─── Tab config ─────────────────────────────────────────────────────────────
@@ -18,7 +19,7 @@ export function VBLeftPanel() {
   const setLeftPanel = useVisualBuilderStore((s) => s.setLeftPanel)
 
   return (
-    <div className="w-[280px] border-r border-[var(--color-border)] bg-[var(--color-background)] flex flex-col shrink-0 overflow-hidden">
+    <div className="w-[280px] h-full border-r border-[var(--color-border)] bg-[var(--color-background)] flex flex-col shrink-0 overflow-hidden">
 
       {/* Tab switcher */}
       <div className="flex border-b border-[var(--color-border)] shrink-0">
@@ -46,23 +47,8 @@ export function VBLeftPanel() {
       {/* Panel content */}
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         {leftPanel === 'modules' && <VBModulePicker />}
-        {leftPanel === 'layers' && <VBLayersPlaceholder />}
+        {leftPanel === 'layers' && <VBLayersPanel />}
       </div>
-    </div>
-  )
-}
-
-// ─── Placeholder for layers panel (Phase 8) ─────────────────────────────────
-
-function VBLayersPlaceholder() {
-  return (
-    <div className="flex flex-col items-center justify-center p-6 text-center">
-      <p className="text-sm text-[var(--color-muted-foreground)]">
-        Panel warstw
-      </p>
-      <p className="text-xs text-[var(--color-subtle)] mt-1">
-        Drzewo bloków strony z przeciąganiem — w kolejnej fazie.
-      </p>
     </div>
   )
 }
