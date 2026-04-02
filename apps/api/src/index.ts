@@ -7,13 +7,15 @@ import { loadModules }    from './modules/loader'
 // Import moduły tutaj — każdy zarejestrowany moduł jest automatycznie
 // montowany pod /api/m/{id}/ jeśli jest aktywny w bazie danych.
 
-import formsModule     from '@overcms/module-forms'
-import blogModule      from '@overcms/module-blog'
-import portfolioModule from '@overcms/module-portfolio'
+import formsModule        from '@overcms/module-forms'
+import blogModule         from '@overcms/module-blog'
+import portfolioModule    from '@overcms/module-portfolio'
+import reservationsModule from '@overcms/module-reservations'
 
 registerModule(formsModule)
 registerModule(blogModule)
 registerModule(portfolioModule)
+registerModule(reservationsModule)
 
 // ─── License activation on startup ────────────────────────────────────────────
 

@@ -207,6 +207,9 @@ importers:
       '@overcms/module-portfolio':
         specifier: workspace:^
         version: link:../../modules/portfolio
+      '@overcms/module-reservations':
+        specifier: workspace:^
+        version: link:../../modules/reservations
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
@@ -417,6 +420,31 @@ importers:
       hono:
         specifier: ^4.0.0
         version: 4.12.8
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.7
+        version: 22.19.15
+
+  modules/reservations:
+    dependencies:
+      '@hono/zod-validator':
+        specifier: ^0.7.6
+        version: 0.7.6(hono@4.12.8)(zod@4.3.6)
+      '@overcms/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@overcms/module-kit':
+        specifier: workspace:*
+        version: link:../../packages/module-kit
+      hono:
+        specifier: ^4.0.0
+        version: 4.12.8
+      resend:
+        specifier: ^6.9.4
+        version: 6.9.4
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       '@types/node':
         specifier: ^22.10.7
