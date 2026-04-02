@@ -4,9 +4,11 @@ import {
   eq,
   rsvPayments,
   rsvReservations,
+  rsvServices,
   modules,
 } from '@overcms/core'
 import { verifyItnHash } from '../utils/hash'
+import { sendConfirmationEmail, sendAdminNotification } from '../services/email'
 
 export const itnRoute = new Hono()
 
@@ -123,7 +125,39 @@ itnRoute.post('/itn', async (c) => {
         .set({ status: 'confirmed', updatedAt: new Date() })
         .where(eq(rsvReservations.id, payment.reservationId))
 
-      // TODO: Send confirmation email (Faza 5)
+      // Get reservation + service info for email
+      const [confirmedRes] = await db
+        .select()
+        .from(rsvReservations)
+        .where(eq(rsvReservations.id, payment.reservationId))
+        .limit(1)
+
+      if (confirmedRes) {
+        const [svc] = await db
+          .select({ name: rsvServices.name })
+          .from(rsvServices)
+          .where(eq(rsvServices.id, confirmedRes.serviceId))
+          .limit(1)
+
+        const emailData = {
+          id: confirmedRes.id,
+          date: confirmedRes.date,
+          startTime: confirmedRes.startTime,
+          endTime: confirmedRes.endTime,
+          customerName: confirmedRes.customerName,
+          customerEmail: confirmedRes.customerEmail,
+          customerPhone: confirmedRes.customerPhone,
+          guestCount: confirmedRes.guestCount,
+          totalPrice: confirmedRes.totalPrice,
+          currency: confirmedRes.currency,
+          notes: confirmedRes.notes,
+          serviceName: svc?.name ?? 'Usługa',
+        }
+
+        // Fire and forget — don't block ITN response
+        sendConfirmationEmail(emailData).catch(() => {})
+        sendAdminNotification(emailData).catch(() => {})
+      }
     }
 
     // Return confirmation XML (required by Autopay)

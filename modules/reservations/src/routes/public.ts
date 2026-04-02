@@ -13,6 +13,7 @@ import {
 import { getAvailableSlots } from '../services/availability'
 import { createBooking } from '../services/booking'
 import { buildPaymentUrl } from '../services/payment'
+import { sendConfirmationEmail, sendAdminNotification } from '../services/email'
 
 export const publicRoutes = new Hono()
 
@@ -89,8 +90,25 @@ publicRoutes.post('/book', zValidator('json', bookSchema), async (c) => {
     return c.json({ error: reservation.error }, 409)
   }
 
-  // If free service, confirm immediately
+  // If free service, confirm immediately and send emails
   if (service.price === 0) {
+    const emailData = {
+      id: reservation.id,
+      date: reservation.date,
+      startTime: reservation.startTime,
+      endTime: reservation.endTime,
+      customerName: reservation.customerName,
+      customerEmail: reservation.customerEmail,
+      customerPhone: reservation.customerPhone,
+      guestCount: reservation.guestCount,
+      totalPrice: reservation.totalPrice,
+      currency: reservation.currency,
+      notes: reservation.notes,
+      serviceName: service.name,
+    }
+    sendConfirmationEmail(emailData).catch(() => {})
+    sendAdminNotification(emailData).catch(() => {})
+
     return c.json({
       data: {
         reservationId: reservation.id,
