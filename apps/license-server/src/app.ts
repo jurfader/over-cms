@@ -6,6 +6,7 @@ import { adminRouter }         from './routes/admin.js'
 import { stripeWebhookRouter } from './routes/stripe-webhook.js'
 import { checkoutRouter }      from './routes/checkout.js'
 import { customerRouter }      from './routes/customer.js'
+import pluginsRouter           from './routes/plugins.js'
 
 const app = new Hono()
 
@@ -46,6 +47,7 @@ app.route('/admin', adminRouter)
 app.route('/webhooks', stripeWebhookRouter)
 app.route('/checkout', checkoutRouter)
 app.route('/customer', customerRouter)
+app.route('/', pluginsRouter)
 
 // ─── Error handler ────────────────────────────────────────────────────────────
 

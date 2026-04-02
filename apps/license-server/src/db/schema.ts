@@ -40,6 +40,27 @@ export const activations = pgTable('lic_activations', {
   uniqueIndex('lic_act_domain_unique').on(t.licenseId, t.domain),
 ])
 
+// ─── Plugins ─────────────────────────────────────────────────────────────────
+
+export const plugins = pgTable('lic_plugins', {
+  id:          varchar('id', { length: 100 }).primaryKey(), // e.g. 'reservations'
+  name:        varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+  version:     varchar('version', { length: 50 }).notNull(),
+  icon:        varchar('icon', { length: 100 }),       // lucide icon name
+  author:      varchar('author', { length: 255 }),
+  minCmsVersion: varchar('min_cms_version', { length: 50 }), // e.g. '1.3.0'
+  requiredPlan: licPlanEnum('required_plan').default('solo'), // minimum plan
+  price:       integer('price').default(0),             // grosze, 0 = free
+  currency:    varchar('currency', { length: 3 }).default('PLN'),
+  downloadUrl: text('download_url'),                    // URL to .tar.gz
+  changelog:   text('changelog'),
+  active:      boolean('active').notNull().default(true),
+  downloads:   integer('downloads').notNull().default(0),
+  createdAt:   timestamp('created_at').notNull().defaultNow(),
+  updatedAt:   timestamp('updated_at').notNull().defaultNow(),
+})
+
 // ─── Audit log ────────────────────────────────────────────────────────────────
 
 export const licAudit = pgTable('lic_audit', {

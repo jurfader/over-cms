@@ -10,6 +10,7 @@ import redirectsRouter from './redirects'
 import usersRouter   from './users'
 import modulesRouter  from './modules'
 import transferRouter from './transfer'
+import marketplaceRouter from './marketplace'
 import type { AppEnv } from '../types'
 
 export function registerRoutes(app: Hono<AppEnv>) {
@@ -24,4 +25,5 @@ export function registerRoutes(app: Hono<AppEnv>) {
   app.route('/api/users', usersRouter)
   app.route('/api/modules',   modulesRouter)
   app.route('/api/transfer',  transferRouter)
+  app.route('/api/marketplace', marketplaceRouter)
 }
