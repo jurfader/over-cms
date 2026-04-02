@@ -207,9 +207,6 @@ importers:
       '@overcms/module-portfolio':
         specifier: workspace:^
         version: link:../../modules/portfolio
-      '@overcms/module-reservations':
-        specifier: workspace:^
-        version: link:../../modules/reservations
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
