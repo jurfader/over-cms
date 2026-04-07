@@ -148,8 +148,9 @@ router.post('/plugins/:id/download', async (c) => {
 // ─── Admin: POST /plugins — add/update plugin (requires admin key) ────────────
 
 router.post('/plugins', async (c) => {
+  const expected = process.env['ADMIN_API_KEY']
   const adminKey = c.req.header('x-admin-key')
-  if (adminKey !== process.env['ADMIN_API_KEY']) {
+  if (!expected || !adminKey || adminKey !== expected) {
     return c.json({ error: 'Unauthorized' }, 401)
   }
 

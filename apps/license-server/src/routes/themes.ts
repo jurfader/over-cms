@@ -181,8 +181,9 @@ router.post('/themes/:id/download', async (c) => {
 // Ten endpoint tylko rejestruje metadane + przechowuje ET credentials.
 
 router.post('/themes', async (c) => {
+  const expected = process.env['ADMIN_API_KEY']
   const adminKey = c.req.header('x-admin-key')
-  if (adminKey !== process.env['ADMIN_API_KEY']) {
+  if (!expected || !adminKey || adminKey !== expected) {
     return c.json({ error: 'Unauthorized' }, 401)
   }
 
