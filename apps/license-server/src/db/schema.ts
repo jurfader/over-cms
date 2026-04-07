@@ -61,6 +61,27 @@ export const plugins = pgTable('lic_plugins', {
   updatedAt:   timestamp('updated_at').notNull().defaultNow(),
 })
 
+// ─── Themes ──────────────────────────────────────────────────────────────────
+// Premium themes (Divi, Extra, etc.) — streamowane bezpośrednio z serwera licencji
+// z /var/lib/overcms-licenses/themes/{id}.zip po walidacji klucza.
+
+export const themes = pgTable('lic_themes', {
+  id:            varchar('id', { length: 100 }).primaryKey(), // 'divi', 'extra'
+  name:          varchar('name', { length: 255 }).notNull(),
+  description:   text('description'),
+  version:       varchar('version', { length: 50 }).notNull(),
+  author:        varchar('author', { length: 255 }),
+  requiredPlan:  licPlanEnum('required_plan').default('solo'), // minimum plan
+  filename:      varchar('filename', { length: 255 }).notNull(), // 'divi.zip'
+  fileSize:      integer('file_size').default(0),          // bytes
+  licenseUsername: varchar('license_username', { length: 255 }), // ET username
+  licenseApiKey:  text('license_api_key'),                       // ET API key (stored server-side)
+  active:        boolean('active').notNull().default(true),
+  downloads:     integer('downloads').notNull().default(0),
+  createdAt:     timestamp('created_at').notNull().defaultNow(),
+  updatedAt:     timestamp('updated_at').notNull().defaultNow(),
+})
+
 // ─── Audit log ────────────────────────────────────────────────────────────────
 
 export const licAudit = pgTable('lic_audit', {
