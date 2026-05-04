@@ -9,6 +9,7 @@ import { generateLicenseKey } from '../utils/license-key.js'
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 
 const createLicenseSchema = z.object({
+  product:          z.enum(['overcms', 'overcrm']).default('overcms'),
   plan:             z.enum(['trial', 'solo', 'agency']).default('trial'),
   buyerEmail:       z.string().email(),
   buyerName:        z.string().optional(),
@@ -19,6 +20,7 @@ const createLicenseSchema = z.object({
 })
 
 const updateLicenseSchema = z.object({
+  product:          z.enum(['overcms', 'overcrm']).optional(),
   plan:             z.enum(['trial', 'solo', 'agency']).optional(),
   status:           z.enum(['active', 'suspended', 'expired', 'revoked']).optional(),
   maxInstallations: z.number().int().positive().optional(),
@@ -74,25 +76,29 @@ async function sendLicenseEmail(email: string, name: string | undefined, license
 export const adminRouter = new Hono()
 
 // ── GET /admin/licenses ───────────────────────────────────────────────────────
+// Optional query: ?product=overcms|overcrm
 adminRouter.get('/licenses', async (c) => {
-  const rows = await db
-    .select({
-      id:               licenses.id,
-      key:              licenses.key,
-      plan:             licenses.plan,
-      status:           licenses.status,
-      buyerEmail:       licenses.buyerEmail,
-      buyerName:        licenses.buyerName,
-      maxInstallations: licenses.maxInstallations,
-      expiresAt:        licenses.expiresAt,
-      createdAt:        licenses.createdAt,
-      activeCount:      sql<number>`(
-        SELECT COUNT(*) FROM lic_activations a
-        WHERE a.license_id = ${licenses.id} AND a.active = true
-      )`,
-    })
-    .from(licenses)
-    .orderBy(desc(licenses.createdAt))
+  const productFilter = c.req.query('product')
+  const select = {
+    id:               licenses.id,
+    key:              licenses.key,
+    product:          licenses.product,
+    plan:             licenses.plan,
+    status:           licenses.status,
+    buyerEmail:       licenses.buyerEmail,
+    buyerName:        licenses.buyerName,
+    maxInstallations: licenses.maxInstallations,
+    expiresAt:        licenses.expiresAt,
+    createdAt:        licenses.createdAt,
+    activeCount:      sql<number>`(
+      SELECT COUNT(*) FROM lic_activations a
+      WHERE a.license_id = ${licenses.id} AND a.active = true
+    )`,
+  }
+
+  const rows = productFilter === 'overcms' || productFilter === 'overcrm'
+    ? await db.select(select).from(licenses).where(eq(licenses.product, productFilter)).orderBy(desc(licenses.createdAt))
+    : await db.select(select).from(licenses).orderBy(desc(licenses.createdAt))
 
   return c.json({ data: rows })
 })
@@ -137,6 +143,7 @@ adminRouter.post('/licenses', zValidator('json', createLicenseSchema), async (c)
 
   const [row] = await db.insert(licenses).values({
     key,
+    product:          body.product,
     plan:             body.plan,
     buyerEmail:       body.buyerEmail,
     buyerName:        body.buyerName,
@@ -158,6 +165,7 @@ adminRouter.patch('/licenses/:key', zValidator('json', updateLicenseSchema), asy
   const body   = c.req.valid('json')
 
   const set: Record<string, unknown> = { updatedAt: sql`now()` }
+  if (body.product          != null) set['product']          = body.product
   if (body.plan             != null) set['plan']             = body.plan
   if (body.status           != null) set['status']           = body.status
   if (body.maxInstallations != null) set['maxInstallations'] = body.maxInstallations

@@ -7,12 +7,17 @@ import {
 
 export const licPlanEnum = pgEnum('lic_plan', ['trial', 'solo', 'agency'])
 export const licStatusEnum = pgEnum('lic_status', ['active', 'suspended', 'expired', 'revoked'])
+// Product — który produkt OVERMEDIA jest licencjonowany.
+// 'overcms' = OverCMS / OverCMS 2.0 (WordPress + React). 'overcrm' = OVERCRM (Laravel CRM).
+// Default 'overcms' dla wstecznej kompatybilności z istniejącymi rekordami.
+export const licProductEnum = pgEnum('lic_product', ['overcms', 'overcrm'])
 
 // ─── Licenses ─────────────────────────────────────────────────────────────────
 
 export const licenses = pgTable('lic_licenses', {
   id:               uuid('id').primaryKey().defaultRandom(),
   key:              varchar('key', { length: 64 }).notNull().unique(),
+  product:          licProductEnum('product').notNull().default('overcms'),
   plan:             licPlanEnum('plan').notNull().default('trial'),
   status:           licStatusEnum('status').notNull().default('active'),
   buyerEmail:       varchar('buyer_email', { length: 255 }).notNull(),
@@ -44,6 +49,7 @@ export const activations = pgTable('lic_activations', {
 
 export const plugins = pgTable('lic_plugins', {
   id:          varchar('id', { length: 100 }).primaryKey(), // e.g. 'reservations'
+  product:     licProductEnum('product').notNull().default('overcms'),
   name:        varchar('name', { length: 255 }).notNull(),
   description: text('description'),
   version:     varchar('version', { length: 50 }).notNull(),
@@ -67,6 +73,7 @@ export const plugins = pgTable('lic_plugins', {
 
 export const themes = pgTable('lic_themes', {
   id:            varchar('id', { length: 100 }).primaryKey(), // 'divi', 'extra'
+  product:       licProductEnum('product').notNull().default('overcms'),
   name:          varchar('name', { length: 255 }).notNull(),
   description:   text('description'),
   version:       varchar('version', { length: 50 }).notNull(),

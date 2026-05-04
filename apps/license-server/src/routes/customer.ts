@@ -38,6 +38,7 @@ customerRouter.get('/:key', async (c) => {
 
   const data = {
     key:              license.key,
+    product:          license.product,
     plan:             license.plan,
     status:           license.status,
     buyerName:        license.buyerName,

@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { eq, sql } from 'drizzle-orm'
+import { eq, and, sql } from 'drizzle-orm'
 import { createReadStream, existsSync, statSync } from 'fs'
 import { join, basename } from 'path'
 import { db } from '../db/index.js'
@@ -11,11 +11,15 @@ const router = new Hono()
 const THEMES_DIR = process.env['LICENSE_THEMES_DIR'] ?? '/var/lib/overcms-licenses/themes'
 
 // ─── GET /themes — public list (marketplace) ────────────────────────────────
+// Optional ?product=overcms|overcrm — domyślnie 'overcms'.
 
 router.get('/themes', async (c) => {
+  const productFilter = c.req.query('product') === 'overcrm' ? 'overcrm' : 'overcms'
+
   const rows = await db
     .select({
       id:           themes.id,
+      product:      themes.product,
       name:         themes.name,
       description:  themes.description,
       version:      themes.version,
@@ -26,7 +30,7 @@ router.get('/themes', async (c) => {
       updatedAt:    themes.updatedAt,
     })
     .from(themes)
-    .where(eq(themes.active, true))
+    .where(and(eq(themes.active, true), eq(themes.product, productFilter)))
     .orderBy(themes.name)
 
   const payload = JSON.stringify({ data: rows })

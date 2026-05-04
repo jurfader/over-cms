@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { eq, sql } from 'drizzle-orm'
+import { eq, and, sql } from 'drizzle-orm'
 import { db } from '../db/index.js'
 import { plugins, licenses, activations } from '../db/schema.js'
 import { signPayload } from '../utils/sign.js'
@@ -7,11 +7,17 @@ import { signPayload } from '../utils/sign.js'
 const router = new Hono()
 
 // ─── GET /plugins — public plugin list (marketplace) ──────────────────────────
+// Optional ?product=overcms|overcrm — filtruje pluginy do konkretnego produktu.
+// Bez parametru: domyślnie 'overcms' (wstecznie kompatybilne z istniejącymi
+// klientami OverCMS którzy nie wysyłają parametru).
 
 router.get('/plugins', async (c) => {
+  const productFilter = c.req.query('product') === 'overcrm' ? 'overcrm' : 'overcms'
+
   const rows = await db
     .select({
       id: plugins.id,
+      product: plugins.product,
       name: plugins.name,
       description: plugins.description,
       version: plugins.version,
@@ -25,7 +31,7 @@ router.get('/plugins', async (c) => {
       updatedAt: plugins.updatedAt,
     })
     .from(plugins)
-    .where(eq(plugins.active, true))
+    .where(and(eq(plugins.active, true), eq(plugins.product, productFilter)))
     .orderBy(plugins.name)
 
   const payload = JSON.stringify({ data: rows })
