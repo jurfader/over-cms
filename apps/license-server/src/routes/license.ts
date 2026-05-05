@@ -2,22 +2,47 @@ import { Hono }       from 'hono'
 import { zValidator } from '@hono/zod-validator'
 import { z }          from 'zod'
 import { eq, and, count } from 'drizzle-orm'
+import { randomBytes } from 'node:crypto'
 import { db, licenses, activations, licAudit } from '../db/index.js'
 import { normalizeDomain } from '../utils/license-key.js'
 import { signPayload } from '../utils/sign.js'
 
+// Etap 2c anti-piracy: rotujący token bindujący instalację
+function generateBindingToken(): string {
+  return randomBytes(32).toString('hex') // 64 znaki hex
+}
+
 // ─── Schemas ──────────────────────────────────────────────────────────────────
+
+// Telemetry phone-home (Etap 2b anti-piracy) — klient OVERCRM/OVERCMS wysyła
+// metrics w activate i validate. Zapisywane w lic_audit (event=telemetry).
+// Pomocne do wykrywania klonowania (różne build_hash dla solo plan, anomalie userów).
+const telemetrySchema = z.object({
+  app_version:     z.string().optional(),
+  php_version:     z.string().optional(),
+  laravel_version: z.string().optional(),
+  users_count:     z.number().int().nonnegative().optional(),
+  clients_count:   z.number().int().nonnegative().optional(),
+  tasks_count:     z.number().int().nonnegative().optional(),
+  modules:         z.array(z.string()).optional(),
+  timezone:        z.string().optional(),
+  locale:          z.string().optional(),
+  error:           z.string().optional(),
+}).passthrough().optional()
 
 const activateSchema = z.object({
   licenseKey:     z.string().min(1),
   domain:         z.string().min(1),
   installationId: z.string().min(1),
+  metrics:        telemetrySchema,
 })
 
 const validateSchema = z.object({
   licenseKey:     z.string().min(1),
   domain:         z.string().min(1),
   installationId: z.string().min(1),
+  metrics:        telemetrySchema,
+  bindingToken:   z.string().min(32).max(128).optional(), // Etap 2c
 })
 
 const deactivateSchema = z.object({
@@ -43,7 +68,7 @@ export const licenseRouter = new Hono()
 
 // ── POST /activate ────────────────────────────────────────────────────────────
 licenseRouter.post('/activate', zValidator('json', activateSchema), async (c) => {
-  const { licenseKey, domain: rawDomain, installationId } = c.req.valid('json')
+  const { licenseKey, domain: rawDomain, installationId, metrics } = c.req.valid('json')
   const domain = normalizeDomain(rawDomain)
 
   // Find license
@@ -74,15 +99,26 @@ licenseRouter.post('/activate', zValidator('json', activateSchema), async (c) =>
     .limit(1)
 
   if (existing) {
-    // Re-activate (update installationId + lastSeen)
+    // Re-activate — wygeneruj NOWY binding token (poprzednie tokeny tracą ważność).
+    // Pirat mógł sklonować z poprzednim tokenem — re-aktywacja przez prawdziwego
+    // klienta zeruje pirata.
+    const newToken = generateBindingToken()
     await db.update(activations)
-      .set({ active: true, installationId, lastSeenAt: new Date() })
+      .set({
+        active: true,
+        installationId,
+        lastSeenAt: new Date(),
+        bindingToken: newToken,
+        previousToken: null,        // re-activate = clean slate
+        tokenRotatedAt: new Date(),
+      })
       .where(eq(activations.id, existing.id))
-    await audit(license.id, 'reactivate', domain)
+    await audit(license.id, 'reactivate', domain, metrics)
     const data = {
-      success:   true,
-      plan:      license.plan,
-      expiresAt: license.expiresAt,
+      success:      true,
+      plan:         license.plan,
+      expiresAt:    license.expiresAt,
+      bindingToken: newToken,
     }
     const signature = signPayload(data)
     const response: Record<string, unknown> = data
@@ -106,19 +142,23 @@ licenseRouter.post('/activate', zValidator('json', activateSchema), async (c) =>
     }, 403)
   }
 
-  // Create activation
+  // Create activation — pierwszy token bindujący
+  const firstToken = generateBindingToken()
   await db.insert(activations).values({
     licenseId:      license.id,
     domain,
     installationId,
+    bindingToken:   firstToken,
+    tokenRotatedAt: new Date(),
   })
 
-  await audit(license.id, 'activate', domain)
+  await audit(license.id, 'activate', domain, metrics)
 
   const data = {
-    success:   true,
-    plan:      license.plan,
-    expiresAt: license.expiresAt,
+    success:      true,
+    plan:         license.plan,
+    expiresAt:    license.expiresAt,
+    bindingToken: firstToken,
   }
   const signature = signPayload(data)
   const response: Record<string, unknown> = data
@@ -128,7 +168,7 @@ licenseRouter.post('/activate', zValidator('json', activateSchema), async (c) =>
 
 // ── POST /validate ────────────────────────────────────────────────────────────
 licenseRouter.post('/validate', zValidator('json', validateSchema), async (c) => {
-  const { licenseKey, domain: rawDomain, installationId } = c.req.valid('json')
+  const { licenseKey, domain: rawDomain, installationId, metrics, bindingToken } = c.req.valid('json')
   const domain = normalizeDomain(rawDomain)
 
   const [license] = await db
@@ -161,15 +201,52 @@ licenseRouter.post('/validate', zValidator('json', validateSchema), async (c) =>
 
   if (!activation) return c.json({ valid: false, error: 'DOMAIN_NOT_ACTIVATED' })
 
-  // Update lastSeen
+  // Etap 2c: binding token verification + rotation
+  // Akceptujemy: aktualny bindingToken LUB previousToken (24h grace window).
+  // Backward compat: gdy activation nie ma bindingToken (instalacja sprzed Etapu 2c),
+  // pomijamy weryfikację — pierwszy validate ustawi token.
+  if (activation.bindingToken) {
+    if (!bindingToken) {
+      // Klient ma starą wersję bez tokenu — wymagamy re-aktywacji
+      await audit(license.id, 'binding-missing', domain, { hint: 'client has no token, has activation token' })
+      return c.json({ valid: false, error: 'BINDING_REQUIRED' })
+    }
+
+    const matchesCurrent = bindingToken === activation.bindingToken
+    const matchesPrevious = activation.previousToken && bindingToken === activation.previousToken
+    const previousStillValid = activation.tokenRotatedAt &&
+      (Date.now() - new Date(activation.tokenRotatedAt).getTime()) < 24 * 60 * 60 * 1000
+
+    if (!matchesCurrent && !(matchesPrevious && previousStillValid)) {
+      await audit(license.id, 'binding-mismatch', domain, {
+        client_token_prefix: bindingToken.slice(0, 8),
+        server_token_prefix: activation.bindingToken.slice(0, 8),
+      })
+      return c.json({ valid: false, error: 'BINDING_MISMATCH' })
+    }
+  }
+
+  // Rotuj token: nowy aktualny, stary do previous (24h grace)
+  const newToken = generateBindingToken()
   await db.update(activations)
-    .set({ lastSeenAt: new Date(), installationId })
+    .set({
+      lastSeenAt:     new Date(),
+      installationId,
+      previousToken:  activation.bindingToken,
+      bindingToken:   newToken,
+      tokenRotatedAt: new Date(),
+    })
     .where(eq(activations.id, activation.id))
 
+  if (metrics) {
+    await audit(license.id, 'telemetry', domain, metrics)
+  }
+
   const data = {
-    valid:     true,
-    plan:      license.plan,
-    expiresAt: license.expiresAt,
+    valid:        true,
+    plan:         license.plan,
+    expiresAt:    license.expiresAt,
+    bindingToken: newToken,
   }
   const signature = signPayload(data)
   const response: Record<string, unknown> = data

@@ -45,8 +45,11 @@ coverage/
 *.tsbuildinfo
 .cache/
 
-# Private — license server DB only
-apps/license-server/src/db/
+# License-server DB layer — schema.ts/index.ts są publiczne (drizzle source of truth).
+# Wykluczamy tylko pliki które ZWYCZAJOWO mogą zawierać sekrety w tym dirze:
+apps/license-server/src/db/secrets*
+apps/license-server/src/db/credentials*
+apps/license-server/src/db/*.local.*
 
 # Cloudflare credentials
 *.json
@@ -57,4 +60,18 @@ apps/license-server/src/db/
 
 # License keys — never commit
 license-private.pem
+*.private.pem
+*.private.key
+
+# Secrets / credentials — globalny defense in depth (wykryje sekrety wstawione gdziekolwiek)
+.secrets/
 .env.license
+*.secrets.*
+*.private.*
+!*.private.example.*
+*credentials.json
+*credentials.yml
+*credentials.yaml
+service-account*.json
+gcp-key*.json
+aws-credentials*

@@ -41,6 +41,17 @@ export const activations = pgTable('lic_activations', {
   active:         boolean('active').notNull().default(true),
   lastSeenAt:     timestamp('last_seen_at').notNull().defaultNow(),
   activatedAt:    timestamp('activated_at').notNull().defaultNow(),
+
+  // Etap 2c anti-piracy: rotujący token bindujący instalację. Każdy /validate
+  // ROTUJE token (server zapisuje nowy + zwraca w response). Klient musi w
+  // następnym /validate wysłać nowy token — stary już nie działa.
+  // Klonowanie OVERCRM = jeden klient ma stary token, prawdziwy ma nowy →
+  // klon dostaje BINDING_MISMATCH przy najbliższym validate (max 24h).
+  // previousToken: 24h grace window — jeśli klient wysyła previous (np. po
+  // network blip który nie dostał nowego tokenu), serwer dalej akceptuje.
+  bindingToken:        varchar('binding_token', { length: 64 }),
+  previousToken:       varchar('previous_token', { length: 64 }),
+  tokenRotatedAt:      timestamp('token_rotated_at'),
 }, (t) => [
   uniqueIndex('lic_act_domain_unique').on(t.licenseId, t.domain),
 ])
