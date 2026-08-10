@@ -1,10 +1,12 @@
 import { Hono }       from 'hono'
 import { zValidator } from '@hono/zod-validator'
 import { z }          from 'zod'
-import { eq, desc, count, sql } from 'drizzle-orm'
+import { eq, desc, count, sql, and } from 'drizzle-orm'
 import { Resend }     from 'resend'
 import { db, licenses, activations, licAudit } from '../db/index.js'
+import { licenseBundles } from '../db/schema.js'
 import { generateLicenseKey } from '../utils/license-key.js'
+import { OVERCRM_BUNDLES, isKnownBundle } from '../utils/bundles.js'
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 
@@ -17,6 +19,15 @@ const createLicenseSchema = z.object({
   expiresAt:        z.string().datetime().optional(),    // ISO string
   notes:            z.string().optional(),
   sendEmail:        z.boolean().default(false),
+})
+
+const grantBundleSchema = z.object({
+  bundle:    z.string().min(1),
+  // 'trial' nie jest tu wymuszane razem z expiresAt celowo — bywa, że dajemy
+  // komuś pakiet na próbę bezterminowo (partner, wdrożenie pilotażowe).
+  source:    z.enum(['manual', 'stripe', 'trial']).default('manual'),
+  expiresAt: z.string().datetime().nullable().optional(),
+  notes:     z.string().optional(),
 })
 
 const updateLicenseSchema = z.object({
@@ -123,7 +134,111 @@ adminRouter.get('/licenses/:key', async (c) => {
     .orderBy(desc(licAudit.createdAt))
     .limit(50)
 
-  return c.json({ data: { license, activations: acts, audit: logs } })
+  // Wszystkie nadania, także wygasłe — panel ma pokazywać historię, a nie tylko
+  // stan bieżący. Co jest aktywne, rozstrzyga expiresAt przy każdym wierszu.
+  const bundles = await db
+    .select()
+    .from(licenseBundles)
+    .where(eq(licenseBundles.licenseId, license.id))
+    .orderBy(licenseBundles.bundle)
+
+  return c.json({ data: { license, activations: acts, audit: logs, bundles } })
+})
+
+// ── GET /admin/bundles — katalog pakietów ─────────────────────────────────────
+adminRouter.get('/bundles', (c) => {
+  return c.json({
+    data: Object.entries(OVERCRM_BUNDLES).map(([id, label]) => ({ id, label })),
+  })
+})
+
+// ── POST /admin/licenses/:key/bundles — nadanie pakietu ───────────────────────
+//
+// UPSERT, nie INSERT: ponowne nadanie tego samego pakietu ma przedłużyć albo
+// zmienić warunki, a nie wywalić się na unikalnym indeksie ani zostawić
+// duplikatu. Typowy przypadek: klient przedłuża trial albo kupuje na stałe
+// coś, co miał na próbę.
+adminRouter.post('/licenses/:key/bundles', zValidator('json', grantBundleSchema), async (c) => {
+  const licKey = c.req.param('key')!
+  const body   = c.req.valid('json')
+
+  if (!isKnownBundle(body.bundle)) {
+    return c.json({
+      error: `Nieznany pakiet "${body.bundle}"`,
+      known: Object.keys(OVERCRM_BUNDLES),
+    }, 400)
+  }
+
+  const [license] = await db
+    .select({ id: licenses.id, product: licenses.product })
+    .from(licenses)
+    .where(eq(licenses.key, licKey))
+    .limit(1)
+
+  if (!license) return c.json({ error: 'Not found' }, 404)
+
+  // Pakiety są pojęciem wyłącznie OVERCRM-owym. Nadanie ich licencji OVERCMS
+  // nic by nie dało (CMS ich nie czyta) i myliłoby obraz w panelu.
+  if (license.product !== 'overcrm') {
+    return c.json({ error: 'Pakiety dotycza wylacznie licencji produktu overcrm' }, 400)
+  }
+
+  const expiresAt = body.expiresAt ? new Date(body.expiresAt) : null
+
+  const [row] = await db
+    .insert(licenseBundles)
+    .values({
+      licenseId: license.id,
+      bundle:    body.bundle,
+      source:    body.source,
+      expiresAt,
+      notes:     body.notes,
+    })
+    .onConflictDoUpdate({
+      target: [licenseBundles.licenseId, licenseBundles.bundle],
+      set: { source: body.source, expiresAt, notes: body.notes, grantedAt: new Date() },
+    })
+    .returning()
+
+  await db.insert(licAudit).values({
+    licenseId: license.id,
+    event:     'bundle-granted',
+    meta:      JSON.stringify({ bundle: body.bundle, source: body.source, expiresAt }),
+  }).catch(() => {})
+
+  return c.json({ data: row }, 201)
+})
+
+// ── DELETE /admin/licenses/:key/bundles/:bundle — odebranie pakietu ───────────
+adminRouter.delete('/licenses/:key/bundles/:bundle', async (c) => {
+  const licKey = c.req.param('key')!
+  const bundle = c.req.param('bundle')!
+
+  const [license] = await db
+    .select({ id: licenses.id })
+    .from(licenses)
+    .where(eq(licenses.key, licKey))
+    .limit(1)
+
+  if (!license) return c.json({ error: 'Not found' }, 404)
+
+  const usuniete = await db
+    .delete(licenseBundles)
+    .where(and(eq(licenseBundles.licenseId, license.id), eq(licenseBundles.bundle, bundle)))
+    .returning({ id: licenseBundles.id })
+
+  if (usuniete.length === 0) return c.json({ error: 'Licencja nie ma tego pakietu' }, 404)
+
+  await db.insert(licAudit).values({
+    licenseId: license.id,
+    event:     'bundle-revoked',
+    meta:      JSON.stringify({ bundle }),
+  }).catch(() => {})
+
+  // Uwaga operacyjna: CRM klienta zobaczy odebranie dopiero przy najbliższym
+  // /validate, czyli w ciągu 24h. Natychmiastowe odcięcie wymaga, żeby klient
+  // kliknął „Odśwież licencję”.
+  return c.json({ success: true, uwaga: 'CRM klienta zobaczy zmiane przy najblizszym validate (do 24h)' })
 })
 
 // ── POST /admin/licenses ──────────────────────────────────────────────────────

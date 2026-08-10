@@ -6,10 +6,59 @@ import { randomBytes } from 'node:crypto'
 import { db, licenses, activations, licAudit } from '../db/index.js'
 import { normalizeDomain } from '../utils/license-key.js'
 import { signPayload } from '../utils/sign.js'
+import { activeBundlesFor } from '../utils/bundles.js'
 
 // Etap 2c anti-piracy: rotujący token bindujący instalację
 function generateBindingToken(): string {
   return randomBytes(32).toString('hex') // 64 znaki hex
+}
+
+/**
+ * Dokłada `bundles` do payloadu — ZAWSZE jako OSTATNI klucz.
+ *
+ * Kolejność kluczy jest częścią podpisu. Klient odtwarza payload klucz po
+ * kluczu i porównuje bajty; `bundles` dokleja sobie na koniec, ale tylko gdy
+ * pole w ogóle przyszło. Spread zachowuje kolejność wstawiania, więc `bundles`
+ * ląduje po `bindingToken` — dokładnie tak, jak odtwarza to klient.
+ *
+ * DWA WARUNKI, oba konieczne:
+ *
+ *  1. produkt to `overcrm` — OVERCMS nie zna pojęcia pakietu;
+ *  2. klient JAWNIE zadeklarował `supports: ["bundles"]`.
+ *
+ * Drugi warunek nie jest ostrożnością na wyrost, tylko skutkiem realnej awarii.
+ * Klient sprzed obsługi pakietów odtwarza payload jako
+ * {valid, plan, expiresAt, bindingToken} i NIE dokleja `bundles`. Dosłanie tego
+ * pola rozjeżdża bajty, klient zwraca INVALID_SIGNATURE i — bo w produkcji jest
+ * fail-closed — BLOKUJE SIĘ CAŁY CRM. Sprawdzone boleśnie na crm.overmedia.pl:
+ * instalacja stała na kodzie sprzed trzech miesięcy, bez ani jednej wzmianki
+ * o pakietach.
+ *
+ * Deklaracja zdolności zamiast sprawdzania wersji jest tu celowa: nie trzeba
+ * utrzymywać mapy „od której wersji co działa”, a klient, który czegoś nie
+ * rozumie, po prostu o to nie prosi.
+ */
+async function withBundles<T extends Record<string, unknown>>(
+  data: T,
+  license: { id: string; product: string },
+  supports: string[] | undefined,
+): Promise<Record<string, unknown>> {
+  if (license.product !== 'overcrm') return data
+  if (!supports?.includes('bundles')) return data
+
+  return { ...data, bundles: await activeBundlesFor(license.id) }
+}
+
+/**
+ * Podpisuje payload i dokłada podpis OBOK niego.
+ *
+ * `signature` nie wchodzi do podpisywanego payloadu — jest doklejane dopiero
+ * po podpisaniu, a klient je pomija przy odtwarzaniu wiadomości.
+ */
+function signed(data: Record<string, unknown>): Record<string, unknown> {
+  const signature = signPayload(data)
+
+  return signature ? { ...data, signature } : data
 }
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
@@ -35,6 +84,9 @@ const activateSchema = z.object({
   domain:         z.string().min(1),
   installationId: z.string().min(1),
   metrics:        telemetrySchema,
+  // Zdolnosci, ktore klient rozumie. Brak pola = stary klient; serwer NIE MOZE
+  // wtedy dokladac nowych pol do podpisywanego payloadu.
+  supports:       z.array(z.string()).optional(),
 })
 
 const validateSchema = z.object({
@@ -43,6 +95,9 @@ const validateSchema = z.object({
   installationId: z.string().min(1),
   metrics:        telemetrySchema,
   bindingToken:   z.string().min(32).max(128).optional(), // Etap 2c
+  // Zdolnosci, ktore klient rozumie. Brak pola = stary klient; serwer NIE MOZE
+  // wtedy dokladac nowych pol do podpisywanego payloadu.
+  supports:       z.array(z.string()).optional(),
 })
 
 const deactivateSchema = z.object({
@@ -68,7 +123,7 @@ export const licenseRouter = new Hono()
 
 // ── POST /activate ────────────────────────────────────────────────────────────
 licenseRouter.post('/activate', zValidator('json', activateSchema), async (c) => {
-  const { licenseKey, domain: rawDomain, installationId, metrics } = c.req.valid('json')
+  const { licenseKey, domain: rawDomain, installationId, metrics, supports } = c.req.valid('json')
   const domain = normalizeDomain(rawDomain)
 
   // Find license
@@ -114,16 +169,13 @@ licenseRouter.post('/activate', zValidator('json', activateSchema), async (c) =>
       })
       .where(eq(activations.id, existing.id))
     await audit(license.id, 'reactivate', domain, metrics)
-    const data = {
+
+    return c.json(signed(await withBundles({
       success:      true,
       plan:         license.plan,
       expiresAt:    license.expiresAt,
       bindingToken: newToken,
-    }
-    const signature = signPayload(data)
-    const response: Record<string, unknown> = data
-    if (signature) response.signature = signature
-    return c.json(response)
+    }, license, supports)))
   }
 
   // Count active installations
@@ -154,21 +206,17 @@ licenseRouter.post('/activate', zValidator('json', activateSchema), async (c) =>
 
   await audit(license.id, 'activate', domain, metrics)
 
-  const data = {
+  return c.json(signed(await withBundles({
     success:      true,
     plan:         license.plan,
     expiresAt:    license.expiresAt,
     bindingToken: firstToken,
-  }
-  const signature = signPayload(data)
-  const response: Record<string, unknown> = data
-  if (signature) response.signature = signature
-  return c.json(response)
+  }, license, supports)))
 })
 
 // ── POST /validate ────────────────────────────────────────────────────────────
 licenseRouter.post('/validate', zValidator('json', validateSchema), async (c) => {
-  const { licenseKey, domain: rawDomain, installationId, metrics, bindingToken } = c.req.valid('json')
+  const { licenseKey, domain: rawDomain, installationId, metrics, bindingToken, supports } = c.req.valid('json')
   const domain = normalizeDomain(rawDomain)
 
   const [license] = await db
@@ -242,16 +290,12 @@ licenseRouter.post('/validate', zValidator('json', validateSchema), async (c) =>
     await audit(license.id, 'telemetry', domain, metrics)
   }
 
-  const data = {
+  return c.json(signed(await withBundles({
     valid:        true,
     plan:         license.plan,
     expiresAt:    license.expiresAt,
     bindingToken: newToken,
-  }
-  const signature = signPayload(data)
-  const response: Record<string, unknown> = data
-  if (signature) response.signature = signature
-  return c.json(response)
+  }, license, supports)))
 })
 
 // ── POST /deactivate ──────────────────────────────────────────────────────────
@@ -317,5 +361,9 @@ licenseRouter.get('/status', async (c) => {
     totalActivations,
     maxInstallations: license.maxInstallations,
     expiresAt:        license.expiresAt,
+    // Informacyjnie, BEZ podpisu — /status służy do podglądu. CRM bierze
+    // pakiety wyłącznie z podpisanego /validate; gdyby czytał je stąd,
+    // wystarczyłby podstawiony serwer, żeby odblokować płatne moduły.
+    bundles:          license.product === 'overcrm' ? await activeBundlesFor(license.id) : undefined,
   })
 })

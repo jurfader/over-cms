@@ -56,11 +56,38 @@ export const activations = pgTable('lic_activations', {
   uniqueIndex('lic_act_domain_unique').on(t.licenseId, t.domain),
 ])
 
+// ─── License bundles (pakiety) ────────────────────────────────────────────────
+// Pakiety OVERCRM: overcrm-ai, overcrm-sprzedaz, … Model jest CELOWO inny niż
+// drabinka planów (trial < solo < agency), bo pakiety są względem siebie
+// NIEZALEŻNE — klient może mieć Pakiet AI bez Pakietu Sprzedaż. Drabinka tego
+// nie wyrazi, dlatego osobna tabela zamiast kolejnego poziomu w `plan`.
+//
+// Osobna tabela, a nie kolumna tablicowa na lic_licenses, bo każde nadanie
+// niesie własne dane: skąd przyszło (ręcznie / Stripe / trial), kiedy i do
+// kiedy. Trial pakietu wygasa niezależnie od licencji, więc potrzebuje
+// własnego expiresAt.
+
+export const licenseBundles = pgTable('lic_license_bundles', {
+  id:        uuid('id').primaryKey().defaultRandom(),
+  licenseId: uuid('license_id').notNull().references(() => licenses.id, { onDelete: 'cascade' }),
+  bundle:    varchar('bundle', { length: 64 }).notNull(),   // 'overcrm-ai'
+  source:    varchar('source', { length: 32 }).notNull().default('manual'), // manual | stripe | trial
+  expiresAt: timestamp('expires_at'),                       // null = bezterminowo
+  grantedAt: timestamp('granted_at').notNull().defaultNow(),
+  notes:     text('notes'),
+}, (t) => [
+  uniqueIndex('lic_bundle_unique').on(t.licenseId, t.bundle),
+])
+
 // ─── Plugins ─────────────────────────────────────────────────────────────────
 
 export const plugins = pgTable('lic_plugins', {
   id:          varchar('id', { length: 100 }).primaryKey(), // e.g. 'reservations'
   product:     licProductEnum('product').notNull().default('overcms'),
+  // Pakiet, do którego należy moduł (tylko produkt overcrm). Odpowiada polu
+  // `bundle` w module.json. NULL = moduł w licencji podstawowej.
+  // Dla overcms nieużywane — tam dostępu pilnuje requiredPlan.
+  bundle:      varchar('bundle', { length: 64 }),
   name:        varchar('name', { length: 255 }).notNull(),
   description: text('description'),
   version:     varchar('version', { length: 50 }).notNull(),
