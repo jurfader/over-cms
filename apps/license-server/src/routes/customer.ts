@@ -3,6 +3,7 @@ import { zValidator } from '@hono/zod-validator'
 import { z }          from 'zod'
 import { eq, and }    from 'drizzle-orm'
 import { db, licenses, activations } from '../db/index.js'
+import { activeBundlesFor } from '../utils/bundles.js'
 import { signPayload } from '../utils/sign.js'
 
 export const customerRouter = new Hono()
@@ -48,6 +49,9 @@ customerRouter.get('/:key', async (c) => {
     createdAt:        license.createdAt,
     activeCount,
     activations:      acts,
+    // Pakiety tylko dla OVERCRM — OVERCMS nie zna tego pojecia. To API sluzy
+    // do podgladu; uprawnien nadaje wylacznie podpisany /validate.
+    bundles:          license.product === 'overcrm' ? await activeBundlesFor(license.id) : undefined,
   }
 
   const signature = signPayload(data)

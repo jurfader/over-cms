@@ -4,6 +4,7 @@ import { logger }        from 'hono/logger'
 import { licenseRouter }      from './routes/license.js'
 import { adminRouter }         from './routes/admin.js'
 import { adminUiRouter }       from './routes/admin-ui.js'
+import { portalRouter }        from './routes/portal.js'
 import { stripeWebhookRouter } from './routes/stripe-webhook.js'
 import { checkoutRouter }      from './routes/checkout.js'
 import { customerRouter }      from './routes/customer.js'
@@ -58,6 +59,7 @@ app.route('/admin', adminRouter)
 app.route('/webhooks', stripeWebhookRouter)
 app.route('/checkout', checkoutRouter)
 app.route('/customer', customerRouter)
+app.route('/portal', portalRouter)
 app.route('/', pluginsRouter)
 app.route('/', themesRouter)
 

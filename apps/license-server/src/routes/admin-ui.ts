@@ -7,6 +7,7 @@ import { licenseBundles, plugins } from '../db/schema.js'
 import { generateLicenseKey } from '../utils/license-key.js'
 import { OVERCRM_BUNDLES, isKnownBundle } from '../utils/bundles.js'
 import { ADMIN_COOKIE, sessionToken, safeEqual } from '../utils/admin-auth.js'
+import { esc, dat, strona } from '../utils/html.js'
 
 /**
  * Panel administratora serwera licencji.
@@ -24,68 +25,8 @@ const ADMIN_SECRET = process.env['LICENSE_ADMIN_SECRET'] ?? ''
 
 // ─── Pomocnicze ───────────────────────────────────────────────────────────────
 
-/** Ucieczka HTML. Wszystko, co pochodzi z bazy, przechodzi przez to. */
-function esc(v: unknown): string {
-  return String(v ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-}
-
-function dat(v: Date | string | null | undefined): string {
-  if (!v) return '—'
-  const d = new Date(v)
-
-  return `${d.toISOString().slice(0, 10)} ${d.toISOString().slice(11, 16)}`
-}
-
-const STYL = `
-:root{--tlo:#0f1115;--karta:#171a21;--obwod:#252a34;--tekst:#e6e8ec;--slaby:#9aa1ad;
---akcent:#4f8cff;--ok:#31c48d;--zle:#f05252;--ostrzez:#e3a008}
-*{box-sizing:border-box}
-body{margin:0;background:var(--tlo);color:var(--tekst);
-font:14px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
-a{color:var(--akcent);text-decoration:none}a:hover{text-decoration:underline}
-header{background:var(--karta);border-bottom:1px solid var(--obwod);padding:14px 22px;
-display:flex;align-items:center;gap:22px;flex-wrap:wrap}
-header h1{font-size:15px;margin:0;font-weight:600;letter-spacing:.02em}
-header nav{display:flex;gap:16px;margin-left:auto;align-items:center}
-main{max-width:1180px;margin:26px auto;padding:0 22px}
-.karta{background:var(--karta);border:1px solid var(--obwod);border-radius:10px;
-padding:18px;margin-bottom:20px}
-.karta h2{margin:0 0 14px;font-size:14px;font-weight:600;color:var(--slaby);
-text-transform:uppercase;letter-spacing:.06em}
-table{width:100%;border-collapse:collapse}
-th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--obwod);vertical-align:top}
-th{color:var(--slaby);font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
-tr:last-child td{border-bottom:none}
-code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px}
-.znacznik{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;
-font-weight:600;letter-spacing:.03em}
-.z-ok{background:rgba(49,196,141,.15);color:var(--ok)}
-.z-zle{background:rgba(240,82,82,.15);color:var(--zle)}
-.z-szary{background:rgba(154,161,173,.15);color:var(--slaby)}
-.z-ostrzez{background:rgba(227,160,8,.15);color:var(--ostrzez)}
-input,select,textarea{background:var(--tlo);color:var(--tekst);border:1px solid var(--obwod);
-border-radius:7px;padding:8px 10px;font:inherit;min-width:170px}
-button{background:var(--akcent);color:#fff;border:0;border-radius:7px;padding:8px 15px;
-font:inherit;font-weight:600;cursor:pointer}
-button:hover{filter:brightness(1.1)}
-button.cichy{background:transparent;color:var(--zle);border:1px solid var(--obwod);font-weight:500}
-form.rzad{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
-.pusto{color:var(--slaby);padding:14px 0;font-style:italic}
-.uwaga{background:rgba(227,160,8,.1);border:1px solid rgba(227,160,8,.3);
-border-radius:8px;padding:11px 14px;margin-bottom:18px;color:var(--ostrzez)}
-.logowanie{max-width:340px;margin:14vh auto}
-`
-
 function layout(tytul: string, tresc: string, zalogowany = true): string {
-  return `<!doctype html><html lang="pl"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${esc(tytul)} — Licencje OVERMEDIA</title><style>${STYL}</style></head><body>
-${zalogowany ? `<header>
+  const naglowek = zalogowany ? `<header>
   <h1>Licencje OVERMEDIA</h1>
   <nav>
     <a href="/admin/ui">Licencje</a>
@@ -94,8 +35,9 @@ ${zalogowany ? `<header>
       <button class="cichy">Wyloguj</button>
     </form>
   </nav>
-</header>` : ''}
-<main>${tresc}</main></body></html>`
+</header>` : ''
+
+  return strona(`${tytul} — Licencje OVERMEDIA`, naglowek, tresc)
 }
 
 // ─── Logowanie ────────────────────────────────────────────────────────────────
