@@ -5,7 +5,7 @@ import { join, basename } from 'node:path'
 import { db } from '../db/index.js'
 import { plugins, licenses, activations } from '../db/schema.js'
 import { signPayload } from '../utils/sign.js'
-import { activeBundlesFor, OVERCRM_BUNDLES } from '../utils/bundles.js'
+import { activeBundlesFor, OVERCRM_BUNDLES, BUNDLE_CORE } from '../utils/bundles.js'
 
 const router = new Hono()
 
@@ -117,8 +117,15 @@ router.post('/plugins/:id/download', async (c) => {
   // Gdyby OVERCRM przepuścić przez drabinkę planów, licencja `agency`
   // odblokowałaby wszystkie płatne moduły naraz — czyli rozdała je za darmo.
   if (license.product === 'overcrm') {
-    // Moduł bez pakietu = wliczony w licencję podstawową.
-    if (plugin.bundle) {
+    // Moduł bez pakietu ALBO z pakietem `overcrm-core` = wliczony w licencję
+    // podstawową i dostępny dla każdej ważnej licencji.
+    //
+    // Warunek na BUNDLE_CORE jest konieczny, nie kosmetyczny: `activeBundlesFor`
+    // celowo NIGDY nie zwraca `overcrm-core`, bo tego pakietu się nie nadaje.
+    // Bez tego sprawdzenia moduł deklarujący go w manifeście byłby zablokowany
+    // dla wszystkich — czyli akurat moduły DARMOWE (Poczta, Kanban, Leady,
+    // Oś czasu) stałyby się jedynymi niemożliwymi do zainstalowania.
+    if (plugin.bundle && plugin.bundle !== BUNDLE_CORE) {
       const posiadane = await activeBundlesFor(license.id)
 
       if (!posiadane.includes(plugin.bundle)) {
